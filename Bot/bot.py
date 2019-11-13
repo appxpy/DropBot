@@ -5,6 +5,7 @@ from random_proxy import RandomProxy
 from UserAgentRandom import LoadHeader
 from bs4 import BeautifulSoup
 from selenium import webdriver
+from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.proxy import Proxy, ProxyType
@@ -12,7 +13,7 @@ from selenium.common.exceptions import NoSuchElementException
 userag = str(LoadHeader())
 WINDOW_SIZE = "1920,1080"
 options = Options()
-options.add_argument("--headless")
+#options.add_argument("--headless")
 options.add_argument("--window-size=%s" % WINDOW_SIZE)
 from selenium.webdriver.common.proxy import Proxy, ProxyType
 prox = Proxy()
@@ -21,16 +22,26 @@ prox.http_proxy = str(RandomProxy())
 capabilities = webdriver.DesiredCapabilities.CHROME
 prox.add_to_capabilities(capabilities)
 
-driver = webdriver.Chrome(desired_capabilities=capabilities, options=options)
-driver.execute_cdp_cmd('Network.setUserAgentOverride', {"userAgent":userag, "platform":"Windows"})
+#driver = webdriver.Chrome(desired_capabilities=capabilities, options=options) - run with proxy
+driver = webdriver.Chrome(options=options) # run without proxy
+driver.execute_cdp_cmd('Network.setUserAgentOverride', {"userAgent":'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36', "platform":"Windows"})
+#####################################################################################################################################################
 username = 'testbotsneak@gmail.com'
 password = 'Georgy20044'
 urlstock = 'https://accounts.stockx.com/login'
-cartpageadi = "https://www.adidas.ru/on/demandware.store/Sites-adidas-RU-Site/ru_RU/Cart-Show"
 modeladi = 'B28054'
 sizeadi = 10.5
 earlyurl = 'https://stockx.com/supreme-san-francisco-box-logo-tee-black'
-# Fill in your details here to be posted to the login form.
+firstName = 'Долбосрак'
+lastName = 'Черножопов'
+city = 'Москва'
+zipcode = '123103'
+street = 'пиписькина'
+houseNumber = '228'
+apartmentNumber = '404'
+phone = '89853334545'
+######################################################################################################################################################
+cartpageadi = "https://www.adidas.ru/on/demandware.store/Sites-adidas-RU-Site/ru_RU/Cart-Show"
 payloadstock = {
 	'username': username,
 	'password': password
@@ -128,6 +139,7 @@ def CheckStockAdidas(modeladi, sizeadi):
 	AddToCart.submit()
 	timer = 60.0
 	threads = 0
+	time.sleep(0.5)
 	while timer != 0:
 		try:
 			driver.find_element_by_class_name(
@@ -147,8 +159,6 @@ def CheckStockAdidas(modeladi, sizeadi):
 				"gl-cta.gl-cta--secondary.gl-cta--full-width")
 	BuyButton.click()
 	print('Transfering on billing page...')
-	driver.save_screenshot('capture.png')
-
 	driver.quit();
 CheckStockAdidas(modeladi,sizeadi)
 exit()
