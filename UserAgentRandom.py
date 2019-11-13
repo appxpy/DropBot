@@ -1,7 +1,7 @@
 import random
 
 def LoadHeader():
-	f = open('user-agentschh.txt', 'r')
+	f = open('UserAgent.txt', 'r')
 	r = f.read()
 	return(random.choice(r.split('\n')))
 	
