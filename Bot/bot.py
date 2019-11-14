@@ -92,7 +92,7 @@ def StockX():
 	# etc...
 
 
-def CheckStockAdidas(modeladi, sizeadi):
+'''def CheckStockAdidas(modeladi, sizeadi):
 	print('Your current size is:', sizeadi)
 	print('Your picked model is:', modeladi)
 	# Generates URLs for releases on Adidas.com
@@ -159,7 +159,10 @@ def CheckStockAdidas(modeladi, sizeadi):
 				"gl-cta.gl-cta--secondary.gl-cta--full-width")
 	BuyButton.click()
 	print('Transfering on billing page...')
+	firstName = driver.find_element_by_id('dwfrm_delivery_singleshipping_shippingAddress_addressFields_firstName')
+	print(firstName.add_argument('value','2')
 	driver.quit();
+	'''
 CheckStockAdidas(modeladi,sizeadi)
 exit()
 
