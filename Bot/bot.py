@@ -163,6 +163,6 @@ def StockX():
 	print(firstName.add_argument('value','2')
 	driver.quit();
 	'''
-CheckStockAdidas(modeladi,sizeadi)
+#CheckStockAdidas(modeladi,sizeadi)
 exit()
 
