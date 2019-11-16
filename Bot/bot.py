@@ -13,7 +13,7 @@ from selenium.common.exceptions import NoSuchElementException
 userag = str(LoadHeader())
 WINDOW_SIZE = "1920,1080"
 options = Options()
-#options.add_argument("--headless")
+options.add_argument("--headless")
 options.add_argument("--window-size=%s" % WINDOW_SIZE)
 from selenium.webdriver.common.proxy import Proxy, ProxyType
 prox = Proxy()
@@ -32,14 +32,7 @@ urlstock = 'https://accounts.stockx.com/login'
 modeladi = 'B28054'
 sizeadi = 10.5
 earlyurl = 'https://stockx.com/supreme-san-francisco-box-logo-tee-black'
-firstName = 'Долбосрак'
-lastName = 'Черножопов'
-city = 'Москва'
-zipcode = '123103'
-street = 'пиписькина'
-houseNumber = '228'
-apartmentNumber = '404'
-phone = '89853334545'
+
 ######################################################################################################################################################
 cartpageadi = "https://www.adidas.ru/on/demandware.store/Sites-adidas-RU-Site/ru_RU/Cart-Show"
 payloadstock = {
@@ -92,7 +85,7 @@ def StockX():
 	# etc...
 
 
-'''def CheckStockAdidas(modeladi, sizeadi):
+def CheckStockAdidas(modeladi, sizeadi):
 	print('Your current size is:', sizeadi)
 	print('Your picked model is:', modeladi)
 	# Generates URLs for releases on Adidas.com
@@ -159,10 +152,9 @@ def StockX():
 				"gl-cta.gl-cta--secondary.gl-cta--full-width")
 	BuyButton.click()
 	print('Transfering on billing page...')
-	firstName = driver.find_element_by_id('dwfrm_delivery_singleshipping_shippingAddress_addressFields_firstName')
-	print(firstName.add_argument('value','2')
+	
 	driver.quit();
-	'''
+	
 #CheckStockAdidas(modeladi,sizeadi)
 exit()
 
