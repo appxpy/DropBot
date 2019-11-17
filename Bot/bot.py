@@ -32,7 +32,6 @@ urlstock = 'https://accounts.stockx.com/login'
 modeladi = 'B28054'
 sizeadi = 10.5
 earlyurl = 'https://stockx.com/supreme-san-francisco-box-logo-tee-black'
-
 ######################################################################################################################################################
 cartpageadi = "https://www.adidas.ru/on/demandware.store/Sites-adidas-RU-Site/ru_RU/Cart-Show"
 payloadstock = {
