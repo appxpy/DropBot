@@ -4,7 +4,7 @@ import time
 WINDOW_SIZE = "1920,1080"
 options = Options()
 options.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36')
-options.add_argument("--headless")
+#options.add_argument("--headless")
 options.add_argument("--window-size=%s" % WINDOW_SIZE)
 driver = webdriver.Chrome(options=options)
 
@@ -13,8 +13,8 @@ def process_cart(url):
     driver.get(url)
     # If bot is in a queue, sleep until we reach processing page and can
     # actually add to cart.
-    while driver.title != 'adidas YEEZY BOOST 350 V2 STATIC NON-REFLECTIVE - STATIC | adidas US':
-        time.sleep(2)
+    #while driver.title != 'adidas YEEZY BOOST 350 V2 STATIC NON-REFLECTIVE - STATIC | adidas US':
+    #    time.sleep(2)
     # Get initial amount of items in bag
     items_in_bag = driver.find_element_by_css_selector('.glass_cart_count___1UWuC').text
     # If bag is empty, replace str with valid int value
