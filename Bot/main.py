@@ -6,17 +6,13 @@ import threading
 from UserAgentRandom import LoadHeader
 from concurrent.futures import ThreadPoolExecutor as Pool
 import re
-proxies = {
-    'http: '
-    'https: '
-}
 sizes = [8.5, 9, 9.5, 10]
 thread_count = 8
 
 # :param size spefific size for purchase
 def url_gen(model,size):
     BaseSize = 580
-    ShoeSize = float(size) - 6.5
+    ShoeSize = float(size) - 6
     ShoeSize = ShoeSize * 20
     RawSize = ShoeSize + BaseSize
     url = 'https://www.adidas.ru/yeezy/' + model + '.html?forceSelSize=' + model + '_' + str(int(RawSize))
@@ -65,7 +61,7 @@ def check_stock(model):
 def main():
     #model = str(input('Model: '))
     model = "EG6463"
-    size = "8.5"
+    size = "4.5"
     print('Size:', size, '\n', 'Model:', model)
     #size = str(input('Shoe size: '))
     sneaker_bot(model,size)
@@ -79,9 +75,9 @@ def sneaker_bot(model,size):
     if str(size) in sizes:
         if str(sizes[str(size)]) == 'IN_STOCK':
             print("We're securing you a pair!")
-            browserOps.process_cart(url)
-            browserOps.autofill_shipping()
-            browserOps.autofill_card()
+            browserOps.process_cart_adidas(url)
+            browserOps.autofill_shipping_adidas()
+            browserOps.autofill_card_adidas()
         else:
             print("Size not available!")
     else:
@@ -93,3 +89,4 @@ with Pool(thread_count) as executor:
     for size in sizes:
         executor.submit(sneaker_bot,size)
 main()
+browserOps.driver.quit()
