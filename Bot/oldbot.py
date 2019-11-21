@@ -24,7 +24,7 @@ prox.add_to_capabilities(capabilities)
 
 #driver = webdriver.Chrome(desired_capabilities=capabilities, options=options) - run with proxy
 driver = webdriver.Chrome(options=options) # run without proxy
-driver.execute_cdp_cmd('Network.setUserAgentOverride', {"userAgent":'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36', "platform":"Windows"})
+driver.execute_cdp_cmd('Network.setUserAgentOverride', {"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36"})
 #####################################################################################################################################################
 username = 'testbotsneak@gmail.com'
 password = 'Georgy20044'
@@ -32,7 +32,6 @@ urlstock = 'https://accounts.stockx.com/login'
 modeladi = 'B28054'
 sizeadi = 10.5
 earlyurl = 'https://stockx.com/supreme-san-francisco-box-logo-tee-black'
-
 ######################################################################################################################################################
 cartpageadi = "https://www.adidas.ru/on/demandware.store/Sites-adidas-RU-Site/ru_RU/Cart-Show"
 payloadstock = {
@@ -89,11 +88,11 @@ def CheckStockAdidas(modeladi, sizeadi):
 	print('Your current size is:', sizeadi)
 	print('Your picked model is:', modeladi)
 	# Generates URLs for releases on Adidas.com
-	BaseSizeadi = 580
-	# Base Size is for Shoe Size 6.5
-	ShoeSizeadi = sizeadi - 6.5
-	ShoeSizeadi = ShoeSizeadi * 20
-	RawSizeadi = ShoeSizeadi + BaseSizeadi
+		BaseSizeadi = 580
+		# Base Size is for Shoe Size 6.5
+		ShoeSizeadi = sizeadi - 6.5
+		ShoeSizeadi = ShoeSizeadi * 20
+		RawSizeadi = ShoeSizeadi + BaseSizeadi
 	ShoeSizeCodeadi = int(RawSizeadi)
 	urladi = 'https://adidas.ru/' + \
 		str(modeladi) + '.html?forceSelSize=' + \
