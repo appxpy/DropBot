@@ -2,19 +2,19 @@
 import requests
 import json
 import browserOps
-from browserOps.autofill_card_adidas import finish
 import threading
+import time
 from UserAgentRandom import LoadHeader
 from concurrent.futures import ThreadPoolExecutor as Pool
 import re
 from now import now
-f = open('timerfile.txt', '+w')
+open('timerfile.txt', 'w').close()
+f = open("timerfile.txt","a+")
 f.write(now())
 f.write('*')
 f.close()
 sizes = [8.5, 9, 9.5, 10]
 thread_count = 8
-print('Log file begin')
 print(now() ,'-', 'Bot started')
 # :param size spefific size for purchase
 def url_gen(model,size):
@@ -38,15 +38,17 @@ def check_stock(model):
     "Upgrade-Insecure-Requests": "1",
     "User-Agent": ua
 }
-    CheckSite = requests.get('https://adidas.ru', headers=headers)
-    print(now() ,'-', 'Recieved response from server with code', CheckSite.status_code)
+    #CheckSite = requests.get('https://adidas.ru', headers=headers)
+    #print(now() ,'-', 'Recieved response from server with code', CheckSite.status_code)
     size_url = 'https://www.adidas.ru/api/products/{}/availability'.format(model)
     raw_sizes = requests.get(size_url,headers=headers)
     size_data = json.loads(raw_sizes.text)
     print(now() ,'-', 'Recieved response from server API with code', raw_sizes.status_code)
     if size_data['availability_status'] == 'PREVIEW':
-        print("Waiting for sizing to be updated...")
-        check_stock()
+        print(now() ,'-', 'Check availability status')
+        time.sleep(1)
+        check_stock(model)
+    print(now() ,'-', 'Availability status OK')
     list = size_data['variation_list']
     size_dict = {}
     size_lookup = {}

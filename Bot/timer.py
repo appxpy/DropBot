@@ -1,4 +1,4 @@
-from datetime import timedelta
+import datetime
 from dateutil.parser import *
 def checktime():
 	f = open('timerfile.txt', 'r')
@@ -6,7 +6,10 @@ def checktime():
 	timelist = []
 	strtimelist = s.split('*')
 	for date in strtimelist:
-		time = datetime.strptime(date,"%H:%M:%S")
+		time = datetime.datetime.strptime(date,"%H:%M:%S")
 		timelist.append(time)
-	min
-delta = timedelta(hours=t.hour, minutes=t.minute, seconds=t.second)
+	delta = timelist[1] - timelist[0]
+	result = delta#datetime.timedelta(delta.seconds)
+	f.close()
+	open('timerfile.txt', 'w').close()
+	return int(delta.total_seconds())

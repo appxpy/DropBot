@@ -3,15 +3,21 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from timer import Checktime
+from selenium.webdriver.common.action_chains import ActionChains
+from timer import checktime
 import time
 from now import now
 options = Options()
-#options.add_argument("--start-maximized")
+options.add_argument('--lang=ru_RU') 
+options.add_argument('--no-proxy-server')
+options.add_argument("--window-size=1920,1080")
 options.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36')
-#options.add_argument("--headless")
+options.add_argument("--headless")
 driver = webdriver.Chrome(options=options)
-print(now() ,'-', 'Webdriver started succesefully')
+driver.delete_all_cookies()
+actions = ActionChains(driver)
+print('----------------------------------LOG FILE----------------------------------')
+print(now() ,'-', 'Webdriver in headless launched succesefully')
 def process_cart_adidas(url):
     # Boot up webdriver; process adidas url
     driver.get(url)
@@ -69,18 +75,24 @@ def autofill_shipping_adidas():
             print(now() ,'-', 'Autofilling email form')
             driver.find_element_by_id('dwfrm_delivery_singleshipping_shippingAddress_email_emailAddress').send_keys(file.readline())
     print(now() ,'-', 'Accepting privacy policy')
+    time.sleep(0.5)
     driver.find_element_by_xpath('//*[@id="dwfrm_delivery"]/div[2]/div[3]/div[2]/div[2]/div[1]/div/div/span').click()
     print(now() ,'-', 'Processing forward on billing page')
-    driver.find_elements_by_css_selector('#dwfrm_delivery_savedelivery')
+    #driver.find_elements_by_css_selector('#dwfrm_delivery_savedelivery')
     driver.get('https://www.adidas.ru/on/demandware.store/Sites-adidas-RU-Site/ru_RU/COSummary2-Start')
 def autofill_card_adidas():
     # Read in card information from file.
     print(now() ,'-', 'Autofilling billing information')
     with open('CardInfo.txt', 'r') as card:
-        print(now() ,'-', 'Autofilling card number begin')
-        driver.find_element_by_id('dwfrm_adyenencrypted_number').send_keys(card.readline())
-        print(now() ,'-', 'Autofilling card cvc begin')
-        driver.find_element_by_id('dwfrm_adyenencrypted_cvc').send_keys(card.readline())
+        try:
+            element = WebDriverWait(driver, 60).until(
+                EC.visibility_of_element_located((By.ID, "dwfrm_adyenencrypted_number"))
+            )
+        finally:
+            print(now() ,'-', 'Autofilling card number begin')
+            driver.find_element_by_id('dwfrm_adyenencrypted_number').send_keys(card.readline())
+            print(now() ,'-', 'Autofilling card cvc begin')
+            driver.find_element_by_id('dwfrm_adyenencrypted_cvc').send_keys(card.readline())
         m = (card.readline()).replace('\n', '')
         y = (card.readline()).replace('\n', '')
     # Open dropdown menus; get months & years
@@ -98,11 +110,10 @@ def autofill_card_adidas():
         if year.text == y:
             year.click()
     print(now() ,'-', 'Autofilling billing information success!')
-    finalbutton = driver.find_elements_by_class_name('co-btn_primary.btn_showcart.button-full-width.button-ctn.button-brd.adi-gradient-blue.button-forward')
-    finalbutton.click()
-    print(now() ,'-', 'Bot work finished')
+    finalbutton = driver.find_elements_by_xpath('//*[@id="content"]/div/div[1]/div[5]/div/button')
+    finalbutton[0].click()
     print(now() ,'-', 'Closing webdriver')
-    f = open('timerfile.txt', '+w')
+    f = open('timerfile.txt', 'a+')
     f.write(now())
     f.close()
-    print(Checktime())
+    print(now() ,'-', 'Bot work finished in', checktime(), 'seconds')
