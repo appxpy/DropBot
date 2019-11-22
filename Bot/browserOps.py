@@ -4,20 +4,21 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
-WINDOW_SIZE = "1920,1080"
+from now import now
 options = Options()
 options.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36')
 #options.add_argument("--headless")
-options.add_argument("--window-size=%s" % WINDOW_SIZE)
 driver = webdriver.Chrome(options=options)
-
+print(now() ,'-', 'Webdriver started succesefully')
 def process_cart_adidas(url):
     # Boot up webdriver; process adidas url
     driver.get(url)
     try:
-        element = WebDriverWait(driver, 10).until(
-            EC.element_to_be_clickable((By.CLASS_NAME, "glass_cart_count___1UWuC"))
+        element = WebDriverWait(driver, 60).until(
+            EC.visibility_of_element_located((By.CLASS_NAME, "glass_cart_count___1UWuC"))
     )
+    except:
+        print(now() ,'-', 'Timeout error occured')
     finally:
         items_in_bag = driver.find_element_by_class_name('glass_cart_count___1UWuC').text
     # If bag is empty, replace str with valid int value
@@ -27,11 +28,16 @@ def process_cart_adidas(url):
     items_in_bag = int(items_in_bag)
     UPDATED = items_in_bag + 1
     # Grab CSS to "Add to Bag" button
-    btn = driver.find_element_by_css_selector('.gl-cta.gl-cta--primary.gl-cta--full-width.btn-bag')
-    # While bag has not updated, add to bag
-    btn.click()
     try:
-        element = WebDriverWait(driver, 10).until(
+        element = WebDriverWait(driver, 60).until(
+            EC.element_to_be_clickable((By.CSS_SELECTOR, ".gl-cta.gl-cta--primary.gl-cta--full-width.btn-bag"))
+    )
+    except:
+        print(now() ,'-', 'Timeout error occured')
+    finally:
+        btn = driver.find_element_by_css_selector('.gl-cta.gl-cta--primary.gl-cta--full-width.btn-bag').click()
+    try:
+        element = WebDriverWait(driver, 60).until(
             EC.element_to_be_clickable((By.CLASS_NAME, "gl-cta.gl-cta--secondary.gl-cta--full-width"))
     )
     finally:
@@ -48,7 +54,7 @@ def autofill_shipping_adidas():
     with open('ClientInfo.txt', 'r') as file:
         # Autofill information
         try:
-            element = WebDriverWait(driver, 10).until(
+            element = WebDriverWait(driver, 60).until(
                 EC.visibility_of_element_located((By.ID, "dwfrm_delivery_singleshipping_shippingAddress_addressFields_firstName"))
             )
         finally:

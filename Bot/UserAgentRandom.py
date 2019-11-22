@@ -5,4 +5,4 @@ def LoadHeader():
 	r = f.read()
 	return(random.choice(r.split('\n')))
 	
-print('Using user agent:', LoadHeader())
+
