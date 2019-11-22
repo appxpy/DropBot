@@ -111,7 +111,8 @@ def autofill_card_adidas():
             year.click()
     print(now() ,'-', 'Autofilling billing information success!')
     finalbutton = driver.find_elements_by_xpath('//*[@id="content"]/div/div[1]/div[5]/div/button')
-    finalbutton[0].click()
+    for btn in finalbutton:
+        btn.click()
     print(now() ,'-', 'Closing webdriver')
     f = open('timerfile.txt', 'a+')
     f.write(now())
