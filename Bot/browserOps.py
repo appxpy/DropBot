@@ -60,43 +60,8 @@ def autofill_shipping_adidas():
         driver.find_element_by_id('dwfrm_delivery_singleshipping_shippingAddress_email_emailAddress').send_keys(file.readline())
 
     driver.find_element_by_xpath('//*[@id="dwfrm_delivery"]/div[2]/div[3]/div[2]/div[2]/div[1]/div/div/span').click()
-    time.sleep(1)
-    # Send to payment screen.
-    timer = 60.0
-    threads = 0
-    time.sleep(0.5)
-    while timer != 0:
-        try:
-            driver.find_element_by_id(
-                "dwfrm_delivery_savedelivery")
-        except NoSuchElementException as e:
-            timer -= 0.5
-            threads += 1
-            time.sleep(0.5)
-            print('No match. Thread number:', str(threads) + '/60')
-            if timer == 60:
-                print('Timeout error.')
-                exit()
-        else:
-            print('Element match success!')
-            break
-
-    time.sleep(1)
-    while timer != 0:
-        try:
-            driver.find_element_by_id(
-                "dwfrm_delivery_savedelivery")
-        except NoSuchElementException as e:
-            timer -= 0.5
-            threads += 1
-            time.sleep(0.5)
-            print('No match. Thread number:', str(threads) + '/60')
-            if timer == 60:
-                print('Timeout error.')
-                exit()
-        else:
-            print('Element match success!')
-            break
+    driver.find_elements_by_css_selector('#dwfrm_delivery_savedelivery')
+    driver.get('https://www.adidas.ru/on/demandware.store/Sites-adidas-RU-Site/ru_RU/COSummary2-Start')
 def autofill_card_adidas():
     # Read in card information from file.
     with open('CardInfo.txt', 'r') as card:
