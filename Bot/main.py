@@ -71,7 +71,7 @@ def check_stock(model):
 
 def main():
     #model = str(input('Model: '))
-    model = "EG6463"
+    model = "FW4839"
     print(now() ,'-', 'Use selected model:', model)
     size = "4.5"
     print(now() ,'-', 'Use selected size:', size)
@@ -101,4 +101,4 @@ with Pool(thread_count) as executor:
     for size in sizes:
         executor.submit(sneaker_bot,size)
 main()
-browserOps.driver.quit()
+#browserOps.driver.quit()

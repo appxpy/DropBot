@@ -95,17 +95,17 @@ def autofill_card_adidas():
             driver.find_element_by_id('dwfrm_adyenencrypted_cvc').send_keys(card.readline())
         m = (card.readline()).replace('\n', '')
         y = (card.readline()).replace('\n', '')
-    # Open dropdown menus; get months & years
     print(now() ,'-', 'Autofilling mounth/year')
     driver.find_element_by_xpath('//*[contains(concat( " ", @class, " " ), concat( " ", "month", " " ))]//*[contains(concat( " ", @class, " " ), concat( " ", "ffSelectButton", " " ))] | //*[contains(concat( " ", @class, " " ), concat( " ", "month", " " ))]//span').click()
-    list = driver.find_elements_by_xpath('//*[@id="adyen-encrypted-form"]/fieldset/div[3]/div[2]/div/div/div/div/div[2]/div')
-    months = list[0].find_elements_by_class_name('selectoption')
+    listx = driver.find_elements_by_xpath('//*[@id="adyen-encrypted-form"]/fieldset/div[3]/div[2]/div/div/div/div/div[2]/div')
+    months = listx[0].find_elements_by_class_name('selectoption')
     for month in months:
         if month.text == m:
             month.click()
+
     driver.find_element_by_xpath('//*[contains(concat( " ", @class, " " ), concat( " ", "nobr", " " ))]//*[contains(concat( " ", @class, " " ), concat( " ", "ffSelectButton", " " ))]').click()
-    list = driver.find_elements_by_xpath('//*[@id="adyen-encrypted-form"]/fieldset/div[3]/div[3]/div/div/div/div/div[2]/div')
-    years = list[0].find_elements_by_css_selector('selectoption')
+    listy = driver.find_elements_by_xpath('//*[@id="adyen-encrypted-form"]/fieldset/div[3]/div[3]/div/div/div/div/div[2]/div')
+    years = listy[0].find_elements_by_class_name('selectoption')
     for year in years:
         if year.text == y:
             year.click()
@@ -114,6 +114,7 @@ def autofill_card_adidas():
     for btn in finalbutton:
         btn.click()
     print(now() ,'-', 'Closing webdriver')
+    driver.quit()
     f = open('timerfile.txt', 'a+')
     f.write(now())
     f.close()
