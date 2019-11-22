@@ -2,11 +2,16 @@
 import requests
 import json
 import browserOps
+from browserOps.autofill_card_adidas import finish
 import threading
 from UserAgentRandom import LoadHeader
 from concurrent.futures import ThreadPoolExecutor as Pool
 import re
 from now import now
+f = open('timerfile.txt', '+w')
+f.write(now())
+f.write('*')
+f.close()
 sizes = [8.5, 9, 9.5, 10]
 thread_count = 8
 print('Log file begin')
