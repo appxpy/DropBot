@@ -8,6 +8,7 @@ from UserAgentRandom import LoadHeader
 from concurrent.futures import ThreadPoolExecutor as Pool
 import re
 from now import now
+thread = 1
 open('timerfile.txt', 'w').close()
 f = open("timerfile.txt","a+")
 f.write(now())
@@ -43,12 +44,13 @@ def check_stock(model):
     size_url = 'https://www.adidas.ru/api/products/{}/availability'.format(model)
     raw_sizes = requests.get(size_url,headers=headers)
     size_data = json.loads(raw_sizes.text)
-    print(now() ,'-', 'Recieved response from server API with code', raw_sizes.status_code)
-    if size_data['availability_status'] == 'PREVIEW':
-        print(now() ,'-', 'Check availability status')
+    while size_data['availability_status'] == 'PREVIEW':
+        raw_sizes = requests.get(size_url,headers=headers)
+        size_data = json.loads(raw_sizes.text)
+        print(now() ,'-', 'Availability status - PREVIEW. Repeating attempts ')
         time.sleep(1)
-        check_stock(model)
-    print(now() ,'-', 'Availability status OK')
+    print(now() ,'-', 'Recieved response from server API with code', raw_sizes.status_code)
+    print(now() ,'-', 'Availability status IN_STOCK')
     list = size_data['variation_list']
     size_dict = {}
     size_lookup = {}
@@ -71,9 +73,9 @@ def check_stock(model):
 
 def main():
     #model = str(input('Model: '))
-    model = "FW4839"
+    model = "FW4843"
     print(now() ,'-', 'Use selected model:', model)
-    size = "4.5"
+    size = "3"
     print(now() ,'-', 'Use selected size:', size)
     #size = str(input('Shoe size: '))
     sneaker_bot(model,size)

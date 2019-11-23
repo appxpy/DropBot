@@ -12,23 +12,24 @@ options.add_argument('--lang=ru_RU')
 options.add_argument('--no-proxy-server')
 options.add_argument("--window-size=1920,1080")
 options.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36')
-options.add_argument("--headless")
+#options.add_argument("--headless")
 driver = webdriver.Chrome(options=options)
 driver.delete_all_cookies()
 actions = ActionChains(driver)
 print('----------------------------------LOG FILE----------------------------------')
-print(now() ,'-', 'Webdriver in headless launched succesefully')
+print(now() ,'-', 'Webdriver in headless mode launched succesefully')
 def process_cart_adidas(url):
     # Boot up webdriver; process adidas url
     driver.get(url)
     print(now() ,'-', 'Transfer on item page')
     # Grab CSS to "Add to Bag" button
     try:
-        element = WebDriverWait(driver, 60).until(
+        element = WebDriverWait(driver, 5).until(
             EC.element_to_be_clickable((By.XPATH, '//*[@id="app"]/div/div/div/div/div/div[3]/div/div[2]/div[2]/div[2]/div/div/form/div[4]/button'))
     )
     except:
-        print(now() ,'-', 'Timeout error occured')
+        print(now() ,'-', 'You now in virtual queue, repeating attempt.')
+        process_cart_adidas(url)
     finally:
         btn = driver.find_element_by_xpath('//*[@id="app"]/div/div/div/div/div/div[3]/div/div[2]/div[2]/div[2]/div/div/form/div[4]/button')
         btn.click()
