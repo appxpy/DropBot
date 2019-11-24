@@ -61,7 +61,7 @@ def process_cart_adidas(url):
     # Navigate to Checkout page
     driver.get('https://www.adidas.ru/on/demandware.store/Sites-adidas-RU-Site/ru_RU/CODelivery-Start')
 
-
+ 
 def autofill_shipping_adidas():
     # Read client info from file.
     print(now() ,'-', 'Begin autofill')

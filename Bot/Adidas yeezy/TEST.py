@@ -4,21 +4,59 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
-from random_proxy import RandomProxy
 from timer import checktime
 import time
 from now import now
-print('----------------------------------LOG FILE----------------------------------')
-f = open('config.txt', 'r')
-cfgline = f.readlines()
+import requests
+import json
+import threading
+import time
+from UserAgentRandom import LoadHeader
+from concurrent.futures import ThreadPoolExecutor as Pool
+import re
+from random_proxy import RandomProxy
+from now import now
+thread = 1
+#model = str(input('Model: '))
+model = "FW4843"
+print(now() ,'-', 'Use selected model:', model)
+size = "2.5"
+print(now() ,'-', 'Use selected size:', size)
+#size = str(input('Shoe size: '))
+open('timerfile.txt', 'w').close()
+f = open("timerfile.txt","a+")
+f.write(now())
+f.write('*')
+f.close()
+thread_count = 8
+print(now() ,'-', 'Bot started')
+def url_gen(model,size):
+    BaseSize = 580
+    ShoeSize = float(size) - 6
+    ShoeSize = ShoeSize * 20
+    RawSize = ShoeSize + BaseSize
+    url = 'https://www.adidas.ru/yeezy/' + model + '.html?forceSelSize=' + model + '_' + str(int(RawSize))
+    print(now() ,'-', 'Url created')
+    return url
+url = url_gen(model,size)
+# :param model specific model of sneaker
+# :return size_lookup dictionary of sizes/availability
+
+# Sets up bot environment to automate purchase sneaker if available.
+# :param size specific size for purchase
+def sneaker_bot(model,size):
+    print(now() ,'-', 'Your size is found, start the purchase phase')
+    process_cart_adidas(url)
+    autofill_shipping_adidas()
+    autofill_card_adidas()
+
+# Allows for multitreading in order to purchase all sizes
+# specified in size list)
+#browserOps.driver.quit()
 options = Options()
-if '1' in cfgline[0]:
-    print(now() ,'-', 'Using proxy')
-    PROXY = str(RandomProxy())
-    options.add_argument('--proxy-server=http://%s' % PROXY)
-else:
-    options.add_argument('--no-proxy-server')
-options.add_argument('--lang=ru_RU')
+PROXY = str(RandomProxy()) # IP:PORT or HOST:PORT
+options.add_argument('--proxy-server=http://%s' % PROXY)
+options.add_argument('--lang=ru_RU') 
 options.add_argument('--no-proxy-server')
 options.add_argument("--window-size=1920,1080")
 options.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36')
@@ -26,6 +64,7 @@ options.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) Apple
 driver = webdriver.Chrome(options=options)
 driver.delete_all_cookies()
 actions = ActionChains(driver)
+print('----------------------------------LOG FILE----------------------------------')
 print(now() ,'-', 'Webdriver in headless mode launched succesefully')
 def process_cart_adidas(url):
     # Boot up webdriver; process adidas url
@@ -34,26 +73,36 @@ def process_cart_adidas(url):
     # Grab CSS to "Add to Bag" button
     try:
         element = WebDriverWait(driver, 5).until(
-            EC.element_to_be_clickable((By.XPATH, '//*[@id="app"]/div/div/div/div/div/div[3]/div/div[2]/div[2]/div[3]/div/div/form/div[3]/button'))
+            EC.element_to_be_clickable((By.XPATH, '//*[@id="app"]/div/div[1]/div/div[2]/div[2]/div[2]/div[2]/div[1]'))
     )
     except:
         print(now() ,'-', 'You now in virtual queue, repeating attempt.')
         process_cart_adidas(url)
     finally:
-        btn = driver.find_element_by_xpath('//*[@id="app"]/div/div/div/div/div/div[3]/div/div[2]/div[2]/div[3]/div/div/form/div[3]/button')
+        btn = driver.find_element_by_xpath('//*[@id="app"]/div/div[1]/div/div[2]/div[2]/div[2]/div[2]/div[1]')
         btn.click()
+    sizes = driver.find_element_by_xpath('//*[@id="app"]/div/div[1]/div/div[2]/div[2]/div[2]/div[2]/div[2]/div/ul')
+    sizeObj = sizes.find_elements_by_tag_name('li')
+    for obj in sizeObj:
+        if str(str(size) + ' UK') in obj.text:
+            obj.click()
     print(now() ,'-', 'Processing cart')
+    Add_To_Cart = driver.find_element_by_xpath(
+                '//*[@id="app"]/div/div[1]/div/div[2]/div[2]/div[2]/button')
+    Add_To_Cart.click()
     try:
         element = WebDriverWait(driver, 60).until(
-            EC.element_to_be_clickable((By.XPATH, '//*[@id="modal-root"]/div/div/div/div/div/div[1]/div[2]/div/a[2]'))
+            EC.element_to_be_clickable((By.XPATH, '//*[@id="dialogcontainer"]/div/a[1]'))
     )
     finally:
-        print(now() ,'-', 'Processing forward on shipping page')    
-        element = driver.find_element_by_xpath('//*[@id="modal-root"]/div/div/div/div/div/div[1]/div[2]/div/a[2]')
-        element.click()
-        time.sleep(5)
+        GeoCheck = driver.find_element_by_xpath(
+                '//*[@id="dialogcontainer"]/div/a[1]')
+        GeoCheck.click()
+    print(now() ,'-', 'Processing forward on shipping page')
+    # Navigate to Checkout page
+    driver.get('https://www.adidas.ru/on/demandware.store/Sites-adidas-RU-Site/ru_RU/CODelivery-Start')
 
- 
+
 def autofill_shipping_adidas():
     # Read client info from file.
     print(now() ,'-', 'Begin autofill')
@@ -127,3 +176,4 @@ def autofill_card_adidas():
     f.write(now())
     f.close()
     print(now() ,'-', 'Bot work finished in', checktime(), 'seconds')
+sneaker_bot(model,size)

@@ -5,4 +5,3 @@ def RandomProxy():
 	r = f.read()
 	return(random.choice(r.split('\n')))
 	
-print('Using proxy:', RandomProxy())

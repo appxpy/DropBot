@@ -24,7 +24,7 @@ def url_gen(model,size):
     ShoeSize = ShoeSize * 20
     RawSize = ShoeSize + BaseSize
     url = 'https://www.adidas.ru/yeezy/' + model + '.html?forceSelSize=' + model + '_' + str(int(RawSize))
-    print(now() ,'-', 'Url created')
+    print(now() ,'-', 'Url created:', url)
     return url
 
 # :param model specific model of sneaker
@@ -73,9 +73,9 @@ def check_stock(model):
 
 def main():
     #model = str(input('Model: '))
-    model = "FW4843"
+    model = "EE7004"
     print(now() ,'-', 'Use selected model:', model)
-    size = "3"
+    size = "8.5"
     print(now() ,'-', 'Use selected size:', size)
     #size = str(input('Shoe size: '))
     sneaker_bot(model,size)
