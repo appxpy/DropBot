@@ -16,6 +16,7 @@ from concurrent.futures import ThreadPoolExecutor as Pool
 import re
 from random_proxy import RandomProxy
 from now import now
+print('----------------------------------LOG FILE----------------------------------')
 thread = 1
 #model = str(input('Model: '))
 model = "FW4843"
@@ -53,18 +54,21 @@ def sneaker_bot(model,size):
 # Allows for multitreading in order to purchase all sizes
 # specified in size list)
 #browserOps.driver.quit()
+f = open('config.txt', 'r')
+cfgline = f.readlines()
 options = Options()
-PROXY = str(RandomProxy()) # IP:PORT or HOST:PORT
-options.add_argument('--proxy-server=http://%s' % PROXY)
+if '1' in cfgline[0]:
+    print(now() ,'-', 'Using proxy')
+    PROXY = str(RandomProxy())
+    options.add_argument('--proxy-server=http://%s' % PROXY)
 options.add_argument('--lang=ru_RU') 
 options.add_argument('--no-proxy-server')
 options.add_argument("--window-size=1920,1080")
 options.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36')
-#options.add_argument("--headless")
+options.add_argument("--headless")
 driver = webdriver.Chrome(options=options)
 driver.delete_all_cookies()
 actions = ActionChains(driver)
-print('----------------------------------LOG FILE----------------------------------')
 print(now() ,'-', 'Webdriver in headless mode launched succesefully')
 def process_cart_adidas(url):
     # Boot up webdriver; process adidas url
