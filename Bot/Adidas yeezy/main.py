@@ -9,6 +9,7 @@ from concurrent.futures import ThreadPoolExecutor as Pool
 import re
 from now import now
 thread = 1
+sizes = [9.5,10,11,11.5]
 open('timerfile.txt', 'w').close()
 f = open("timerfile.txt","a+")
 f.write(now())
@@ -76,6 +77,7 @@ def main():
     print(now() ,'-', 'Use selected model:', model)
     size = "3"
     print(now() ,'-', 'Use selected size:', size)
+    use_proxy = 0
     #size = str(input('Shoe size: '))
     sneaker_bot(model,size)
 

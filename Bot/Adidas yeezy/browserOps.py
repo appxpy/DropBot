@@ -4,11 +4,19 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
+from random_proxy import RandomProxy
 from timer import checktime
 import time
 from now import now
+print('----------------------------------LOG FILE----------------------------------')
+f = open('config.txt', 'r')
+cfgline = f.readlines()
 options = Options()
-options.add_argument('--lang=ru_RU') 
+if '1' in cfgline[0]:
+    print(now() ,'-', 'Using proxy')
+    PROXY = str(RandomProxy())
+    options.add_argument('--proxy-server=http://%s' % PROXY)
+options.add_argument('--lang=ru_RU')
 options.add_argument('--no-proxy-server')
 options.add_argument("--window-size=1920,1080")
 options.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36')
@@ -16,7 +24,6 @@ options.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) Apple
 driver = webdriver.Chrome(options=options)
 driver.delete_all_cookies()
 actions = ActionChains(driver)
-print('----------------------------------LOG FILE----------------------------------')
 print(now() ,'-', 'Webdriver in headless mode launched succesefully')
 def process_cart_adidas(url):
     # Boot up webdriver; process adidas url
@@ -35,20 +42,24 @@ def process_cart_adidas(url):
         btn.click()
     sizes = driver.find_element_by_xpath('//*[@id="app"]/div/div[1]/div/div[2]/div[2]/div[2]/div[2]/div[2]/div/ul')
     sizeObj = sizes.find_elements_by_tag_name('li')
-    print(sizeObj)
+    for obj in sizeObj:
+        if str(str(size) + ' UK') in obj.text:
+            obj.click()
     print(now() ,'-', 'Processing cart')
-
+    Add_To_Cart = driver.find_element_by_xpath(
+                '//*[@id="app"]/div/div[1]/div/div[2]/div[2]/div[2]/button')
+    Add_To_Cart.click()
     try:
         element = WebDriverWait(driver, 60).until(
-            EC.element_to_be_clickable((By.CLASS_NAME, "gl-cta.gl-cta--secondary.gl-cta--full-width"))
+            EC.element_to_be_clickable((By.XPATH, '//*[@id="dialogcontainer"]/div/a[1]'))
     )
     finally:
-        BuyButton = driver.find_element_by_class_name(
-                "gl-cta.gl-cta--secondary.gl-cta--full-width")
-        BuyButton.click()
-        print(now() ,'-', 'Processing forward on shipping page')
+        GeoCheck = driver.find_element_by_xpath(
+                '//*[@id="dialogcontainer"]/div/a[1]')
+        GeoCheck.click()
+    print(now() ,'-', 'Processing forward on shipping page')
     # Navigate to Checkout page
-    #driver.get('https://www.adidas.ru/on/demandware.store/Sites-adidas-RU-Site/ru_RU/CODelivery-Start')
+    driver.get('https://www.adidas.ru/on/demandware.store/Sites-adidas-RU-Site/ru_RU/CODelivery-Start')
 
 
 def autofill_shipping_adidas():
