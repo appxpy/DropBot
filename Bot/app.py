@@ -35,7 +35,7 @@ def launch_yeezy():
     options.add_argument("--window-size=1920,1080")
     options.add_argument(
         'user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36')
-    #options.add_argument("--headless")
+    options.add_argument("--headless")
     driver = webdriver.Chrome(options=options)
     driver.delete_all_cookies()
     print(now(), '-', 'Webdriver in headless mode launched succesefully')
@@ -131,21 +131,6 @@ def launch_yeezy():
                 print(now(), '-', 'Your size is not available')
         else:
             print(now(), '-', 'During to API error we are not able to save you a pair')
-
-    def get_clear_browsing_button():
-        return driver.find_element_by_css_selector('* /deep/ #clearBrowsingDataConfirm')
-
-    def clear_cache():
-        timeout = 60
-        driver.get('chrome://settings/clearBrowserData')
-        print(now())
-        print(now(), '-', 'Forward on page for clearing cache', checktime(), 'seconds')
-        wait = WebDriverWait(driver, timeout)
-        wait.until(get_clear_browsing_button)
-        get_clear_browsing_button(driver).click()
-        print(now(), '-', 'Clearing cache..', checktime(), 'seconds')
-        wait.until_not(get_clear_browsing_button)
-        print(now(), '-', 'Cache cleared!', checktime(), 'seconds')
 
     def process_cart_adidas(url, size):
         # Boot up webdriver; process adidas url
@@ -285,7 +270,6 @@ def launch_yeezy():
         f.write(now())
         f.close()
         print(now(), '-', 'Bot work finished in', checktime(), 'seconds')
-        clear_cache()
         print(now(), '-', 'Closing webdriver')
         exit()
     main()
