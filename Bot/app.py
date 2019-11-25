@@ -235,10 +235,10 @@ def launch_yeezy():
                         (By.ID, "dwfrm_adyenencrypted_number"))
                 )
             finally:
-                print(now(), '-', 'Autofilling card number begin')
+                print(now(), '-', 'Autofilling card number')
                 driver.find_element_by_id(
                     'dwfrm_adyenencrypted_number').send_keys(card.readline())
-                print(now(), '-', 'Autofilling card cvc begin')
+                print(now(), '-', 'Autofilling card cvc')
                 driver.find_element_by_id(
                     'dwfrm_adyenencrypted_cvc').send_keys(card.readline())
             m = (card.readline()).replace('\n', '')
