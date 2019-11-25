@@ -1,0 +1,3 @@
+Use proxy : 0
+Model: "FW4839"
+Size: "8.5"
