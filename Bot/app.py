@@ -181,7 +181,7 @@ def launch_yeezy():
     def autofill_shipping_adidas():
         # Read client info from file.
         print(now(), '-', 'Begin autofill')
-        with open('ClientInfo.txt', 'r') as file:
+        with open('ClientInfo.txt', 'r', encoding='utf-8') as file:
             # Autofill information
             try:
                 element = WebDriverWait(driver, 60).until(
@@ -228,7 +228,7 @@ def launch_yeezy():
     def autofill_card_adidas():
         # Read in card information from file.
         print(now(), '-', 'Autofilling billing information')
-        with open('CardInfo.txt', 'r') as card:
+        with open('CardInfo.txt', 'r', encoding='utf-8') as card:
             try:
                 element = WebDriverWait(driver, 60).until(
                     EC.visibility_of_element_located(
