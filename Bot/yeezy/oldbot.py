@@ -13,7 +13,7 @@ from selenium.common.exceptions import NoSuchElementException
 userag = str(LoadHeader())
 WINDOW_SIZE = "1920,1080"
 options = Options()
-options.add_argument("--headless")
+#options.add_argument("--headless")
 options.add_argument("--window-size=%s" % WINDOW_SIZE)
 from selenium.webdriver.common.proxy import Proxy, ProxyType
 prox = Proxy()
@@ -24,7 +24,7 @@ prox.add_to_capabilities(capabilities)
 
 #driver = webdriver.Chrome(desired_capabilities=capabilities, options=options) - run with proxy
 driver = webdriver.Chrome(options=options) # run without proxy
-driver.execute_cdp_cmd('Network.setUserAgentOverride', {"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36"})
+#driver.execute_cdp_cmd('Network.setUserAgentOverride', {"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36"})
 #####################################################################################################################################################
 username = 'testbotsneak@gmail.com'
 password = 'Georgy20044'
@@ -88,11 +88,11 @@ def CheckStockAdidas(modeladi, sizeadi):
 	print('Your current size is:', sizeadi)
 	print('Your picked model is:', modeladi)
 	# Generates URLs for releases on Adidas.com
-		BaseSizeadi = 580
-		# Base Size is for Shoe Size 6.5
-		ShoeSizeadi = sizeadi - 6.5
-		ShoeSizeadi = ShoeSizeadi * 20
-		RawSizeadi = ShoeSizeadi + BaseSizeadi
+	BaseSizeadi = 580
+	# Base Size is for Shoe Size 6.5
+	ShoeSizeadi = sizeadi - 6.5
+	ShoeSizeadi = ShoeSizeadi * 20
+	RawSizeadi = ShoeSizeadi + BaseSizeadi
 	ShoeSizeCodeadi = int(RawSizeadi)
 	urladi = 'https://adidas.ru/' + \
 		str(modeladi) + '.html?forceSelSize=' + \
@@ -151,9 +151,23 @@ def CheckStockAdidas(modeladi, sizeadi):
 				"gl-cta.gl-cta--secondary.gl-cta--full-width")
 	BuyButton.click()
 	print('Transfering on billing page...')
+	with open('ClientInfo.txt', 'r') as file:
+		# Autofill information
+		driver.find_element_by_id('dwfrm_delivery_singleshipping_shippingAddress_addressFields_firstName').send_keys(file.readline())
+		driver.find_element_by_id('dwfrm_shipping_shiptoaddress_shippingAddress_lastName').send_keys(file.readline())
+		driver.find_element_by_id('dwfrm_shipping_shiptoaddress_shippingAddress_address1').send_keys(file.readline())
+		driver.find_element_by_id('dwfrm_shipping_shiptoaddress_shippingAddress_city').send_keys(file.readline())
+		# Store indicated state.
+		s = (file.readline()).replace('\n', '')
+		# Continue to autofill...
+		driver.find_element_by_id('dwfrm_shipping_shiptoaddress_shippingAddress_postalCode').send_keys(file.readline())
+		driver.find_element_by_id('dwfrm_shipping_shiptoaddress_shippingAddress_phone').send_keys(file.readline())
+		driver.find_element_by_id('dwfrm_shipping_email_emailAddress').send_keys(file.readline())
+    # Open states dropdown.
+		driver.find_element_by_xpath('/html/body/div[1]/div[3]/div/div/div/div/div[2]/form/div[1]/ng-form/div[1]/div/div[6]/div[1]/div[1]').click()
+	list = driver.find_elements_by_class_name('materialize-select-list.dwfrm_shipping_shiptoaddress_shippingAddress_countyProvince')
+	#driver.quit();
 	
-	driver.quit();
-	
-#CheckStockAdidas(modeladi,sizeadi)
+CheckStockAdidas(modeladi,sizeadi)
 exit()
 

@@ -1,0 +1,3 @@
+Use proxy : 0
+Model: "FU9006"
+Size: "10.5"
