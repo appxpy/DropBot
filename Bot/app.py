@@ -148,14 +148,14 @@ def launch_yeezy():
                     (By.XPATH, '//*[@id="app"]/div/div[1]/div/div[2]/div[2]/div[2]/div[2]/div[1]'))
             )
         except:
-            print(now(), '-', 'You now in virtual queue, repeating attempt.')
-            process_cart_adidas(url)
+            print(now(), '-', 'You now in virtual queue or model is not dropping')
+            process_cart_adidas(url, size)
+
         finally:
             btn = driver.find_element_by_xpath(
                 '//*[@id="app"]/div/div[1]/div/div[2]/div[2]/div[2]/div[2]/div[1]')
             btn.click()
-        sizes = driver.find_element_by_xpath(
-            '//*[@id="app"]/div/div[1]/div/div[2]/div[2]/div[2]/div[2]/div[2]/div/ul')
+        sizes = driver.find_element_by_xpath('//*[@id="app"]/div/div[1]/div/div[2]/div[2]/div[2]/div[2]/div[2]/div/ul')
         sizeObj = sizes.find_elements_by_tag_name('li')
         for obj in sizeObj:
             if str(str(size) + ' UK') in obj.text:

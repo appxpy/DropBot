@@ -1,5 +1,4 @@
 import datetime
-from dateutil.parser import *
 def checktime():
 	f = open('timerfile.txt', 'r')
 	s = f.read()
