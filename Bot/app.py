@@ -1,5 +1,28 @@
+###########################################################################################
+###########################################################################################
+###########################################################################################
+###########################################################################################
+###########################################################################################
+###########################################################################################
+###########################################################################################
+###########################################################################################
+###########################################################################################
+###########################################################################################
+###########################################################################################
+###########################################################################################
+####################This program is property of Pankevich George.##########################
+#######################Using it without legal permissions on it############################
+###############################will provoke a lawsuit.#####################################
+###########################################################################################
+#############################Thank you for your purchase!##################################
+###########################################################################################
+###########################################################################################
+###########################################################################################
+###########################################################################################
+###########################################################################################
+###########################################################################################
 def launch_yeezy():
-    print(
+    print( 
             '|----------------------------------LOG FILE----------------------------------|')
     import sys
     sys.path.insert(0, 'yeezy')
@@ -35,7 +58,7 @@ def launch_yeezy():
     options.add_argument("--window-size=1920,1080")
     options.add_argument(
         'user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36')
-    options.add_argument("--headless")
+    #options.add_argument("--headless")
     driver = webdriver.Chrome(options=options)
     driver.delete_all_cookies()
     print(now(), '-', 'Webdriver in headless mode launched succesefully')
@@ -61,11 +84,6 @@ def launch_yeezy():
         size = pattern.search(size).group(0)
         size = size.replace('"', '')
         print(now(), '-', 'Use selected size:', size)
-        open('timerfile.txt', 'w').close()
-        f = open("timerfile.txt", "a+")
-        f.write(now())
-        f.write('*')
-        f.close()
         thread_count = 8
         print(now(), '-', 'Bot started')
         # size = str(input('Shoe size: '))
@@ -92,8 +110,8 @@ def launch_yeezy():
         while size_data['availability_status'] == 'PREVIEW':
             raw_sizes = requests.get(size_url, headers=headers)
             size_data = json.loads(raw_sizes.text)
-            print(now(), '-', 'Availability status - PREVIEW. Repeating attempts ')
-            time.sleep(1)
+            print(now(), '-', 'Availability status - PREVIEW. Continue sending json requests to:', size_url)
+            time.sleep(5)
         print(now(), '-', 'Recieved response from server API with code',
               raw_sizes.status_code)
         print(now(), '-', 'Availability status IN_STOCK')
@@ -152,6 +170,11 @@ def launch_yeezy():
             process_cart_adidas(url, size)
 
         finally:
+            open('timerfile.txt', 'w').close()
+            f = open("timerfile.txt", "a+")
+            f.write(now())
+            f.write('*')
+            f.close()
             btn = driver.find_element_by_xpath(
                 '//*[@id="app"]/div/div[1]/div/div[2]/div[2]/div[2]/div[2]/div[1]')
             btn.click()
@@ -164,58 +187,105 @@ def launch_yeezy():
         Add_To_Cart = driver.find_element_by_xpath(
             '//*[@id="app"]/div/div[1]/div/div[2]/div[2]/div[2]/button')
         Add_To_Cart.click()
+        f = open('timerfile.txt', 'a+')
+        f.write(now())
+        f.close()
+        print(now(), '-', 'Bot succesefully secured your item in', checktime(), 'seconds')
         try:
-            element = WebDriverWait(driver, 60).until(
+            element = WebDriverWait(driver, 10).until(
                 EC.element_to_be_clickable(
                     (By.XPATH, '//*[@id="dialogcontainer"]/div/a[1]'))
             )
-        finally:
-            GeoCheck = driver.find_element_by_xpath(
-                '//*[@id="dialogcontainer"]/div/a[1]')
-            GeoCheck.click()
+        except:
+            print(now(), '-', 'Geo checker not founded. Continue...')
+        else:
+                GeoCheck = driver.find_element_by_xpath(
+                    '//*[@id="dialogcontainer"]/div/a[1]')
+                GeoCheck.click()
+                print(now(), '-', 'Geo checker founded. Continue...')
         print(now(), '-', 'Processing forward on shipping page')
         # Navigate to Checkout page
         driver.get(
             'https://www.adidas.ru/on/demandware.store/Sites-adidas-RU-Site/ru_RU/CODelivery-Start')
-
+        print(now(), '-', 'Bot work finished in', checktime(), 'seconds')
     def autofill_shipping_adidas():
         # Read client info from file.
         print(now(), '-', 'Begin autofill')
-        with open('ClientInfo.txt', 'r', encoding='utf-8') as file:
+        with open('config.txt', 'r', encoding='utf-8') as file:
             # Autofill information
+            cfgline = file.readlines()
             try:
                 element = WebDriverWait(driver, 60).until(
                     EC.visibility_of_element_located(
                         (By.ID, "dwfrm_delivery_singleshipping_shippingAddress_addressFields_firstName"))
                 )
+            except:
+                print(now(), '-', 'Adress fields could not founded. Please update your chrome to the newest one and check chromedriver in PATH')
+                exit()
             finally:
-                print(now(), '-', 'Autofilling firstname field')
+                print(now(), '-', 'Autofilling firstame field')
+                textfield = cfgline[5]
+                pattern = re.compile('".*?"')
+                textfield = pattern.search(textfield).group(0)
+                textfield = textfield.replace('"', '')
                 driver.find_element_by_id(
-                    "dwfrm_delivery_singleshipping_shippingAddress_addressFields_firstName").send_keys(file.readline())
+                    "dwfrm_delivery_singleshipping_shippingAddress_addressFields_firstName").send_keys(textfield)
                 print(now(), '-', 'Autofilling lastname field')
+                textfield = cfgline[6]
+                pattern = re.compile('".*?"')
+                textfield = pattern.search(textfield).group(0)
+                textfield = textfield.replace('"', '')
                 driver.find_element_by_id(
-                    'dwfrm_delivery_singleshipping_shippingAddress_addressFields_lastName').send_keys(file.readline())
+                    'dwfrm_delivery_singleshipping_shippingAddress_addressFields_lastName').send_keys(textfield)
                 print(now(), '-', 'Autofilling adress field')
+                textfield = cfgline[7]
+                pattern = re.compile('".*?"')
+                textfield = pattern.search(textfield).group(0)
+                textfield = textfield.replace('"', '')
                 driver.find_element_by_id(
-                    'dwfrm_delivery_singleshipping_shippingAddress_addressFields_city').send_keys(file.readline())
+                    'dwfrm_delivery_singleshipping_shippingAddress_addressFields_city').send_keys(textfield)
                 print(now(), '-', 'Autofilling zipcode field')
+                textfield = cfgline[8]
+                pattern = re.compile('".*?"')
+                textfield = pattern.search(textfield).group(0)
+                textfield = textfield.replace('"', '')
                 driver.find_element_by_id(
-                    'dwfrm_delivery_singleshipping_shippingAddress_addressFields_zip').send_keys(file.readline())
+                    'dwfrm_delivery_singleshipping_shippingAddress_addressFields_zip').send_keys(textfield)
                 print(now(), '-', 'Autofilling street field')
+                textfield = cfgline[9]
+                pattern = re.compile('".*?"')
+                textfield = pattern.search(textfield).group(0)
+                textfield = textfield.replace('"', '')
                 driver.find_element_by_id(
-                    'dwfrm_delivery_singleshipping_shippingAddress_addressFields_address1').send_keys(file.readline())
+                    'dwfrm_delivery_singleshipping_shippingAddress_addressFields_address1').send_keys(textfield)
                 print(now(), '-', 'Autofilling house number field')
+                textfield = cfgline[10]
+                pattern = re.compile('".*?"')
+                textfield = pattern.search(textfield).group(0)
+                textfield = textfield.replace('"', '')
                 driver.find_element_by_id(
-                    'dwfrm_delivery_singleshipping_shippingAddress_addressFields_houseNumber').send_keys(file.readline())
+                    'dwfrm_delivery_singleshipping_shippingAddress_addressFields_houseNumber').send_keys(textfield)
                 print(now(), '-', 'Autofilling apartament number field')
+                textfield = cfgline[11]
+                pattern = re.compile('".*?"')
+                textfield = pattern.search(textfield).group(0)
+                textfield = textfield.replace('"', '')
                 driver.find_element_by_id(
-                    'dwfrm_delivery_singleshipping_shippingAddress_addressFields_apartmentNumber').send_keys(file.readline())
+                    'dwfrm_delivery_singleshipping_shippingAddress_addressFields_apartmentNumber').send_keys(textfield)
                 print(now(), '-', 'Autofilling phone form')
+                textfield = cfgline[12]
+                pattern = re.compile('".*?"')
+                textfield = pattern.search(textfield).group(0)
+                textfield = textfield.replace('"', '')
                 driver.find_element_by_id(
-                    'dwfrm_delivery_singleshipping_shippingAddress_addressFields_phone').send_keys(file.readline())
+                    'dwfrm_delivery_singleshipping_shippingAddress_addressFields_phone').send_keys(textfield)
                 print(now(), '-', 'Autofilling email form')
+                textfield = cfgline[13]
+                pattern = re.compile('".*?"')
+                textfield = pattern.search(textfield).group(0)
+                textfield = textfield.replace('"', '')
                 driver.find_element_by_id(
-                    'dwfrm_delivery_singleshipping_shippingAddress_email_emailAddress').send_keys(file.readline())
+                    'dwfrm_delivery_singleshipping_shippingAddress_email_emailAddress').send_keys(textfield)
         print(now(), '-', 'Accepting privacy policy')
         time.sleep(0.5)
         driver.find_element_by_xpath(
@@ -228,21 +298,45 @@ def launch_yeezy():
     def autofill_card_adidas():
         # Read in card information from file.
         print(now(), '-', 'Autofilling billing information')
-        with open('CardInfo.txt', 'r', encoding='utf-8') as card:
+        with open('config.txt', 'r', encoding='utf-8') as card:
+            cfgline = file.readlines()
             try:
                 element = WebDriverWait(driver, 60).until(
                     EC.visibility_of_element_located(
                         (By.ID, "dwfrm_adyenencrypted_number"))
                 )
             finally:
+                print(now(), '-', 'Autofilling holder name')
+                textfield = cfgline[15]
+                pattern = re.compile('".*?"')
+                textfield = pattern.search(textfield).group(0)
+                textfield = textfield.replace('"', '')
+                driver.find_element_by_id(
+                    'dwfrm_adyenencrypted_holderName').send_keys(textfield)
                 print(now(), '-', 'Autofilling card number')
+                textfield = cfgline[14]
+                pattern = re.compile('".*?"')
+                textfield = pattern.search(textfield).group(0)
+                textfield = textfield.replace('"', '')
                 driver.find_element_by_id(
-                    'dwfrm_adyenencrypted_number').send_keys(card.readline())
+                    'dwfrm_adyenencrypted_number').send_keys(textfield)
                 print(now(), '-', 'Autofilling card cvc')
+                textfield = cfgline[18]
+                pattern = re.compile('".*?"')
+                textfield = pattern.search(textfield).group(0)
+                textfield = textfield.replace('"', '')
                 driver.find_element_by_id(
-                    'dwfrm_adyenencrypted_cvc').send_keys(card.readline())
-            m = (card.readline()).replace('\n', '')
-            y = (card.readline()).replace('\n', '')
+                    'dwfrm_adyenencrypted_cvc').send_keys(textfield)
+            textfield = cfgline[16]
+            pattern = re.compile('".*?"')
+            textfield = pattern.search(textfield).group(0)
+            textfield = textfield.replace('"', '')
+            m = (textfield).replace('\n', '')
+            textfield = cfgline[17]
+            pattern = re.compile('".*?"')
+            textfield = pattern.search(textfield).group(0)
+            textfield = textfield.replace('"', '')
+            y = (textfield).replace('\n', '')
         print(now(), '-', 'Autofilling mounth/year')
         driver.find_element_by_xpath(
             '//*[contains(concat( " ", @class, " " ), concat( " ", "month", " " ))]//*[contains(concat( " ", @class, " " ), concat( " ", "ffSelectButton", " " ))] | //*[contains(concat( " ", @class, " " ), concat( " ", "month", " " ))]//span').click()
@@ -266,13 +360,8 @@ def launch_yeezy():
             '//*[@id="content"]/div/div[1]/div[5]/div/button')
         for btn in finalbutton:
             btn.click()
-        f = open('timerfile.txt', 'a+')
-        f.write(now())
-        f.close()
-        print(now(), '-', 'Bot work finished in', checktime(), 'seconds')
         print(now(), '-', 'Closing webdriver')
         exit()
     main()
-
 
 launch_yeezy()
