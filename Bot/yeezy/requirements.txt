@@ -1,5 +1,0 @@
-DateTime==4.3
-requests==2.6.0
-selenium==3.141.0
-simplejson==3.16.0
-
