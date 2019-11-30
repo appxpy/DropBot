@@ -8,7 +8,7 @@ body, html{
 }
 
 .navbar{
- background:#F97300;
+ background: #9242bd;
 }
 .nav-link , .navbar-brand{
  color: #f4f4f4;
@@ -19,7 +19,7 @@ body, html{
 }
 .nav-link:hover{
  background: #f4f4f4;
- color: #f97300;
+ color: #9242bd;
 }
 .navbar-collapse{
  justify-content: flex-end;
@@ -27,3 +27,5 @@ body, html{
 .navbar-toggler{
   background:#fff !important;
 }
+.navbar-brand:hover{
+  color: #cfcfcf
