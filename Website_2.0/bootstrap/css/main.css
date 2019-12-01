@@ -8,11 +8,20 @@ body, html{
 }
 
 /* Navbar */
+.navbar-brand {
+ background-image: url('logo1.png');
+ transition: background-image .2s linear;
+ width: 250px;
+ height: 45px;
+}
+.navbar-brand:hover {
+  background-image: url('logo2.png');
+}
 a:hover {
 	color:white;
 }
 .navbar{
- background: linear-gradient(90deg, #ffc852 0%, #3A1C71 100%);;
+ background: linear-gradient(90deg, #ffc852 0%, #3A1C71 100%);
 }
 .nav-link , .navbar-brand{
  color: #f4f4f4;
@@ -59,10 +68,6 @@ a:hover {
 }
 .navbar-toggler{
   background:#fff !important;
-}
-.navbar-brand{
-  color: white;
-  transition: 0.5s linear;
 }
 .navbar-brand:hover {
  color: black;
