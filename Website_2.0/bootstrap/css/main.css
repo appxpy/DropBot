@@ -1,0 +1,85 @@
+@import url("https://fonts.googleapis.com/css?family=Ubuntu:300,400,500,700&display=swap");
+
+body, html{
+  width: 100%;
+  height: 100%;
+  font-family: 'Ubuntu', sans-serif;
+  color: #222;
+}
+
+/* Navbar */
+a:hover {
+	color:white;
+}
+.navbar{
+ background: linear-gradient(90deg, #ffc852 0%, #3A1C71 100%);;
+}
+.nav-link , .navbar-brand{
+ color: #f4f4f4;
+ cursor: pointer;
+}
+.nav-link{
+ margin-right: 1em !important;
+ font-size: 1.1em !important;
+ display: inline-block;
+ position: relative;
+ text-decoration: none;
+}
+.nav-link::before{
+ display: block;
+ position: absolute;
+ content: "";
+ height: 2px;
+ width: 0;
+ background-color: white;
+ transition: width .5s ease-in-out, left .5s ease-in-out;
+ left: 50%;
+ bottom: 0;
+}
+.nav-link::after{
+ display: block;
+ position: absolute;
+ content: "";
+ height: 2px;
+ width: 0;
+ background-color: white;
+ transition: width .5s ease-in-out;
+ left: 50%;
+ bottom: 0;
+}
+.nav-link:hover::before{
+ width: 50%;
+ left: 0;
+}
+.nav-link:hover::after{
+ width: 50%;
+}
+.navbar-collapse{
+ justify-content: flex-end;
+}
+.navbar-toggler{
+  background:#fff !important;
+}
+.navbar-brand{
+  color: white;
+  transition: 0.5s linear;
+}
+.navbar-brand:hover {
+ color: black;
+}
+/* Header */
+.header-img{
+ max-width:100%;
+ width:100%;
+ height:auto
+}
+
+.overlay{
+ position: absolute;
+ max-width:100%;
+ width:100%;
+ height:auto
+ left: 0;
+ top: 0;
+ /*background: rgba(244, 244, 244, 0.59);*/
+}
