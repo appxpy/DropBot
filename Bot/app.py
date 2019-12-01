@@ -23,26 +23,23 @@
 ###########################################################################################
 def launch_yeezy():
     print( 
-            '|----------------------------------LOG FILE----------------------------------|')
-    import sys 
-    sys.path.insert(0, 'yeezy') # Transfer to work directory
+            '|----------------------------------LOG----------------------------------|')
     from selenium import webdriver
     from selenium.webdriver.chrome.options import Options
     from selenium.webdriver.common.by import By
     from selenium.webdriver.support.ui import WebDriverWait
     from selenium.webdriver.support import expected_conditions as EC
     from selenium.webdriver.common.action_chains import ActionChains
-    from timer import checktime
     import time
-    from now import now
     import requests
     import json
     import time
-    from UserAgentRandom import LoadHeader
     from concurrent.futures import ThreadPoolExecutor as Pool
     import re
-    from random_proxy import RandomProxy
-    from now import now
+    import datetime
+    def now():
+        now = datetime.datetime.now()
+        return  now.strftime("%X")
     f = open('config.txt', 'r')
     cfgline = f.readlines()
     options = Options()
@@ -69,6 +66,19 @@ def launch_yeezy():
             "Upgrade-Insecure-Requests": "1",
             "User-Agent": ua
         }
+    def checktime():
+        f = open('timerfile.txt', 'r')
+        s = f.read()
+        timelist = []
+        strtimelist = s.split('*')
+        for date in strtimelist:
+            time = datetime.datetime.strptime(date,"%H:%M:%S")
+            timelist.append(time)
+        delta = timelist[1] - timelist[0]
+        f.close()
+        open('timerfile.txt', 'w').close()
+        return int(delta.total_seconds())
+
     def main():
         f = open('config.txt', 'r')
         cfgline = f.readlines()
@@ -106,11 +116,16 @@ def launch_yeezy():
             model)
         raw_sizes = requests.get(size_url, headers=headers)
         size_data = json.loads(raw_sizes.text)
-        while size_data['availability_status'] == 'PREVIEW':
-            raw_sizes = requests.get(size_url, headers=headers)
-            size_data = json.loads(raw_sizes.text)
-            print(now(), '-', 'Availability status - PREVIEW. Continue sending json requests to:', size_url)
-            time.sleep(5)
+        try:
+             while size_data['availability_status'] == 'PREVIEW':
+                 raw_sizes = requests.get(size_url, headers=headers)
+                 size_data = json.loads(raw_sizes.text)
+                 print(now(), '-', 'Availability status - PREVIEW. Continue sending json requests to:', size_url)
+                 time.sleep(5)
+        except:
+            print(now(), '-', 'API error occured. Your model is not valid.')
+            print(now(), '-', 'Bot stopped with exit code 1')
+            exit()
         print(now(), '-', 'Recieved response from server API with code',
               raw_sizes.status_code)
         print(now(), '-', 'Availability status IN_STOCK')
