@@ -9,7 +9,7 @@ body, html{
 
 /* Navbar */
 .navbar{
- background: linear-gradient(90deg, #ffc852 0%, #3A1C71 100%);;
+ background: linear-gradient(90deg, #ffc852 0%, #3A1C71 100%);
 }
 .nav-link , .navbar-brand{
  color: #f4f4f4;
