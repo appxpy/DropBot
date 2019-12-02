@@ -7,7 +7,6 @@ def launch_yeezy(model, size, thread_num, proxy):
     from selenium.webdriver.common.action_chains import ActionChains
     import time
     import random
-    from numpy import arange
     import requests
     import json
     import time
@@ -17,10 +16,6 @@ def launch_yeezy(model, size, thread_num, proxy):
         now = datetime.datetime.now()
         prefix = str('[THREAD:' + str(thread_num) + '] - ')
         result = prefix + now.strftime("%X")
-        return result
-    def randomTime():
-        timelist = list(arange(0, 0.5, 0.01))
-        result = random.choice(timelist)
         return result
     f = open('config.txt', 'r')
     cfgline = f.readlines()
