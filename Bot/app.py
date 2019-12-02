@@ -31,6 +31,7 @@ def launch_yeezy():
     from selenium.webdriver.support import expected_conditions as EC
     from selenium.webdriver.common.action_chains import ActionChains
     import time
+    import random
     import requests
     import json
     import time
@@ -40,13 +41,17 @@ def launch_yeezy():
     def now():
         now = datetime.datetime.now()
         return  now.strftime("%X")
+    def randomProxy():
+        f = open('proxies.txt', 'r')
+        r = f.read()
+        return(random.choice(r.split('\n')))
     f = open('config.txt', 'r')
     cfgline = f.readlines()
     options = Options()
     if '1' in cfgline[0]:
         print(now(), '-', 'Using proxy:', RandomProxy())
-        PROXY = str(RandomProxy())
-        options.add_argument('--proxy-server=http://%s' % PROXY)
+        proxy = str(RandomProxy())
+        options.add_argument('--proxy-server=http://%s' % proxy)
     else:
         options.add_argument('--no-proxy-server')
     options.add_argument('--lang=ru_RU')
