@@ -13,25 +13,20 @@ def launch_yeezy(model, size, thread_num, proxy):
     import time
     import re
     import datetime
-    from threading import Semaphore
-    screen_lock = Semaphore(value=1)
     def now():
         now = datetime.datetime.now()
         prefix = str('[THREAD:' + str(thread_num) + '] - ')
         result = prefix + now.strftime("%X")
         return result
     def randomTime():
-        timelist = list(arange(0, 1, 0.05))
+        timelist = list(arange(0, 0.5, 0.01))
         result = random.choice(timelist)
         return result
     f = open('config.txt', 'r')
     cfgline = f.readlines()
     options = Options()
     if proxy != 0:
-        screen_lock.acquire()
-        time.sleep(randomTime())
-        print(now(), '-', 'Using proxy:', proxy, 'time:', randomTime())
-        screen_lock.release()
+        print(now(), '-', 'Using proxy:', proxy)
         options.add_argument('--proxy-server=http://%s' % proxy)
     else:
         options.add_argument('--no-proxy-server')
@@ -69,7 +64,6 @@ def launch_yeezy(model, size, thread_num, proxy):
         print(now(), '-', 'Use selected model:', model)
         print(now(), '-', 'Use selected size:', size)
         print(now(), '-', 'Bot started')
-        # size = str(input('Shoe size: '))
         sneaker_bot(model, size)
 
     def url_gen(model, size):
@@ -83,9 +77,6 @@ def launch_yeezy(model, size, thread_num, proxy):
         return url
 
     def check_stock(model):
-        # ua = LoadHeader()
-        # CheckSite = requests.get('https://adidas.ru', headers=headers)
-        # print(now() ,'-', 'Recieved response from server with code', CheckSite.status_code)
         size_url = 'https://www.adidas.ru/api/products/{}/availability'.format(
             model)
         raw_sizes = requests.get(size_url, headers=headers)
