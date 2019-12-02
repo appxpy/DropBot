@@ -1,6 +1,6 @@
 Use proxy : 0
 Model: "FU9006"
-Size: "10.5"
+Size or list of sizes comma separated in quotation marks: "10.5"
 Name: "Name"
 Last Name: "Lastname"
 City: "Москва"
@@ -15,3 +15,4 @@ Owner name: "VASYA PUPKIN"
 Mounth: "02"
 Year: "2020"
 CVC/CVV2 Code: "000"
+Need to buy two or more pairs?(y/n): "n"

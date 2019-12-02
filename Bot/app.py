@@ -1,29 +1,4 @@
-###########################################################################################
-###########################################################################################
-###########################################################################################
-###########################################################################################
-###########################################################################################
-###########################################################################################
-###########################################################################################
-###########################################################################################
-###########################################################################################
-###########################################################################################
-###########################################################################################
-###########################################################################################
-####################This program is property of Pankevich George.##########################
-#######################Using it without legal permissions on it############################
-###############################will provoke a lawsuit.#####################################
-###########################################################################################
-############################Thank you for your purchase!###################################
-###########################################################################################
-###########################################################################################
-###########################################################################################
-###########################################################################################
-###########################################################################################
-###########################################################################################
-def launch_yeezy():
-    print( 
-            '|----------------------------------LOG----------------------------------|')
+def launch_yeezy(model, size, thread_num):
     from selenium import webdriver
     from selenium.webdriver.chrome.options import Options
     from selenium.webdriver.common.by import By
@@ -35,12 +10,13 @@ def launch_yeezy():
     import requests
     import json
     import time
-    from concurrent.futures import ThreadPoolExecutor as Pool
     import re
     import datetime
     def now():
         now = datetime.datetime.now()
-        return  now.strftime("%X")
+        prefix = str('[THREAD:' + str(thread_num) + '] - ')
+        result = prefix + now.strftime("%X")
+        return result
     def randomProxy():
         f = open('proxies.txt', 'r')
         r = f.read()
@@ -84,21 +60,9 @@ def launch_yeezy():
         open('timerfile.txt', 'w').close()
         return int(delta.total_seconds())
 
-    def main():
-        f = open('config.txt', 'r')
-        cfgline = f.readlines()
-        # model = str(input('Model: '))
-        model = cfgline[1]
-        pattern = re.compile('".*?"')
-        model = pattern.search(model).group(0)
-        model = model.replace('"', '')
+    def main(model, size):
         print(now(), '-', 'Use selected model:', model)
-        size = cfgline[2]
-        pattern = re.compile('".*?"')
-        size = pattern.search(size).group(0)
-        size = size.replace('"', '')
         print(now(), '-', 'Use selected size:', size)
-        thread_count = 8
         print(now(), '-', 'Bot started')
         # size = str(input('Shoe size: '))
         sneaker_bot(model, size)
@@ -243,63 +207,63 @@ def launch_yeezy():
                 exit()
             finally:
                 print(now(), '-', 'Autofilling firstame field')
-                textfield = cfgline[5]
+                textfield = cfgline[3]
                 pattern = re.compile('".*?"')
                 textfield = pattern.search(textfield).group(0)
                 textfield = textfield.replace('"', '')
                 driver.find_element_by_id(
                     "dwfrm_delivery_singleshipping_shippingAddress_addressFields_firstName").send_keys(textfield)
                 print(now(), '-', 'Autofilling lastname field')
-                textfield = cfgline[6]
+                textfield = cfgline[4]
                 pattern = re.compile('".*?"')
                 textfield = pattern.search(textfield).group(0)
                 textfield = textfield.replace('"', '')
                 driver.find_element_by_id(
                     'dwfrm_delivery_singleshipping_shippingAddress_addressFields_lastName').send_keys(textfield)
                 print(now(), '-', 'Autofilling adress field')
-                textfield = cfgline[7]
+                textfield = cfgline[5]
                 pattern = re.compile('".*?"')
                 textfield = pattern.search(textfield).group(0)
                 textfield = textfield.replace('"', '')
                 driver.find_element_by_id(
                     'dwfrm_delivery_singleshipping_shippingAddress_addressFields_city').send_keys(textfield)
                 print(now(), '-', 'Autofilling zipcode field')
-                textfield = cfgline[8]
+                textfield = cfgline[6]
                 pattern = re.compile('".*?"')
                 textfield = pattern.search(textfield).group(0)
                 textfield = textfield.replace('"', '')
                 driver.find_element_by_id(
                     'dwfrm_delivery_singleshipping_shippingAddress_addressFields_zip').send_keys(textfield)
                 print(now(), '-', 'Autofilling street field')
-                textfield = cfgline[9]
+                textfield = cfgline[7]
                 pattern = re.compile('".*?"')
                 textfield = pattern.search(textfield).group(0)
                 textfield = textfield.replace('"', '')
                 driver.find_element_by_id(
                     'dwfrm_delivery_singleshipping_shippingAddress_addressFields_address1').send_keys(textfield)
                 print(now(), '-', 'Autofilling house number field')
-                textfield = cfgline[10]
+                textfield = cfgline[8]
                 pattern = re.compile('".*?"')
                 textfield = pattern.search(textfield).group(0)
                 textfield = textfield.replace('"', '')
                 driver.find_element_by_id(
                     'dwfrm_delivery_singleshipping_shippingAddress_addressFields_houseNumber').send_keys(textfield)
                 print(now(), '-', 'Autofilling apartament number field')
-                textfield = cfgline[11]
+                textfield = cfgline[9]
                 pattern = re.compile('".*?"')
                 textfield = pattern.search(textfield).group(0)
                 textfield = textfield.replace('"', '')
                 driver.find_element_by_id(
                     'dwfrm_delivery_singleshipping_shippingAddress_addressFields_apartmentNumber').send_keys(textfield)
                 print(now(), '-', 'Autofilling phone form')
-                textfield = cfgline[12]
+                textfield = cfgline[10]
                 pattern = re.compile('".*?"')
                 textfield = pattern.search(textfield).group(0)
                 textfield = textfield.replace('"', '')
                 driver.find_element_by_id(
                     'dwfrm_delivery_singleshipping_shippingAddress_addressFields_phone').send_keys(textfield)
                 print(now(), '-', 'Autofilling email form')
-                textfield = cfgline[13]
+                textfield = cfgline[11]
                 pattern = re.compile('".*?"')
                 textfield = pattern.search(textfield).group(0)
                 textfield = textfield.replace('"', '')
@@ -326,32 +290,32 @@ def launch_yeezy():
                 )
             finally:
                 print(now(), '-', 'Autofilling holder name')
-                textfield = cfgline[15]
+                textfield = cfgline[13]
                 pattern = re.compile('".*?"')
                 textfield = pattern.search(textfield).group(0)
                 textfield = textfield.replace('"', '')
                 driver.find_element_by_id(
                     'dwfrm_adyenencrypted_holderName').send_keys(textfield)
                 print(now(), '-', 'Autofilling card number')
-                textfield = cfgline[14]
+                textfield = cfgline[12]
                 pattern = re.compile('".*?"')
                 textfield = pattern.search(textfield).group(0)
                 textfield = textfield.replace('"', '')
                 driver.find_element_by_id(
                     'dwfrm_adyenencrypted_number').send_keys(textfield)
                 print(now(), '-', 'Autofilling card cvc')
-                textfield = cfgline[18]
+                textfield = cfgline[16]
                 pattern = re.compile('".*?"')
                 textfield = pattern.search(textfield).group(0)
                 textfield = textfield.replace('"', '')
                 driver.find_element_by_id(
                     'dwfrm_adyenencrypted_cvc').send_keys(textfield)
-            textfield = cfgline[16]
+            textfield = cfgline[14]
             pattern = re.compile('".*?"')
             textfield = pattern.search(textfield).group(0)
             textfield = textfield.replace('"', '')
             m = (textfield).replace('\n', '')
-            textfield = cfgline[17]
+            textfield = cfgline[15]
             pattern = re.compile('".*?"')
             textfield = pattern.search(textfield).group(0)
             textfield = textfield.replace('"', '')
@@ -381,6 +345,46 @@ def launch_yeezy():
             btn.click()
         print(now(), '-', 'Closing webdriver')
         exit()
-    main()
-
-launch_yeezy()
+    main(model, size)
+if __name__ == '__main__':
+    def now():
+        now = datetime.datetime.now()
+        return  now.strftime("%X")
+    print( 
+            '|----------------------------------LOG----------------------------------|')
+    import re
+    import datetime
+    from multiprocessing import Process
+    f = open('config.txt', 'r')
+    cfgline = f.readlines()
+    # model = str(input('Model: '))
+    model = cfgline[1]
+    pattern = re.compile('".*?"')
+    model = pattern.search(model).group(0)
+    model = model.replace('"', '')
+    sizes = cfgline[2]
+    pattern = re.compile('".*?"')
+    sizes = pattern.search(sizes).group(0)
+    sizes = sizes.replace('"', '')
+    if '"y"' in cfgline[17]:
+        print(now(), 'Creating thread pool...')
+        try:
+            thread_count = len(sizes.split(','))
+            sizes = sizes.split(',')
+            if int(thread_count) == 1:
+                print(now(), 'You entered only one size.')
+                exit()
+        except:
+            print('You should write size for each pair comma separated in quotation marks')
+            exit()
+        else:
+            thread_num = 0
+            for size in sizes:
+                thread_num += 1
+                proc = Process(target=launch_yeezy, args=(model,size,thread_num))
+                proc.start()
+    else:
+        size = sizes
+        thread_num = 1
+        launch_yeezy(model, size, thread_num)
+    
