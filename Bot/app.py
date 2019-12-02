@@ -90,6 +90,7 @@ def launch_yeezy(model, size, thread_num, proxy):
         except:
             print(now(), '-', 'API error occured. Your model is not valid.')
             print(now(), '-', 'Bot stopped with exit code 1')
+            driver.quit()
             exit()
         print(now(), '-', 'Recieved response from server API with code',
               raw_sizes.status_code)
@@ -135,8 +136,9 @@ def launch_yeezy(model, size, thread_num, proxy):
         try:
         	page = requests.get(url, headers=headers)
         except:
-        	print(now(), '-', 'Internet or proxy error occured')
-        	exit()
+            print(now(), '-', 'Internet or proxy error occured')
+            driver.quit()
+            exit()
         print(now(), '-', 'Transfer on item page')
         # Grab CSS to "Add to Bag" button
         try:
@@ -200,6 +202,7 @@ def launch_yeezy(model, size, thread_num, proxy):
                 )
             except:
                 print(now(), '-', 'Adress fields could not founded. Please update your chrome to the newest one and check chromedriver in PATH')
+                driver.quit()
                 exit()
             finally:
                 print(now(), '-', 'Autofilling firstame field')
@@ -340,14 +343,14 @@ def launch_yeezy(model, size, thread_num, proxy):
         for btn in finalbutton:
             btn.click()
         print(now(), '-', 'Closing webdriver')
+        driver.quit()
         exit()
     main(model, size)
 if __name__ == '__main__':
     def now():
         now = datetime.datetime.now()
         return  now.strftime("%X")
-    print( 
-            '|----------------------------------LOG----------------------------------|')
+    print('|----------------------------------LOG----------------------------------|')
     import re
     import datetime
     from multiprocessing import Process
