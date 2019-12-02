@@ -1,4 +1,4 @@
-def launch_yeezy(model, size, thread_num):
+def launch_yeezy(model, size, thread_num, proxy):
     from selenium import webdriver
     from selenium.webdriver.chrome.options import Options
     from selenium.webdriver.common.by import By
@@ -7,26 +7,31 @@ def launch_yeezy(model, size, thread_num):
     from selenium.webdriver.common.action_chains import ActionChains
     import time
     import random
+    from numpy import arange
     import requests
     import json
     import time
     import re
     import datetime
+    from threading import Semaphore
+    screen_lock = Semaphore(value=1)
     def now():
         now = datetime.datetime.now()
         prefix = str('[THREAD:' + str(thread_num) + '] - ')
         result = prefix + now.strftime("%X")
         return result
-    def randomProxy():
-        f = open('proxies.txt', 'r')
-        r = f.read()
-        return(random.choice(r.split('\n')))
+    def randomTime():
+        timelist = list(arange(0, 1, 0.05))
+        result = random.choice(timelist)
+        return result
     f = open('config.txt', 'r')
     cfgline = f.readlines()
     options = Options()
-    if '1' in cfgline[0]:
-        print(now(), '-', 'Using proxy:', RandomProxy())
-        proxy = str(RandomProxy())
+    if proxy != 0:
+        screen_lock.acquire()
+        time.sleep(randomTime())
+        print(now(), '-', 'Using proxy:', proxy, 'time:', randomTime())
+        screen_lock.release()
         options.add_argument('--proxy-server=http://%s' % proxy)
     else:
         options.add_argument('--no-proxy-server')
@@ -355,8 +360,11 @@ if __name__ == '__main__':
     import re
     import datetime
     from multiprocessing import Process
+    from threading import Thread
+    from threading import Semaphore
     f = open('config.txt', 'r')
     cfgline = f.readlines()
+    f.close()
     # model = str(input('Model: '))
     model = cfgline[1]
     pattern = re.compile('".*?"')
@@ -366,6 +374,9 @@ if __name__ == '__main__':
     pattern = re.compile('".*?"')
     sizes = pattern.search(sizes).group(0)
     sizes = sizes.replace('"', '')
+    f = open('proxies.txt')
+    prx = f.readlines()
+    f.close()
     if '"y"' in cfgline[17]:
         print(now(), 'Creating thread pool...')
         try:
@@ -374,17 +385,28 @@ if __name__ == '__main__':
             if int(thread_count) == 1:
                 print(now(), 'You entered only one size.')
                 exit()
+            if int(thread_count) > len(prx):
+                print(now(), 'You should have minimum', thread_count, 'proxies to start bot.')
+                exit()
         except:
             print('You should write size for each pair comma separated in quotation marks')
             exit()
         else:
+            print(now(), 'Initializing threads with input arguments...')
             thread_num = 0
             for size in sizes:
                 thread_num += 1
-                proc = Process(target=launch_yeezy, args=(model,size,thread_num))
+                proxy = prx[thread_num - 1]
+                if '\n' in proxy:
+                    proxy = proxy.replace('\n', '')
+                proc = Thread(target=launch_yeezy, args=(model,size,thread_num,proxy))
                 proc.start()
     else:
         size = sizes
+        if len(size) > 3:
+            print(now(), 'Fatal error. Check your field number 17')
+            exit()
         thread_num = 1
-        launch_yeezy(model, size, thread_num)
+        proxy = 0
+        launch_yeezy(model, size, thread_num,proxy)
     
