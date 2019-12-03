@@ -25,6 +25,7 @@ def launch_yeezy(model, size, thread_num, proxy):
         options.add_argument('--proxy-server=http://%s' % proxy)
     else:
         options.add_argument('--no-proxy-server')
+    options.add_experimental_option('excludeSwitches', ['enable-logging'])
     options.add_argument('--lang=ru_RU')
     options.add_argument('--disable-gpu')
     options.add_argument("--window-size=1920,1080")
@@ -366,11 +367,17 @@ if __name__ == '__main__':
     f = open('proxies.txt')
     prx = f.readlines()
     f.close()
-    if '"y"' in cfgline[17]:
-        print(now(), 'Creating thread pool...')
+    print(now(), 'Creating thread pool...')
+    if len(sizes.split(',')) > 1:
         try:
             thread_count = len(sizes.split(','))
             sizes = sizes.split(',')
+            try:
+                for size in sizes:
+                    float(size)
+            except:
+                print(now(), 'You entered size which is not a number')
+                exit()
             if int(thread_count) == 1:
                 print(now(), 'You entered only one size.')
                 exit()
@@ -378,7 +385,7 @@ if __name__ == '__main__':
                 print(now(), 'You should have minimum', thread_count, 'proxies to start bot.')
                 exit()
         except:
-            print('You should write size for each pair comma separated in quotation marks')
+            print(now(), 'You should write size for each pair comma separated in quotation marks')
             exit()
         else:
             print(now(), 'Initializing threads with input arguments...')
@@ -388,13 +395,11 @@ if __name__ == '__main__':
                 proxy = prx[thread_num - 1]
                 if '\n' in proxy:
                     proxy = proxy.replace('\n', '')
+                print(now(), 'Initializing thread with ID:', thread_num)
                 proc = Thread(target=launch_yeezy, args=(model,size,thread_num,proxy))
                 proc.start()
     else:
         size = sizes
-        if len(size) > 3:
-            print(now(), 'Fatal error. Check your field number 17')
-            exit()
         thread_num = 1
         proxy = 0
         launch_yeezy(model, size, thread_num,proxy)
