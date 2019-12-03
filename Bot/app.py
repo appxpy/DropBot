@@ -14,8 +14,8 @@ def launch_yeezy(model, size, thread_num, proxy):
     import datetime
     def now():
         now = datetime.datetime.now()
-        prefix = str('[THREAD:' + str(thread_num) + '] - ')
-        result = prefix + now.strftime("%X")
+        prefix = str(' - [ID:' + str(thread_num) + ']')
+        result = now.strftime("%X") + prefix
         return result
     f = open('config.txt', 'r')
     cfgline = f.readlines()
