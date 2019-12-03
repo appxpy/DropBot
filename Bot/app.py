@@ -12,16 +12,27 @@ def launch_yeezy(model, size, thread_num, proxy):
     import time
     import re
     import datetime
-    def now():
+    def nowINFO():
         now = datetime.datetime.now()
-        prefix = str(' - [ID:' + str(thread_num) + ']')
+        if len(str(thread_num)) >= 2:
+            prefix = str(' - [ID:' + str(thread_num) + '/INFO]')
+        else:
+            prefix = str(' - [ID:0' + str(thread_num) + '/INFO]')
+        result = now.strftime("%X") + prefix
+        return result
+    def nowERROR():
+        now = datetime.datetime.now()
+        if len(str(thread_num)) >= 2:
+            prefix = str(' - [ID:' + str(thread_num) + '/ERROR]')
+        else:
+            prefix = str(' - [ID:0' + str(thread_num) + '/ERROR]')
         result = now.strftime("%X") + prefix
         return result
     f = open('config.txt', 'r')
     cfgline = f.readlines()
     options = Options()
     if proxy != 0:
-        print(now(), '-', 'Using proxy:', proxy)
+        print(nowINFO(), '-', 'Using proxy:', proxy)
         options.add_argument('--proxy-server=http://%s' % proxy)
     else:
         options.add_argument('--no-proxy-server')
@@ -34,7 +45,7 @@ def launch_yeezy(model, size, thread_num, proxy):
     options.add_argument("--headless")
     driver = webdriver.Chrome(options=options)
     driver.delete_all_cookies()
-    print(now(), '-', 'Webdriver in headless mode launched succesefully')
+    print(nowINFO(), '-', 'Webdriver in headless mode launched succesefully')
     ua = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36"
     headers = {
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
@@ -57,9 +68,9 @@ def launch_yeezy(model, size, thread_num, proxy):
         return int(delta.total_seconds())
 
     def main(model, size):
-        print(now(), '-', 'Use selected model:', model)
-        print(now(), '-', 'Use selected size:', size)
-        print(now(), '-', 'Bot started')
+        print(nowINFO(), '-', 'Use selected model:', model)
+        print(nowINFO(), '-', 'Use selected size:', size)
+        print(nowINFO(), '-', 'Bot started')
         sneaker_bot(model, size)
 
     def url_gen(model, size):
@@ -69,7 +80,7 @@ def launch_yeezy(model, size, thread_num, proxy):
         RawSize = ShoeSize + BaseSize
         url = 'https://www.adidas.ru/yeezy/' + model + \
             '.html?forceSelSize=' + model + '_' + str(int(RawSize))
-        print(now(), '-', 'Url created')
+        print(nowINFO(), '-', 'Url created')
         return url
 
     def check_stock(model):
@@ -81,16 +92,16 @@ def launch_yeezy(model, size, thread_num, proxy):
              while size_data['availability_status'] == 'PREVIEW':
                  raw_sizes = requests.get(size_url, headers=headers)
                  size_data = json.loads(raw_sizes.text)
-                 print(now(), '-', 'Availability status - PREVIEW. Continue sending json requests to:', size_url)
+                 print(nowINFO(), '-', 'Availability status - PREVIEW. Continue sending json requests to:', size_url)
                  time.sleep(5)
         except:
-            print(now(), '-', 'API error occured. Your model is not valid.')
-            print(now(), '-', 'Bot stopped with exit code 1')
+            print(nowERROR(), '-', 'API error occured. Your model is not valid.')
+            print(nowERROR(), '-', 'Bot stopped with exit code 1')
             driver.quit()
             exit()
-        print(now(), '-', 'Recieved response from server API with code',
+        print(nowINFO(), '-', 'Recieved response from server API with code',
               raw_sizes.status_code)
-        print(now(), '-', 'Availability status IN_STOCK')
+        print(nowINFO(), '-', 'Availability status IN_STOCK')
         list = size_data['variation_list']
         size_dict = {}
         size_lookup = {}
@@ -108,7 +119,7 @@ def launch_yeezy(model, size, thread_num, proxy):
             sizes_list.append(x1)
         value_list = size_lookup.values()
         size_lookup = dict(zip(sizes_list, value_list))
-        print(now(), '-', 'Created size list based on API')
+        print(nowINFO(), '-', 'Created size list based on API')
         return size_lookup
 
     def sneaker_bot(model, size):
@@ -117,14 +128,14 @@ def launch_yeezy(model, size, thread_num, proxy):
         url = url_gen(model, size)
         if str(size) in sizes:
             if str(sizes[str(size)]) == 'IN_STOCK':
-                print(now(), '-', 'Your size is found, start the purchase phase')
+                print(nowINFO(), '-', 'Your size is found, start the purchase phase')
                 process_cart_adidas(url, size)
                 autofill_shipping_adidas()
                 autofill_card_adidas()
             else:
-                print(now(), '-', 'Your size is not available')
+                print(nowERROR(), '-', 'Your size is not available')
         else:
-            print(now(), '-', 'During to API error we are not able to save you a pair')
+            print(nowERROR(), '-', 'During to API error we are not able to save you a pair')
 
     def process_cart_adidas(url, size):
         # Boot up webdriver; process adidas url
@@ -132,10 +143,10 @@ def launch_yeezy(model, size, thread_num, proxy):
         try:
         	page = requests.get(url, headers=headers)
         except:
-            print(now(), '-', 'Internet or proxy error occured')
+            print(nowERROR(), '-', 'Internet or proxy error occured')
             driver.quit()
             exit()
-        print(now(), '-', 'Transfer on item page')
+        print(nowINFO(), '-', 'Transfer on item page')
         # Grab CSS to "Add to Bag" button
         try:
             element = WebDriverWait(driver, 5).until(
@@ -143,7 +154,7 @@ def launch_yeezy(model, size, thread_num, proxy):
                     (By.XPATH, '//*[@id="app"]/div/div[1]/div/div[2]/div[2]/div[2]/div[2]/div[1]'))
             )
         except:
-            print(now(), '-', 'You now in virtual queue or model is not dropping')
+            print(nowINFO(), '-', 'You now in virtual queue or model is not dropping')
             process_cart_adidas(url, size)
 
         finally:
@@ -160,34 +171,34 @@ def launch_yeezy(model, size, thread_num, proxy):
         for obj in sizeObj:
             if str(str(size) + ' UK') in obj.text:
                 obj.click()
-        print(now(), '-', 'Processing cart')
+        print(nowINFO(), '-', 'Processing cart')
         Add_To_Cart = driver.find_element_by_xpath(
             '//*[@id="app"]/div/div[1]/div/div[2]/div[2]/div[2]/button')
         Add_To_Cart.click()
         f = open('timerfile.txt', 'a+')
         f.write(now())
         f.close()
-        print(now(), '-', 'Bot succesefully secured your item in', checktime(), 'seconds')
+        print(nowINFO(), '-', 'Bot succesefully secured your item in', checktime(), 'seconds')
         try:
             element = WebDriverWait(driver, 10).until(
                 EC.element_to_be_clickable(
                     (By.XPATH, '//*[@id="dialogcontainer"]/div/a[1]'))
             )
         except:
-            print(now(), '-', 'Geo checker not founded. Continue...')
+            print(nowINFO(), '-', 'Geo checker not founded. Continue...')
         else:
                 GeoCheck = driver.find_element_by_xpath(
                     '//*[@id="dialogcontainer"]/div/a[1]')
                 GeoCheck.click()
-                print(now(), '-', 'Geo checker founded. Continue...')
-        print(now(), '-', 'Processing forward on shipping page')
+                print(nowINFO(), '-', 'Geo checker founded. Continue...')
+        print(nowINFO(), '-', 'Processing forward on shipping page')
         # Navigate to Checkout page
         driver.get(
             'https://www.adidas.ru/on/demandware.store/Sites-adidas-RU-Site/ru_RU/CODelivery-Start')
-        print(now(), '-', 'Bot work finished in', checktime(), 'seconds')
+        print(nowINFO(), '-', 'Bot work finished in', checktime(), 'seconds')
     def autofill_shipping_adidas():
         # Read client info from file.
-        print(now(), '-', 'Begin autofill')
+        print(nowINFO(), '-', 'Begin autofill')
         with open('config.txt', 'r', encoding='utf-8') as file:
             # Autofill information
             cfgline = file.readlines()
@@ -197,85 +208,85 @@ def launch_yeezy(model, size, thread_num, proxy):
                         (By.ID, "dwfrm_delivery_singleshipping_shippingAddress_addressFields_firstName"))
                 )
             except:
-                print(now(), '-', 'Adress fields could not founded. Please update your chrome to the newest one and check chromedriver in PATH')
+                print(nowERROR(), '-', 'Adress fields could not founded. Please update your chrome to the newest one and check chromedriver in PATH')
                 driver.quit()
                 exit()
             finally:
-                print(now(), '-', 'Autofilling firstame field')
+                print(nowINFO(), '-', 'Autofilling firstame field')
                 textfield = cfgline[3]
                 pattern = re.compile('".*?"')
                 textfield = pattern.search(textfield).group(0)
                 textfield = textfield.replace('"', '')
                 driver.find_element_by_id(
                     "dwfrm_delivery_singleshipping_shippingAddress_addressFields_firstName").send_keys(textfield)
-                print(now(), '-', 'Autofilling lastname field')
+                print(nowINFO(), '-', 'Autofilling lastname field')
                 textfield = cfgline[4]
                 pattern = re.compile('".*?"')
                 textfield = pattern.search(textfield).group(0)
                 textfield = textfield.replace('"', '')
                 driver.find_element_by_id(
                     'dwfrm_delivery_singleshipping_shippingAddress_addressFields_lastName').send_keys(textfield)
-                print(now(), '-', 'Autofilling adress field')
+                print(nowINFO(), '-', 'Autofilling adress field')
                 textfield = cfgline[5]
                 pattern = re.compile('".*?"')
                 textfield = pattern.search(textfield).group(0)
                 textfield = textfield.replace('"', '')
                 driver.find_element_by_id(
                     'dwfrm_delivery_singleshipping_shippingAddress_addressFields_city').send_keys(textfield)
-                print(now(), '-', 'Autofilling zipcode field')
+                print(nowINFO(), '-', 'Autofilling zipcode field')
                 textfield = cfgline[6]
                 pattern = re.compile('".*?"')
                 textfield = pattern.search(textfield).group(0)
                 textfield = textfield.replace('"', '')
                 driver.find_element_by_id(
                     'dwfrm_delivery_singleshipping_shippingAddress_addressFields_zip').send_keys(textfield)
-                print(now(), '-', 'Autofilling street field')
+                print(nowINFO(), '-', 'Autofilling street field')
                 textfield = cfgline[7]
                 pattern = re.compile('".*?"')
                 textfield = pattern.search(textfield).group(0)
                 textfield = textfield.replace('"', '')
                 driver.find_element_by_id(
                     'dwfrm_delivery_singleshipping_shippingAddress_addressFields_address1').send_keys(textfield)
-                print(now(), '-', 'Autofilling house number field')
+                print(nowINFO(), '-', 'Autofilling house number field')
                 textfield = cfgline[8]
                 pattern = re.compile('".*?"')
                 textfield = pattern.search(textfield).group(0)
                 textfield = textfield.replace('"', '')
                 driver.find_element_by_id(
                     'dwfrm_delivery_singleshipping_shippingAddress_addressFields_houseNumber').send_keys(textfield)
-                print(now(), '-', 'Autofilling apartament number field')
+                print(nowINFO(), '-', 'Autofilling apartament number field')
                 textfield = cfgline[9]
                 pattern = re.compile('".*?"')
                 textfield = pattern.search(textfield).group(0)
                 textfield = textfield.replace('"', '')
                 driver.find_element_by_id(
                     'dwfrm_delivery_singleshipping_shippingAddress_addressFields_apartmentNumber').send_keys(textfield)
-                print(now(), '-', 'Autofilling phone form')
+                print(nowINFO(), '-', 'Autofilling phone form')
                 textfield = cfgline[10]
                 pattern = re.compile('".*?"')
                 textfield = pattern.search(textfield).group(0)
                 textfield = textfield.replace('"', '')
                 driver.find_element_by_id(
                     'dwfrm_delivery_singleshipping_shippingAddress_addressFields_phone').send_keys(textfield)
-                print(now(), '-', 'Autofilling email form')
+                print(nowINFO(), '-', 'Autofilling email form')
                 textfield = cfgline[11]
                 pattern = re.compile('".*?"')
                 textfield = pattern.search(textfield).group(0)
                 textfield = textfield.replace('"', '')
                 driver.find_element_by_id(
                     'dwfrm_delivery_singleshipping_shippingAddress_email_emailAddress').send_keys(textfield)
-        print(now(), '-', 'Accepting privacy policy')
+        print(nowINFO(), '-', 'Accepting privacy policy')
         time.sleep(0.5)
         driver.find_element_by_xpath(
             '//*[@id="dwfrm_delivery"]/div[2]/div[3]/div[2]/div[2]/div[1]/div/div/span').click()
-        print(now(), '-', 'Processing forward on billing page')
+        print(nowINFO(), '-', 'Processing forward on billing page')
         # driver.find_elements_by_css_selector('#dwfrm_delivery_savedelivery')
         driver.get(
             'https://www.adidas.ru/on/demandware.store/Sites-adidas-RU-Site/ru_RU/COSummary2-Start')
 
     def autofill_card_adidas():
         # Read in card information from file.
-        print(now(), '-', 'Autofilling billing information')
+        print(nowINFO(), '-', 'Autofilling billing information')
         with open('config.txt', 'r', encoding='utf-8') as card:
             cfgline = file.readlines()
             try:
@@ -284,21 +295,21 @@ def launch_yeezy(model, size, thread_num, proxy):
                         (By.ID, "dwfrm_adyenencrypted_number"))
                 )
             finally:
-                print(now(), '-', 'Autofilling holder name')
+                print(nowINFO(), '-', 'Autofilling holder name')
                 textfield = cfgline[13]
                 pattern = re.compile('".*?"')
                 textfield = pattern.search(textfield).group(0)
                 textfield = textfield.replace('"', '')
                 driver.find_element_by_id(
                     'dwfrm_adyenencrypted_holderName').send_keys(textfield)
-                print(now(), '-', 'Autofilling card number')
+                print(nowINFO(), '-', 'Autofilling card number')
                 textfield = cfgline[12]
                 pattern = re.compile('".*?"')
                 textfield = pattern.search(textfield).group(0)
                 textfield = textfield.replace('"', '')
                 driver.find_element_by_id(
                     'dwfrm_adyenencrypted_number').send_keys(textfield)
-                print(now(), '-', 'Autofilling card cvc')
+                print(nowINFO(), '-', 'Autofilling card cvc')
                 textfield = cfgline[16]
                 pattern = re.compile('".*?"')
                 textfield = pattern.search(textfield).group(0)
@@ -315,7 +326,7 @@ def launch_yeezy(model, size, thread_num, proxy):
             textfield = pattern.search(textfield).group(0)
             textfield = textfield.replace('"', '')
             y = (textfield).replace('\n', '')
-        print(now(), '-', 'Autofilling mounth/year')
+        print(nowINFO(), '-', 'Autofilling mounth/year')
         driver.find_element_by_xpath(
             '//*[contains(concat( " ", @class, " " ), concat( " ", "month", " " ))]//*[contains(concat( " ", @class, " " ), concat( " ", "ffSelectButton", " " ))] | //*[contains(concat( " ", @class, " " ), concat( " ", "month", " " ))]//span').click()
         listx = driver.find_elements_by_xpath(
@@ -333,19 +344,26 @@ def launch_yeezy(model, size, thread_num, proxy):
         for year in years:
             if year.text == y:
                 year.click()
-        print(now(), '-', 'Autofilling billing information success!')
+        print(nowINFO(), '-', 'Autofilling billing information success!')
         finalbutton = driver.find_elements_by_xpath(
             '//*[@id="content"]/div/div[1]/div[5]/div/button')
         for btn in finalbutton:
             btn.click()
-        print(now(), '-', 'Closing webdriver')
+        print(nowINFO(), '-', 'Closing webdriver')
         driver.quit()
         exit()
     main(model, size)
 if __name__ == '__main__':
-    def now():
+    def nowERROR():
         now = datetime.datetime.now()
-        return  now.strftime("%X")
+        prefix = ' - [ID:MAIN/ERROR] - '
+        result = now.strftime("%X") + prefix
+        return result
+    def nowINFO():
+        now = datetime.datetime.now()
+        prefix = ' - [ID:MAIN/INFO] - '
+        result = now.strftime("%X") + prefix
+        return result
     print('|----------------------------------LOG----------------------------------|')
     import re
     import datetime
@@ -367,7 +385,7 @@ if __name__ == '__main__':
     f = open('proxies.txt')
     prx = f.readlines()
     f.close()
-    print(now(), 'Creating thread pool...')
+    print(nowINFO(), 'Creating thread pool...')
     if len(sizes.split(',')) > 1:
         try:
             thread_count = len(sizes.split(','))
@@ -376,26 +394,26 @@ if __name__ == '__main__':
                 for size in sizes:
                     float(size)
             except:
-                print(now(), 'You entered size which is not a number')
+                print(nowERROR(), 'You entered size which is not a number')
                 exit()
             if int(thread_count) == 1:
-                print(now(), 'You entered only one size.')
+                print(nowERROR(), 'You entered only one size.')
                 exit()
             if int(thread_count) > len(prx):
-                print(now(), 'You should have minimum', thread_count, 'proxies to start bot.')
+                print(nowERROR(), 'You should have minimum', thread_count, 'proxies to start bot.')
                 exit()
         except:
-            print(now(), 'You should write size for each pair comma separated in quotation marks')
+            print(nowERROR(), 'You should write size for each pair comma separated in quotation marks')
             exit()
         else:
-            print(now(), 'Initializing threads with input arguments...')
+            print(nowINFO(), 'Initializing threads with input arguments...')
             thread_num = 0
             for size in sizes:
                 thread_num += 1
                 proxy = prx[thread_num - 1]
                 if '\n' in proxy:
                     proxy = proxy.replace('\n', '')
-                print(now(), 'Initializing thread with ID:', thread_num)
+                print(nowINFO(), 'Initializing thread with ID:', thread_num)
                 proc = Thread(target=launch_yeezy, args=(model,size,thread_num,proxy))
                 proc.start()
     else:
