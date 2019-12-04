@@ -89,19 +89,21 @@ def launch_yeezy(model, size, thread_num, proxy):
         try:
             raw_sizes = requests.get(size_url, headers=headers)
         except:
-            print(nowERROR(), '-', 'Proxy error occured.')
+            print(nowERROR(), '-', 'Proxy error occured. Check your internet connection or authorized ip on your proxy server')
             print(nowERROR(), '-', 'Bot stopped with exit code 1')
             driver.quit()
             exit()
         size_data = json.loads(raw_sizes.text)
         try:
-             while size_data['availability_status'] == 'PREVIEW':
+            request_counter = 1
+            while size_data['availability_status'] == 'PREVIEW':
                  raw_sizes = requests.get(size_url, headers=headers)
                  size_data = json.loads(raw_sizes.text)
-                 print(nowINFO(), '-', 'Availability status - PREVIEW. Continue sending json requests to:', size_url)
-                 time.sleep(1)
+                 print(nowINFO(), '-', 'Availability status - PREVIEW. Continue sending json request number', request_counter,'to:', size_url + '.')
+                 request_counter += 1
+                 time.sleep(5)
         except:
-            print(nowERROR(), '-', 'API error occured.')
+            print(nowERROR(), '-', 'API or Internet connection error occured')
             print(nowERROR(), '-', 'Bot stopped with exit code 1')
             driver.quit()
             exit()
@@ -155,7 +157,7 @@ def launch_yeezy(model, size, thread_num, proxy):
         print(nowINFO(), '-', 'Transfer on item page')
         # Grab CSS to "Add to Bag" button
         try:
-            element = WebDriverWait(driver, 5).until(
+            element = WebDriverWait(driver, 20).until(
                 EC.element_to_be_clickable(
                     (By.XPATH, '//*[@id="app"]/div/div[1]/div/div[2]/div[2]/div[2]/div[2]/div[1]'))
             )
