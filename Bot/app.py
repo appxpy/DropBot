@@ -86,16 +86,22 @@ def launch_yeezy(model, size, thread_num, proxy):
     def check_stock(model):
         size_url = 'https://www.adidas.ru/api/products/{}/availability'.format(
             model)
-        raw_sizes = requests.get(size_url, headers=headers)
+        try:
+            raw_sizes = requests.get(size_url, headers=headers)
+        except:
+            print(nowERROR(), '-', 'Proxy error occured.')
+            print(nowERROR(), '-', 'Bot stopped with exit code 1')
+            driver.quit()
+            exit()
         size_data = json.loads(raw_sizes.text)
         try:
              while size_data['availability_status'] == 'PREVIEW':
                  raw_sizes = requests.get(size_url, headers=headers)
                  size_data = json.loads(raw_sizes.text)
                  print(nowINFO(), '-', 'Availability status - PREVIEW. Continue sending json requests to:', size_url)
-                 time.sleep(5)
+                 time.sleep(1)
         except:
-            print(nowERROR(), '-', 'API error occured. Your model is not valid.')
+            print(nowERROR(), '-', 'API error occured.')
             print(nowERROR(), '-', 'Bot stopped with exit code 1')
             driver.quit()
             exit()
@@ -410,7 +416,7 @@ if __name__ == '__main__':
             thread_num = 0
             for size in sizes:
                 thread_num += 1
-                proxy = prx[thread_num - 1]
+                proxy = prx[thread_num - 1].replace('\n', '')
                 if '\n' in proxy:
                     proxy = proxy.replace('\n', '')
                 print(nowINFO(), 'Initializing thread with ID:', thread_num)

@@ -2,8 +2,6 @@ f = open('proxies.txt', 'r', encoding='utf-8')
 list = f.readlines()
 proxy = list[0]
 print(proxy)
-import logging
-logging.basicConfig(level=logging.DEBUG)
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
@@ -19,5 +17,4 @@ options.add_argument(
     'user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36')
 #options.add_argument("--headless")
 driver = webdriver.Chrome(options=options)
-driver.delete_all_cookies()
 driver.get('http://2ip.ru')
