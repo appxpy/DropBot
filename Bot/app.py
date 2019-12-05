@@ -404,8 +404,8 @@ if __name__ == '__main__':
     except ModuleNotFoundError:
         import sys
         import subprocess
-        subprocess.call([sys.executable, "-m", "pip", "install", "--upgrade", "pip"], stdout=subprocess.PIPE)
-        subprocess.call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"], stdout=subprocess.PIPE)
+        subprocess.call([sys.executable, "-m", "pip", "install", "--upgrade", "pip"])
+        subprocess.call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
         print(nowINFO(), 'Packages succesefully installed!')
     finally:
         import os
