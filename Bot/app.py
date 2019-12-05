@@ -12,6 +12,7 @@ def launch_yeezy(model, size, thread_num, proxy):
     import time
     import re
     import datetime
+    import sys
     def nowINFO():
         now = datetime.datetime.now()
         if len(str(thread_num)) >= 2:
@@ -43,9 +44,13 @@ def launch_yeezy(model, size, thread_num, proxy):
     options.add_argument(
         'user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36')
     options.add_argument("--headless")
-    driver = webdriver.Chrome(options=options)
+    if sys.platform.startswith('win32'):
+        driver = webdriver.Chrome(options=options, executable_path='chromedriver.exe')
+        print(nowINFO(), '-', 'Webdriver in headless mode for windows launched succesefully')
+    else:
+        driver = webdriver.Chrome(options=options, executable_path='chromedriver')
+        print(nowINFO(), '-', 'Webdriver in headless mode for UNIX systems launched succesefully')
     driver.delete_all_cookies()
-    print(nowINFO(), '-', 'Webdriver in headless mode launched succesefully')
     ua = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36"
     headers = {
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
@@ -363,70 +368,124 @@ def launch_yeezy(model, size, thread_num, proxy):
     main(model, size)
 if __name__ == '__main__':
     def nowERROR():
+        import datetime
         now = datetime.datetime.now()
         prefix = ' - [ID:MAIN/ERROR] - '
         result = now.strftime("%X") + prefix
         return result
     def nowINFO():
+        import datetime
         now = datetime.datetime.now()
         prefix = ' - [ID:MAIN/INFO] - '
         result = now.strftime("%X") + prefix
         return result
     print('|----------------------------------LOG----------------------------------|')
-    import re
-    import datetime
-    from multiprocessing import Process
-    from threading import Thread
-    from threading import Semaphore
-    f = open('config.txt', 'r')
-    cfgline = f.readlines()
-    f.close()
-    # model = str(input('Model: '))
-    model = cfgline[1]
-    pattern = re.compile('".*?"')
-    model = pattern.search(model).group(0)
-    model = model.replace('"', '')
-    sizes = cfgline[2]
-    pattern = re.compile('".*?"')
-    sizes = pattern.search(sizes).group(0)
-    sizes = sizes.replace('"', '')
-    f = open('proxies.txt')
-    prx = f.readlines()
-    f.close()
-    print(nowINFO(), 'Creating thread pool...')
-    if len(sizes.split(',')) > 1:
-        try:
-            thread_count = len(sizes.split(','))
-            sizes = sizes.split(',')
-            try:
-                for size in sizes:
-                    float(size)
-            except:
-                print(nowERROR(), 'You entered size which is not a number')
-                exit()
-            if int(thread_count) == 1:
-                print(nowERROR(), 'You entered only one size.')
-                exit()
-            if int(thread_count) > len(prx):
-                print(nowERROR(), 'You should have minimum', thread_count, 'proxies to start bot.')
-                exit()
-        except:
-            print(nowERROR(), 'You should write size for each pair comma separated in quotation marks')
-            exit()
+    try:
+        from selenium import webdriver
+        from selenium.webdriver.chrome.options import Options
+        from selenium.webdriver.common.by import By
+        from selenium.webdriver.support.ui import WebDriverWait
+        from selenium.webdriver.support import expected_conditions as EC
+        from selenium.webdriver.common.action_chains import ActionChains
+        import time
+        import random
+        import zipfile
+        import requests
+        import json
+        import time
+        import re
+        import datetime
+        import subprocess
+        import sys
+        from multiprocessing import Process
+        from threading import Thread
+        from threading import Semaphore
+        from subprocess import run
+    except ModuleNotFoundError:
+        import sys
+        import subprocess
+        subprocess.call([sys.executable, "-m", "pip", "install", "--upgrade", "pip"], stdout=subprocess.PIPE)
+        subprocess.call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"], stdout=subprocess.PIPE)
+        print(nowINFO(), 'Packages succesefully installed!')
+    finally:
+        import os
+        if sys.platform.startswith('win32'):
+            if os.path.exists('chromedriver.exe'):
+                print(nowINFO(), 'Installed chromedriver for win32')
+            else:
+                print(nowINFO(), 'Installing chromedriver for win32...')
+                import urllib.request
+                import zipfile as z
+                urllib.request.urlretrieve("https://chromedriver.storage.googleapis.com/78.0.3904.105/chromedriver_win32.zip", "chromedriver.zip")
+                with z.ZipFile('chromedriver.zip', 'r') as zip_ref:
+                    zip_ref.extractall()
+                os.remove('chromedriver.zip')
+                print(nowINFO(), 'Chromedriver installed succesefully!')
         else:
-            print(nowINFO(), 'Initializing threads with input arguments...')
-            thread_num = 0
-            for size in sizes:
-                thread_num += 1
-                proxy = prx[thread_num - 1].replace('\n', '')
-                if '\n' in proxy:
-                    proxy = proxy.replace('\n', '')
-                print(nowINFO(), 'Initializing thread with ID:', thread_num)
-                proc = Thread(target=launch_yeezy, args=(model,size,thread_num,proxy))
-                proc.start()
-    else:
-        size = sizes
-        thread_num = 1
-        proxy = 0
-        launch_yeezy(model, size, thread_num,proxy)
-    
+            if os.path.exists('chromedriver'):
+                print(nowINFO(), 'Installed chromedriver for mac64')
+            else:
+                print(nowINFO(), 'Installing chromedriver for mac64...')
+                import urllib.request
+                import zipfile as z
+                urllib.request.urlretrieve("https://chromedriver.storage.googleapis.com/78.0.3904.105/chromedriver_mac64.zip", "chromedriver.zip")
+                with z.ZipFile('chromedriver.zip', 'r') as zip_ref:
+                    zip_ref.extractall()
+                os.remove('chromedriver.zip')
+                print(nowINFO(), 'Chromedriver installed succesefully!')
+        import re
+        from multiprocessing import Process
+        from threading import Thread
+        from threading import Semaphore
+        f = open('config.txt', 'r')
+        cfgline = f.readlines()
+        f.close()
+        # model = str(input('Model: '))
+        model = cfgline[1]
+        pattern = re.compile('".*?"')
+        model = pattern.search(model).group(0)
+        model = model.replace('"', '')
+        sizes = cfgline[2]
+        pattern = re.compile('".*?"')
+        sizes = pattern.search(sizes).group(0)
+        sizes = sizes.replace('"', '')
+        f = open('proxies.txt')
+        prx = f.readlines()
+        f.close()
+        print(nowINFO(), 'Creating thread pool...')
+        if len(sizes.split(',')) > 1:
+            try:
+                thread_count = len(sizes.split(','))
+                sizes = sizes.split(',')
+                try:
+                    for size in sizes:
+                        float(size)
+                except:
+                    print(nowERROR(), 'You entered size which is not a number')
+                    exit()
+                if int(thread_count) == 1:
+                    print(nowERROR(), 'You entered only one size.')
+                    exit()
+                if int(thread_count) > len(prx):
+                    print(nowERROR(), 'You should have minimum', thread_count, 'proxies to start bot.')
+                    exit()
+            except:
+                print(nowERROR(), 'You should write size for each pair comma separated in quotation marks')
+                exit()
+            else:
+                print(nowINFO(), 'Initializing threads with input arguments...')
+                thread_num = 0
+                for size in sizes:
+                    thread_num += 1
+                    proxy = prx[thread_num - 1].replace('\n', '')
+                    if '\n' in proxy:
+                        proxy = proxy.replace('\n', '')
+                    print(nowINFO(), 'Initializing thread with ID:', thread_num)
+                    proc = Thread(target=launch_yeezy, args=(model,size,thread_num,proxy))
+                    proc.start()
+        else:
+            size = sizes
+            thread_num = 1
+            proxy = 0
+            launch_yeezy(model, size, thread_num,proxy)
+        
