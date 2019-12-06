@@ -104,7 +104,7 @@ def launch_yeezy(model, size, thread_num, proxy):
             while size_data['availability_status'] == 'PREVIEW':
                  raw_sizes = requests.get(size_url, headers=headers)
                  size_data = json.loads(raw_sizes.text)
-                 print(nowINFO(), '-', 'Availability status - PREVIEW. Continue sending json request number', request_counter,'to:', size_url + '.')
+                 print(nowINFO(), '-', 'Availability status - PREVIEW. Continue sending json request number', str(request_counter) + '.')
                  request_counter += 1
                  time.sleep(5)
         except:
@@ -404,8 +404,8 @@ if __name__ == '__main__':
     except ModuleNotFoundError:
         import sys
         import subprocess
-        subprocess.call([sys.executable, "-m", "pip", "install", "--upgrade", "pip"])
-        subprocess.call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
+        subprocess.call([sys.executable, "-m", "pip", "install", "--upgrade", "pip"], stdout=subprocess.PIPE)
+        subprocess.call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"], stdout=subprocess.PIPE)
         print(nowINFO(), 'Packages succesefully installed!')
     finally:
         import os
