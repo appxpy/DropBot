@@ -1,8 +1,8 @@
 ##############CONFIG FILE##############
 1. Model: "FW2498"
 2. Size or list of sizes comma separated in quotation marks намin UK): "10,10.5,7,7,8,7,10.5,6,6,7"
-3. Name: "Name"
-4. Last Name: "Lastname"
+3. Name: "Долбосрак"
+4. Last Name: "Черножопов"
 5. City: "Москва"
 6. Zipcode: "123103"
 7. Adress: "Маршала Жукова пркт"

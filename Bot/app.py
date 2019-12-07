@@ -378,7 +378,11 @@ if __name__ == '__main__':
         now = datetime.datetime.now()
         prefix = ' - [ID:MAIN/INFO] - '
         result = now.strftime("%X") + prefix
-        return result
+        return(result)
+    def reporthook(count, blockSize, totalSize):
+      percent = int(count*blockSize*100/totalSize)
+      sys.stdout.write("\r" + 'Chrome installer downloading' + "...%d%%" % percent)
+      sys.stdout.flush()
     print('|----------------------------------LOG----------------------------------|')
     try:
         from selenium import webdriver
@@ -388,6 +392,7 @@ if __name__ == '__main__':
         from selenium.webdriver.support import expected_conditions as EC
         from selenium.webdriver.common.action_chains import ActionChains
         import time
+        import hashlib
         import random
         import zipfile
         import requests
@@ -404,10 +409,162 @@ if __name__ == '__main__':
     except ModuleNotFoundError:
         import sys
         import subprocess
+        print(sys.executable)
         subprocess.call([sys.executable, "-m", "pip", "install", "--upgrade", "pip"], stdout=subprocess.PIPE)
         subprocess.call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"], stdout=subprocess.PIPE)
         print(nowINFO(), 'Packages succesefully installed!')
     finally:
+        import os
+        if os.path.exists('config.txt'):
+            print(nowINFO(), 'Config.txt file succesefully founded!')
+        else:
+            print(nowINFO(), 'Config.txt file not exist, creating new one...')
+            config = []
+            config.append('##############CONFIG FILE##############')
+            textfield = str(input('Please enter your model: '))
+            textfield = '1. Model: "' + textfield + '"'
+            config.append(textfield)
+            textfield = str(input('Please enter your Size or list of sizes comma separated in UK): '))
+            textfield = '2. Size or list of sizes comma separated in quotation marks in UK): "' + textfield + '"'
+            config.append(textfield)
+            textfield = str(input('Please enter your name: '))
+            textfield = '3. Firstame: "' + textfield + '"'
+            config.append(textfield)
+            textfield = str(input('Please enter your last name: '))
+            textfield = '4. Last name: "' + textfield + '"'
+            config.append(textfield)
+            textfield = str(input('Please enter your city: '))
+            textfield = '5. City: "' + textfield + '"'
+            config.append(textfield)
+            textfield = str(input('Please enter your zipcode: '))
+            textfield = '6. Zipcode: "' + textfield + '"'
+            config.append(textfield)
+            textfield = str(input('Please enter your adress without home and apartament number: '))
+            textfield = '7. Adress: "' + textfield + '"'
+            config.append(textfield)
+            textfield = str(input('Please enter your house number: '))
+            textfield = '8. House number: "' + textfield + '"'
+            config.append(textfield)
+            textfield = str(input('Please enter your apartament number: '))
+            textfield = '9. apartament number: "' + textfield + '"'
+            config.append(textfield)
+            textfield = str(input('Please enter your telephone number without +7 : '))
+            textfield = '10. Telephone number: "' + textfield + '"'
+            config.append(textfield)
+            textfield = str(input('Please enter email: '))
+            textfield = '11. Email: "' + textfield + '"'
+            config.append(textfield)
+            textfield = str(input('Please enter card number like this (xxxx xxxx xxxx xxxx): '))
+            textfield = '12. Card number: "' + textfield + '"'
+            config.append(textfield)
+            textfield = str(input('Please enter card owner name: '))
+            textfield = '13. Card owner name: "' + textfield + '"'
+            config.append(textfield)
+            textfield = str(input('Please enter card expiring mounth: '))
+            textfield = '14. Card expiring mounth: "' + textfield + '"'
+            config.append(textfield)
+            textfield = str(input('Please enter card expiring year: '))
+            textfield = '15. Card expiring year: "' + textfield + '"'
+            config.append(textfield)
+            textfield = str(input('Please enter CVC/CVV2 card code: '))
+            textfield = '16. CVC/CVV2 Code: "' + textfield + '"'
+            config.append(textfield)
+            f = open('config.txt', '+w', encoding='utf-8')
+            for line in config:
+                line = line + '\n'
+                f.write(line)
+            f.close()
+            print(nowINFO(), 'Config.txt file succesefully created!')
+        if os.path.exists('proxies.txt'):
+            print(nowINFO(), 'Proxies.txt file succesefully founded!')
+        else:
+            print(nowINFO(), 'Proxies.txt file not exist, creating new one...')
+            try:
+                proxyCount = int(input('Please enter how much proxies do you have(if 0 - no proxy): '))
+            except:
+                print(nowERROR(), 'ProxyCount is not a number.')
+                input('Press enter to exit...')
+                exit()
+            if proxyCount != 0:
+                proxyCountRev = 0
+                proxyTotal = proxyCount
+                f = open('proxies.txt', '+a', encoding='utf-8')
+                while proxyCount != 0:
+                    proxyCount -= 1
+                    proxyCountRev += 1
+                    proxy = str(input('Enter your proxy: '))
+                    if proxyCount != 0:
+                        proxy = proxy + '\n'
+                    f.write(proxy)
+                    print(nowINFO(), 'Proxy number', proxyCountRev,'out of', proxyTotal, 'succesefully written to file.')
+                f.close()
+            else:
+                f = open('proxies.txt', '+a', encoding='utf-8')
+                f.close()
+            print(nowINFO(), 'Proxy.txt file succesefully created!')
+        import hashlib
+        EncryptedPassword = 'c12414dbe0782f8ddc6977eb8442826420eb04cbefcc758e5275433115859613'
+        UserPass = str(input('Please input your password: '))
+        if hashlib.sha256(str(UserPass).encode('utf-8')).hexdigest() != EncryptedPassword:
+            print(nowINFO(), 'Input password hash is:', hashlib.sha256(str(UserPass).encode('utf-8')).hexdigest())
+            print(nowERROR(), 'Incorrect password, nice try!')
+            input('Press enter to exit...')
+            exit()
+        else:
+            try:
+                import os
+                f = open('config.txt', 'r', encoding='utf-8')
+                cfgline = f.readlines()
+                f.close()
+                # model = str(input('Model: '))
+                name = cfgline[3]
+                pattern = re.compile('".*?"')
+                name = pattern.search(name).group(0)
+                name = name.replace('"', '')
+                surname = cfgline[4]
+                pattern = re.compile('".*?"')
+                surname = pattern.search(surname).group(0)
+                surname = surname.replace('"', '')
+                if sys.platform.startswith('win32'):
+                    os.system('cls')
+                else:
+                    os.system('clear')
+                print('|----------------------------------LOG----------------------------------|')
+                print(nowINFO(), 'Input password hash is:', hashlib.sha256(str(UserPass).encode('utf-8')).hexdigest())
+                print(nowINFO(), 'Password authorized!')
+                print(nowINFO(), 'Welcome back', name, surname)
+            except:
+                print(nowERROR(), 'File config.txt is missing')
+                exit()
+        try:
+            if sys.platform.startswith('win32'):
+                from selenium.webdriver.chrome.options import Options
+                options = Options()
+                options.add_experimental_option('excludeSwitches', ['enable-logging'])
+                options.add_argument('--headless')
+                driver = webdriver.Chrome(options=options, executable_path='chromedriver.exe')
+            else:
+                from selenium.webdriver.chrome.options import Options
+                options = Options()
+                options.add_experimental_option('excludeSwitches', ['enable-logging'])
+                options.add_argument('--headless')
+                driver = webdriver.Chrome(options=options, executable_path='chromedriver')
+        except:
+            import urllib.request
+            import os
+            if sys.platform.startswith('win32'):
+                print(nowINFO(), 'Google chrome is not installed, intstalling...')
+                urllib.request.urlretrieve("https://dl.google.com/release2/chrome/AOwc74zXwu9gfZo8W5cKY0Y_78.0.3904.70/78.0.3904.70_chrome_installer.exe", "chrome_installer.exe", reporthook=reporthook)
+                subprocess.call(['chrome_installer.exe' , '/silent' , '/install'])
+                os.remove('chrome_installer.exe')
+            else:
+                print(nowINFO(), 'Google chrome is not installed, downloading...')
+                urllib.request.urlretrieve("google.com/intl/ru/chrome/thank-you.html?platform=mac&statcb=0&installdataindex=empty&defaultbrowser=0", "chrome_installer.dmg", reporthook=reporthook)
+                print(nowINFO(), 'Please install google chrome from chrome_installer.dmg file in Bot directory...')
+                input('Press enter to exit...')
+                exit()
+        else:
+            driver.quit()
         import os
         if sys.platform.startswith('win32'):
             if os.path.exists('chromedriver.exe'):
