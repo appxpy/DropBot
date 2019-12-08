@@ -48,7 +48,7 @@ def launch_yeezy(model, size, thread_num, proxy):
         driver = webdriver.Chrome(options=options, executable_path='chromedriver.exe')
         print(nowINFO(), '-', 'Webdriver in headless mode for windows launched succesefully')
     else:
-        driver = webdriver.Chrome(options=options, executable_path='chromedriver')
+        driver = webdriver.Chrome(options=options, executable_path='./chromedriver')
         print(nowINFO(), '-', 'Webdriver in headless mode for UNIX systems launched succesefully')
     driver.delete_all_cookies()
     ua = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36"
@@ -97,7 +97,7 @@ def launch_yeezy(model, size, thread_num, proxy):
             print(nowERROR(), '-', 'Proxy error occured. Check your internet connection or authorized ip on your proxy server')
             print(nowERROR(), '-', 'Bot stopped with exit code 1')
             driver.quit()
-            exit()
+            sys.exit()
         size_data = json.loads(raw_sizes.text)
         try:
             request_counter = 1
@@ -111,7 +111,7 @@ def launch_yeezy(model, size, thread_num, proxy):
             print(nowERROR(), '-', 'API or Internet connection error occured')
             print(nowERROR(), '-', 'Bot stopped with exit code 1')
             driver.quit()
-            exit()
+            sys.exit()
         print(nowINFO(), '-', 'Recieved response from server API with code',
               raw_sizes.status_code)
         print(nowINFO(), '-', 'Availability status IN_STOCK')
@@ -158,7 +158,7 @@ def launch_yeezy(model, size, thread_num, proxy):
         except:
             print(nowERROR(), '-', 'Internet or proxy error occured')
             driver.quit()
-            exit()
+            sys.exit()
         print(nowINFO(), '-', 'Transfer on item page')
         # Grab CSS to "Add to Bag" button
         try:
@@ -223,7 +223,7 @@ def launch_yeezy(model, size, thread_num, proxy):
             except:
                 print(nowERROR(), '-', 'Adress fields could not founded. Please update your chrome to the newest one and check chromedriver in PATH')
                 driver.quit()
-                exit()
+                sys.exit()
             finally:
                 print(nowINFO(), '-', 'Autofilling firstame field')
                 textfield = cfgline[3]
@@ -364,7 +364,7 @@ def launch_yeezy(model, size, thread_num, proxy):
             btn.click()
         print(nowINFO(), '-', 'Closing webdriver')
         driver.quit()
-        exit()
+        sys.exit()
     main(model, size)
 if __name__ == '__main__':
     def nowERROR():
@@ -382,6 +382,10 @@ if __name__ == '__main__':
     def reporthook(count, blockSize, totalSize):
       percent = int(count*blockSize*100/totalSize)
       sys.stdout.write("\r" + 'Chrome installer downloading' + "...%d%%" % percent)
+      sys.stdout.flush()
+    def reporthook2(count, blockSize, totalSize):
+      percent = int(count*blockSize*100/totalSize)
+      sys.stdout.write("\r" + 'Chromedriver downloading' + "...%d%%" % percent)
       sys.stdout.flush()
     print('|----------------------------------LOG----------------------------------|')
     try:
@@ -484,7 +488,7 @@ if __name__ == '__main__':
             except:
                 print(nowERROR(), 'ProxyCount is not a number.')
                 input('Press enter to exit...')
-                exit()
+                sys.exit()
             if proxyCount != 0:
                 proxyCountRev = 0
                 proxyTotal = proxyCount
@@ -509,7 +513,7 @@ if __name__ == '__main__':
             print(nowINFO(), 'Input password hash is:', hashlib.sha256(str(UserPass).encode('utf-8')).hexdigest())
             print(nowERROR(), 'Incorrect password, nice try!')
             input('Press enter to exit...')
-            exit()
+            sys.exit()
         else:
             try:
                 import os
@@ -535,37 +539,10 @@ if __name__ == '__main__':
                 print(nowINFO(), 'Welcome back', name, surname)
             except:
                 print(nowERROR(), 'File config.txt is missing')
-                exit()
-        try:
-            if sys.platform.startswith('win32'):
-                from selenium.webdriver.chrome.options import Options
-                options = Options()
-                options.add_experimental_option('excludeSwitches', ['enable-logging'])
-                options.add_argument('--headless')
-                driver = webdriver.Chrome(options=options, executable_path='chromedriver.exe')
-            else:
-                from selenium.webdriver.chrome.options import Options
-                options = Options()
-                options.add_experimental_option('excludeSwitches', ['enable-logging'])
-                options.add_argument('--headless')
-                driver = webdriver.Chrome(options=options, executable_path='chromedriver')
-        except:
-            import urllib.request
-            import os
-            if sys.platform.startswith('win32'):
-                print(nowINFO(), 'Google chrome is not installed, intstalling...')
-                urllib.request.urlretrieve("https://dl.google.com/release2/chrome/AOwc74zXwu9gfZo8W5cKY0Y_78.0.3904.70/78.0.3904.70_chrome_installer.exe", "chrome_installer.exe", reporthook=reporthook)
-                subprocess.call(['chrome_installer.exe' , '/silent' , '/install'])
-                os.remove('chrome_installer.exe')
-            else:
-                print(nowINFO(), 'Google chrome is not installed, downloading...')
-                urllib.request.urlretrieve("google.com/intl/ru/chrome/thank-you.html?platform=mac&statcb=0&installdataindex=empty&defaultbrowser=0", "chrome_installer.dmg", reporthook=reporthook)
-                print(nowINFO(), 'Please install google chrome from chrome_installer.dmg file in Bot directory...')
-                input('Press enter to exit...')
-                exit()
-        else:
-            driver.quit()
+                sys.exit()
         import os
+        import ssl
+        ssl._create_default_https_context = ssl._create_unverified_context
         if sys.platform.startswith('win32'):
             if os.path.exists('chromedriver.exe'):
                 print(nowINFO(), 'Installed chromedriver for win32')
@@ -573,11 +550,11 @@ if __name__ == '__main__':
                 print(nowINFO(), 'Installing chromedriver for win32...')
                 import urllib.request
                 import zipfile as z
-                urllib.request.urlretrieve("https://chromedriver.storage.googleapis.com/78.0.3904.105/chromedriver_win32.zip", "chromedriver.zip")
+                urllib.request.urlretrieve("https://chromedriver.storage.googleapis.com/78.0.3904.105/chromedriver_win32.zip", "chromedriver.zip", reporthook=reporthook2)
                 with z.ZipFile('chromedriver.zip', 'r') as zip_ref:
                     zip_ref.extractall()
                 os.remove('chromedriver.zip')
-                print(nowINFO(), 'Chromedriver installed succesefully!')
+                print(nowINFO(), '\nChromedriver installed succesefully!')
         else:
             if os.path.exists('chromedriver'):
                 print(nowINFO(), 'Installed chromedriver for mac64')
@@ -585,11 +562,47 @@ if __name__ == '__main__':
                 print(nowINFO(), 'Installing chromedriver for mac64...')
                 import urllib.request
                 import zipfile as z
-                urllib.request.urlretrieve("https://chromedriver.storage.googleapis.com/78.0.3904.105/chromedriver_mac64.zip", "chromedriver.zip")
+                urllib.request.urlretrieve("https://chromedriver.storage.googleapis.com/78.0.3904.105/chromedriver_mac64.zip", "chromedriver.zip", reporthook=reporthook2)
                 with z.ZipFile('chromedriver.zip', 'r') as zip_ref:
                     zip_ref.extractall()
+                print(nowINFO(), '\nWriting permissions..')
+                os.chmod("chromedriver", 0o777)
                 os.remove('chromedriver.zip')
                 print(nowINFO(), 'Chromedriver installed succesefully!')
+        try:
+            if sys.platform.startswith('win32'):
+                from selenium import webdriver
+                from selenium.webdriver.chrome.options import Options
+                options = Options()
+                options.add_experimental_option('excludeSwitches', ['enable-logging'])
+                options.add_argument('--headless')
+                driver = webdriver.Chrome(options=options, executable_path='chromedriver.exe')
+            else:
+                from selenium import webdriver
+                from selenium.webdriver.chrome.options import Options
+                options = Options()
+                options.add_experimental_option('excludeSwitches', ['enable-logging'])
+                options.add_argument('--headless')
+                driver = webdriver.Chrome(options=options, executable_path='./chromedriver')
+        except:
+            import urllib.request
+            import os
+            import ssl
+            ssl._create_default_https_context = ssl._create_unverified_context
+            if sys.platform.startswith('win32'):
+                print(nowINFO(), 'Google chrome is not installed, intstalling...')
+                urllib.request.urlretrieve("https://dl.google.com/release2/chrome/AOwc74zXwu9gfZo8W5cKY0Y_78.0.3904.70/78.0.3904.70_chrome_installer.exe", "chrome_installer.exe", reporthook=reporthook)
+                subprocess.call(['chrome_installer.exe' , '/silent' , '/install'])
+                os.remove('chrome_installer.exe')
+                print('\n')
+            else:
+                print(nowINFO(), 'Google chrome is not installed, downloading...')
+                urllib.request.urlretrieve("https://dl.google.com/chrome/mac/stable/GGRO/googlechrome.dmg", "chrome_installer.dmg", reporthook=reporthook)
+                print(nowINFO(), '\nPlease install google chrome from chrome_installer.dmg file in Bot directory...')
+                input('Press enter to exit...')
+                sys.exit()
+        else:
+            driver.quit()
         import re
         from multiprocessing import Process
         from threading import Thread
@@ -619,16 +632,16 @@ if __name__ == '__main__':
                         float(size)
                 except:
                     print(nowERROR(), 'You entered size which is not a number')
-                    exit()
+                    sys.exit()
                 if int(thread_count) == 1:
                     print(nowERROR(), 'You entered only one size.')
-                    exit()
+                    sys.exit()
                 if int(thread_count) > len(prx):
                     print(nowERROR(), 'You should have minimum', thread_count, 'proxies to start bot.')
-                    exit()
+                    sys.exit()
             except:
                 print(nowERROR(), 'You should write size for each pair comma separated in quotation marks')
-                exit()
+                sys.exit()
             else:
                 print(nowINFO(), 'Initializing threads with input arguments...')
                 thread_num = 0
