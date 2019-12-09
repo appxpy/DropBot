@@ -48,7 +48,7 @@ def launch_yeezy(model, size, thread_num, proxy):
         driver = webdriver.Chrome(options=options, executable_path='chromedriver.exe')
         print(nowINFO(), '-', 'Webdriver in headless mode for windows launched succesefully')
     else:
-        driver = webdriver.Chrome(options=options, executable_path='chromedriver')
+        driver = webdriver.Chrome(options=options, executable_path='./chromedriver')
         print(nowINFO(), '-', 'Webdriver in headless mode for UNIX systems launched succesefully')
     driver.delete_all_cookies()
     ua = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36"
@@ -97,21 +97,21 @@ def launch_yeezy(model, size, thread_num, proxy):
             print(nowERROR(), '-', 'Proxy error occured. Check your internet connection or authorized ip on your proxy server')
             print(nowERROR(), '-', 'Bot stopped with exit code 1')
             driver.quit()
-            exit()
+            sys.exit()
         size_data = json.loads(raw_sizes.text)
         try:
             request_counter = 1
             while size_data['availability_status'] == 'PREVIEW':
                  raw_sizes = requests.get(size_url, headers=headers)
                  size_data = json.loads(raw_sizes.text)
-                 print(nowINFO(), '-', 'Availability status - PREVIEW. Continue sending json request number', request_counter,'to:', size_url + '.')
+                 print(nowINFO(), '-', 'Availability status - PREVIEW. Continue sending json request number', str(request_counter) + '.')
                  request_counter += 1
                  time.sleep(5)
         except:
             print(nowERROR(), '-', 'API or Internet connection error occured')
             print(nowERROR(), '-', 'Bot stopped with exit code 1')
             driver.quit()
-            exit()
+            sys.exit()
         print(nowINFO(), '-', 'Recieved response from server API with code',
               raw_sizes.status_code)
         print(nowINFO(), '-', 'Availability status IN_STOCK')
@@ -158,7 +158,7 @@ def launch_yeezy(model, size, thread_num, proxy):
         except:
             print(nowERROR(), '-', 'Internet or proxy error occured')
             driver.quit()
-            exit()
+            sys.exit()
         print(nowINFO(), '-', 'Transfer on item page')
         # Grab CSS to "Add to Bag" button
         try:
@@ -223,7 +223,7 @@ def launch_yeezy(model, size, thread_num, proxy):
             except:
                 print(nowERROR(), '-', 'Adress fields could not founded. Please update your chrome to the newest one and check chromedriver in PATH')
                 driver.quit()
-                exit()
+                sys.exit()
             finally:
                 print(nowINFO(), '-', 'Autofilling firstame field')
                 textfield = cfgline[3]
@@ -364,7 +364,7 @@ def launch_yeezy(model, size, thread_num, proxy):
             btn.click()
         print(nowINFO(), '-', 'Closing webdriver')
         driver.quit()
-        exit()
+        sys.exit()
     main(model, size)
 if __name__ == '__main__':
     def nowERROR():
@@ -378,7 +378,17 @@ if __name__ == '__main__':
         now = datetime.datetime.now()
         prefix = ' - [ID:MAIN/INFO] - '
         result = now.strftime("%X") + prefix
-        return result
+        return(result)
+    def reporthook(count, blockSize, totalSize):
+      percent = int(count*blockSize*100/totalSize)
+      prefix = nowINFO()
+      sys.stdout.write("\r" + prefix + 'Chrome installer downloading' + "...%d%%" % percent)
+      sys.stdout.flush()
+    def reporthook2(count, blockSize, totalSize):
+      percent = int(count*blockSize*100/totalSize)
+      prefix = nowINFO()
+      sys.stdout.write("\r" + prefix + 'Chromedriver downloading' + "...%d%%" % percent)
+      sys.stdout.flush()
     print('|----------------------------------LOG----------------------------------|')
     try:
         from selenium import webdriver
@@ -388,6 +398,7 @@ if __name__ == '__main__':
         from selenium.webdriver.support import expected_conditions as EC
         from selenium.webdriver.common.action_chains import ActionChains
         import time
+        import hashlib
         import random
         import zipfile
         import requests
@@ -404,11 +415,136 @@ if __name__ == '__main__':
     except ModuleNotFoundError:
         import sys
         import subprocess
-        subprocess.call([sys.executable, "-m", "pip", "install", "--upgrade", "pip"])
-        subprocess.call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
+        print(sys.executable)
+        subprocess.call([sys.executable, "-m", "pip", "install", "--upgrade", "pip"], stdout=subprocess.PIPE)
+        subprocess.call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"], stdout=subprocess.PIPE)
         print(nowINFO(), 'Packages succesefully installed!')
     finally:
         import os
+        if os.path.exists('config.txt'):
+            print(nowINFO(), 'Config.txt file succesefully founded!')
+        else:
+            print(nowINFO(), 'Config.txt file not exist, creating new one...')
+            config = []
+            config.append('##############CONFIG FILE##############')
+            textfield = str(input('Please enter your model: '))
+            textfield = '1. Model: "' + textfield + '"'
+            config.append(textfield)
+            textfield = str(input('Please enter your Size or list of sizes comma separated in UK): '))
+            textfield = '2. Size or list of sizes comma separated in quotation marks in UK): "' + textfield + '"'
+            config.append(textfield)
+            textfield = str(input('Please enter your name: '))
+            textfield = '3. Firstame: "' + textfield + '"'
+            config.append(textfield)
+            textfield = str(input('Please enter your last name: '))
+            textfield = '4. Last name: "' + textfield + '"'
+            config.append(textfield)
+            textfield = str(input('Please enter your city: '))
+            textfield = '5. City: "' + textfield + '"'
+            config.append(textfield)
+            textfield = str(input('Please enter your zipcode: '))
+            textfield = '6. Zipcode: "' + textfield + '"'
+            config.append(textfield)
+            textfield = str(input('Please enter your adress without home and apartament number: '))
+            textfield = '7. Adress: "' + textfield + '"'
+            config.append(textfield)
+            textfield = str(input('Please enter your house number: '))
+            textfield = '8. House number: "' + textfield + '"'
+            config.append(textfield)
+            textfield = str(input('Please enter your apartament number: '))
+            textfield = '9. apartament number: "' + textfield + '"'
+            config.append(textfield)
+            textfield = str(input('Please enter your telephone number without +7 : '))
+            textfield = '10. Telephone number: "' + textfield + '"'
+            config.append(textfield)
+            textfield = str(input('Please enter email: '))
+            textfield = '11. Email: "' + textfield + '"'
+            config.append(textfield)
+            textfield = str(input('Please enter card number like this (xxxx xxxx xxxx xxxx): '))
+            textfield = '12. Card number: "' + textfield + '"'
+            config.append(textfield)
+            textfield = str(input('Please enter card owner name: '))
+            textfield = '13. Card owner name: "' + textfield + '"'
+            config.append(textfield)
+            textfield = str(input('Please enter card expiring mounth: '))
+            textfield = '14. Card expiring mounth: "' + textfield + '"'
+            config.append(textfield)
+            textfield = str(input('Please enter card expiring year: '))
+            textfield = '15. Card expiring year: "' + textfield + '"'
+            config.append(textfield)
+            textfield = str(input('Please enter CVC/CVV2 card code: '))
+            textfield = '16. CVC/CVV2 Code: "' + textfield + '"'
+            config.append(textfield)
+            f = open('config.txt', '+w', encoding='utf-8')
+            for line in config:
+                line = line + '\n'
+                f.write(line)
+            f.close()
+            print(nowINFO(), 'Config.txt file succesefully created!')
+        if os.path.exists('proxies.txt'):
+            print(nowINFO(), 'Proxies.txt file succesefully founded!')
+        else:
+            print(nowINFO(), 'Proxies.txt file not exist, creating new one...')
+            try:
+                proxyCount = int(input('Please enter how much proxies do you have(if 0 - no proxy): '))
+            except:
+                print(nowERROR(), 'ProxyCount is not a number.')
+                input('Press enter to exit...')
+                sys.exit()
+            if proxyCount != 0:
+                proxyCountRev = 0
+                proxyTotal = proxyCount
+                f = open('proxies.txt', '+a', encoding='utf-8')
+                while proxyCount != 0:
+                    proxyCount -= 1
+                    proxyCountRev += 1
+                    proxy = str(input('Enter your proxy: '))
+                    if proxyCount != 0:
+                        proxy = proxy + '\n'
+                    f.write(proxy)
+                    print(nowINFO(), 'Proxy number', proxyCountRev,'out of', proxyTotal, 'succesefully written to file.')
+                f.close()
+            else:
+                f = open('proxies.txt', '+a', encoding='utf-8')
+                f.close()
+            print(nowINFO(), 'Proxy.txt file succesefully created!')
+        import hashlib
+        EncryptedPassword = 'c12414dbe0782f8ddc6977eb8442826420eb04cbefcc758e5275433115859613'
+        UserPass = str(input('Please input your password: '))
+        if hashlib.sha256(str(UserPass).encode('utf-8')).hexdigest() != EncryptedPassword:
+            print(nowINFO(), 'Input password hash is:', hashlib.sha256(str(UserPass).encode('utf-8')).hexdigest())
+            print(nowERROR(), 'Incorrect password, nice try!')
+            input('Press enter to exit...')
+            sys.exit()
+        else:
+            try:
+                import os
+                f = open('config.txt', 'r', encoding='utf-8')
+                cfgline = f.readlines()
+                f.close()
+                # model = str(input('Model: '))
+                name = cfgline[3]
+                pattern = re.compile('".*?"')
+                name = pattern.search(name).group(0)
+                name = name.replace('"', '')
+                surname = cfgline[4]
+                pattern = re.compile('".*?"')
+                surname = pattern.search(surname).group(0)
+                surname = surname.replace('"', '')
+                if sys.platform.startswith('win32'):
+                    os.system('cls')
+                else:
+                    os.system('clear')
+                print('|----------------------------------LOG----------------------------------|')
+                print(nowINFO(), 'Input password hash is:', hashlib.sha256(str(UserPass).encode('utf-8')).hexdigest())
+                print(nowINFO(), 'Password authorized!')
+                print(nowINFO(), 'Welcome back', name, surname)
+            except:
+                print(nowERROR(), 'File config.txt is missing')
+                sys.exit()
+        import os
+        import ssl
+        ssl._create_default_https_context = ssl._create_unverified_context
         if sys.platform.startswith('win32'):
             if os.path.exists('chromedriver.exe'):
                 print(nowINFO(), 'Installed chromedriver for win32')
@@ -416,11 +552,18 @@ if __name__ == '__main__':
                 print(nowINFO(), 'Installing chromedriver for win32...')
                 import urllib.request
                 import zipfile as z
-                urllib.request.urlretrieve("https://chromedriver.storage.googleapis.com/78.0.3904.105/chromedriver_win32.zip", "chromedriver.zip")
+                if os.path.exists('chromedriver.zip'):
+                    os.remove('chromedriver.zip')
+                try:
+                    urllib.request.urlretrieve("https://chromedriver.storage.googleapis.com/78.0.3904.105/chromedriver_win32.zip", "chromedriver.zip", reporthook=reporthook2)
+                except:
+                    print('\r' + nowERROR(), 'Chromedriver for mac64 downloading fail. Check your internet connection')
+                    imput('Press enter to exit...')
+                    sys.exit()
                 with z.ZipFile('chromedriver.zip', 'r') as zip_ref:
                     zip_ref.extractall()
                 os.remove('chromedriver.zip')
-                print(nowINFO(), 'Chromedriver installed succesefully!')
+                print('\r' + nowINFO(), 'Chromedriver installed succesefully!')
         else:
             if os.path.exists('chromedriver'):
                 print(nowINFO(), 'Installed chromedriver for mac64')
@@ -428,11 +571,55 @@ if __name__ == '__main__':
                 print(nowINFO(), 'Installing chromedriver for mac64...')
                 import urllib.request
                 import zipfile as z
-                urllib.request.urlretrieve("https://chromedriver.storage.googleapis.com/78.0.3904.105/chromedriver_mac64.zip", "chromedriver.zip")
+                if os.path.exists('chromedriver.zip'):
+                    os.remove('chromedriver.zip')
+                try:
+                    urllib.request.urlretrieve("https://chromedriver.storage.googleapis.com/78.0.3904.105/chromedriver_mac64.zip", "chromedriver.zip", reporthook=reporthook2)
+                except:
+                    print('\r' + nowERROR(), 'Chromedriver for mac64 downloading fail. Check your internet connection')
+                    imput('Press enter to exit...')
+                    sys.exit()
                 with z.ZipFile('chromedriver.zip', 'r') as zip_ref:
                     zip_ref.extractall()
+                print('\r' + nowINFO(), 'Writing permissions..')
+                os.chmod("chromedriver", 0o777)
                 os.remove('chromedriver.zip')
                 print(nowINFO(), 'Chromedriver installed succesefully!')
+        try:
+            if sys.platform.startswith('win32'):
+                from selenium import webdriver
+                from selenium.webdriver.chrome.options import Options
+                options = Options()
+                options.add_experimental_option('excludeSwitches', ['enable-logging'])
+                options.add_argument('--headless')
+                driver = webdriver.Chrome(options=options, executable_path='chromedriver.exe')
+            else:
+                from selenium import webdriver
+                from selenium.webdriver.chrome.options import Options
+                options = Options()
+                options.add_experimental_option('excludeSwitches', ['enable-logging'])
+                options.add_argument('--headless')
+                driver = webdriver.Chrome(options=options, executable_path='./chromedriver')
+        except:
+            import urllib.request
+            import os
+            import ssl
+            ssl._create_default_https_context = ssl._create_unverified_context
+            if sys.platform.startswith('win32'):
+                print(nowINFO(), 'Google chrome is not installed, intstalling...')
+                urllib.request.urlretrieve("https://dl.google.com/release2/chrome/AOwc74zXwu9gfZo8W5cKY0Y_78.0.3904.70/78.0.3904.70_chrome_installer.exe", "chrome_installer.exe", reporthook=reporthook)
+                subprocess.call(['chrome_installer.exe' , '/silent' , '/install'])
+                os.remove('chrome_installer.exe')
+                print('\n')
+            else:
+                print(nowINFO(), 'Google chrome is not installed, downloading...')
+                urllib.request.urlretrieve("https://dl.google.com/chrome/mac/stable/GGRO/googlechrome.dmg", "chrome_installer.dmg", reporthook=reporthook)
+                print('\n')
+                print(nowINFO(), 'Please install google chrome from chrome_installer.dmg file in Bot directory...')
+                input('Press enter to exit...')
+                sys.exit()
+        else:
+            driver.quit()
         import re
         from multiprocessing import Process
         from threading import Thread
@@ -462,16 +649,16 @@ if __name__ == '__main__':
                         float(size)
                 except:
                     print(nowERROR(), 'You entered size which is not a number')
-                    exit()
+                    sys.exit()
                 if int(thread_count) == 1:
                     print(nowERROR(), 'You entered only one size.')
-                    exit()
+                    sys.exit()
                 if int(thread_count) > len(prx):
                     print(nowERROR(), 'You should have minimum', thread_count, 'proxies to start bot.')
-                    exit()
+                    sys.exit()
             except:
                 print(nowERROR(), 'You should write size for each pair comma separated in quotation marks')
-                exit()
+                sys.exit()
             else:
                 print(nowINFO(), 'Initializing threads with input arguments...')
                 thread_num = 0
