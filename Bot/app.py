@@ -91,20 +91,26 @@ def launch_yeezy(model, size, thread_num, proxy):
     def check_stock(model):
         size_url = 'https://www.adidas.ru/api/products/{}/availability'.format(
             model)
+        size_url_main = 'https://www.adidas.ru/api/products/{}'.format(
+            model)
         try:
             raw_sizes = requests.get(size_url, headers=headers)
+            size_data = json.loads(raw_sizes.text)
+            sizeapiinfo = requests.get(size_url_main, headers=headers)
+            apijson = json.loads(sizeapiinfo.text)
+            name = apijson['name']
+            price = apijson['pricing_information']['currentPrice']
         except:
             print(nowERROR(), '-', 'Proxy error occured. Check your internet connection or authorized ip on your proxy server')
             print(nowERROR(), '-', 'Bot stopped with exit code 1')
             driver.quit()
             sys.exit()
-        size_data = json.loads(raw_sizes.text)
         try:
             request_counter = 1
             while size_data['availability_status'] == 'PREVIEW':
                  raw_sizes = requests.get(size_url, headers=headers)
                  size_data = json.loads(raw_sizes.text)
-                 print(nowINFO(), '-', 'Availability status - PREVIEW. Continue sending json request number', str(request_counter) + '.')
+                 print(nowINFO(), '-', 'Status of',name,'- PREVIEW, current price is',price,'roubles. Request number is:', str(request_counter))
                  request_counter += 1
                  time.sleep(5)
         except:
