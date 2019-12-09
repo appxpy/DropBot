@@ -381,11 +381,13 @@ if __name__ == '__main__':
         return(result)
     def reporthook(count, blockSize, totalSize):
       percent = int(count*blockSize*100/totalSize)
-      sys.stdout.write("\r" + 'Chrome installer downloading' + "...%d%%" % percent)
+      prefix = nowINFO()
+      sys.stdout.write("\r" + prefix + 'Chrome installer downloading' + "...%d%%" % percent)
       sys.stdout.flush()
     def reporthook2(count, blockSize, totalSize):
       percent = int(count*blockSize*100/totalSize)
-      sys.stdout.write("\r" + 'Chromedriver downloading' + "...%d%%" % percent)
+      prefix = nowINFO()
+      sys.stdout.write("\r" + prefix + 'Chromedriver downloading' + "...%d%%" % percent)
       sys.stdout.flush()
     print('|----------------------------------LOG----------------------------------|')
     try:
@@ -550,11 +552,18 @@ if __name__ == '__main__':
                 print(nowINFO(), 'Installing chromedriver for win32...')
                 import urllib.request
                 import zipfile as z
-                urllib.request.urlretrieve("https://chromedriver.storage.googleapis.com/78.0.3904.105/chromedriver_win32.zip", "chromedriver.zip", reporthook=reporthook2)
+                if os.path.exists('chromedriver.zip'):
+                    os.remove('chromedriver.zip')
+                try:
+                    urllib.request.urlretrieve("https://chromedriver.storage.googleapis.com/78.0.3904.105/chromedriver_win32.zip", "chromedriver.zip", reporthook=reporthook2)
+                except:
+                    print('\r' + nowERROR(), 'Chromedriver for mac64 downloading fail. Check your internet connection')
+                    imput('Press enter to exit...')
+                    sys.exit()
                 with z.ZipFile('chromedriver.zip', 'r') as zip_ref:
                     zip_ref.extractall()
                 os.remove('chromedriver.zip')
-                print(nowINFO(), '\nChromedriver installed succesefully!')
+                print('\r' + nowINFO(), 'Chromedriver installed succesefully!')
         else:
             if os.path.exists('chromedriver'):
                 print(nowINFO(), 'Installed chromedriver for mac64')
@@ -562,10 +571,17 @@ if __name__ == '__main__':
                 print(nowINFO(), 'Installing chromedriver for mac64...')
                 import urllib.request
                 import zipfile as z
-                urllib.request.urlretrieve("https://chromedriver.storage.googleapis.com/78.0.3904.105/chromedriver_mac64.zip", "chromedriver.zip", reporthook=reporthook2)
+                if os.path.exists('chromedriver.zip'):
+                    os.remove('chromedriver.zip')
+                try:
+                    urllib.request.urlretrieve("https://chromedriver.storage.googleapis.com/78.0.3904.105/chromedriver_mac64.zip", "chromedriver.zip", reporthook=reporthook2)
+                except:
+                    print('\r' + nowERROR(), 'Chromedriver for mac64 downloading fail. Check your internet connection')
+                    imput('Press enter to exit...')
+                    sys.exit()
                 with z.ZipFile('chromedriver.zip', 'r') as zip_ref:
                     zip_ref.extractall()
-                print(nowINFO(), '\nWriting permissions..')
+                print('\r' + nowINFO(), 'Writing permissions..')
                 os.chmod("chromedriver", 0o777)
                 os.remove('chromedriver.zip')
                 print(nowINFO(), 'Chromedriver installed succesefully!')
@@ -598,7 +614,8 @@ if __name__ == '__main__':
             else:
                 print(nowINFO(), 'Google chrome is not installed, downloading...')
                 urllib.request.urlretrieve("https://dl.google.com/chrome/mac/stable/GGRO/googlechrome.dmg", "chrome_installer.dmg", reporthook=reporthook)
-                print(nowINFO(), '\nPlease install google chrome from chrome_installer.dmg file in Bot directory...')
+                print('\n')
+                print(nowINFO(), 'Please install google chrome from chrome_installer.dmg file in Bot directory...')
                 input('Press enter to exit...')
                 sys.exit()
         else:
