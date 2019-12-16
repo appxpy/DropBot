@@ -29,7 +29,7 @@ def launch_yeezy(model, size, thread_num, proxy):
             prefix = str(' - [ID:0' + str(thread_num) + '/ERROR]')
         result = now.strftime("%X") + prefix
         return result
-    f = open('config.txt', 'r')
+    f = open('config.txt', 'r', encoding='utf-8')
     cfgline = f.readlines()
     options = Options()
     if proxy != 0:
@@ -630,7 +630,7 @@ if __name__ == '__main__':
         from multiprocessing import Process
         from threading import Thread
         from threading import Semaphore
-        f = open('config.txt', 'r')
+        f = open('config.txt', 'r', encoding='utf-8')
         cfgline = f.readlines()
         f.close()
         # model = str(input('Model: '))
