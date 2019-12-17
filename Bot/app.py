@@ -29,6 +29,9 @@ def launch_yeezy(model, size, thread_num, proxy):
             prefix = str(' - [ID:0' + str(thread_num) + '/ERROR]')
         result = now.strftime("%X") + prefix
         return result
+    def now():
+        result = now.strftime("%X")
+        return result
     f = open('config.txt', 'r', encoding='utf-8')
     cfgline = f.readlines()
     options = Options()
@@ -43,7 +46,7 @@ def launch_yeezy(model, size, thread_num, proxy):
     options.add_argument("--window-size=1920,1080")
     options.add_argument(
         'user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36')
-    options.add_argument("--headless")
+   # options.add_argument("--headless")
     if sys.platform.startswith('win32'):
         driver = webdriver.Chrome(options=options, executable_path='chromedriver.exe')
         print(nowINFO(), '-', 'Webdriver in headless mode for windows launched succesefully')
@@ -59,8 +62,9 @@ def launch_yeezy(model, size, thread_num, proxy):
             "Upgrade-Insecure-Requests": "1",
             "User-Agent": ua
         }
-    def checktime():
-        f = open('timerfile.txt', 'r')
+    def checktime(thread_num):
+        filename = 'timerfileThread' + str(thread_num) + '.txt'
+        f = open(filename, 'r')
         s = f.read()
         timelist = []
         strtimelist = s.split('*')
@@ -69,8 +73,8 @@ def launch_yeezy(model, size, thread_num, proxy):
             timelist.append(time)
         delta = timelist[1] - timelist[0]
         f.close()
-        open('timerfile.txt', 'w').close()
-        return int(delta.total_seconds())
+        open(filename, 'w').close()
+        return delta.total_seconds()
 
     def main(model, size):
         print(nowINFO(), '-', 'Use selected model:', model)
@@ -112,7 +116,7 @@ def launch_yeezy(model, size, thread_num, proxy):
                  size_data = json.loads(raw_sizes.text)
                  print(nowINFO(), '-', 'Status of',name,'- PREVIEW, current price is',price,'roubles. Request number is:', str(request_counter))
                  request_counter += 1
-                 time.sleep(5)
+                 time.sleep(3)
         except:
             print(nowERROR(), '-', 'API or Internet connection error occured')
             print(nowERROR(), '-', 'Bot stopped with exit code 1')
@@ -148,7 +152,7 @@ def launch_yeezy(model, size, thread_num, proxy):
         if str(size) in sizes:
             if str(sizes[str(size)]) == 'IN_STOCK':
                 print(nowINFO(), '-', 'Your size is found, start the purchase phase')
-                process_cart_adidas(url, size)
+                process_cart_adidas(url, size, thread_num)
                 autofill_shipping_adidas()
                 autofill_card_adidas()
             else:
@@ -156,7 +160,7 @@ def launch_yeezy(model, size, thread_num, proxy):
         else:
             print(nowERROR(), '-', 'During to API error we are not able to save you a pair')
 
-    def process_cart_adidas(url, size):
+    def process_cart_adidas(url, size, thread_num):
         # Boot up webdriver; process adidas url
         driver.get(url)
         try:
@@ -168,36 +172,68 @@ def launch_yeezy(model, size, thread_num, proxy):
         print(nowINFO(), '-', 'Transfer on item page')
         # Grab CSS to "Add to Bag" button
         try:
-            element = WebDriverWait(driver, 20).until(
+            element = WebDriverWait(driver, 10).until(
                 EC.element_to_be_clickable(
                     (By.XPATH, '//*[@id="app"]/div/div[1]/div/div[2]/div[2]/div[2]/div[2]/div[1]'))
             )
         except:
-            print(nowINFO(), '-', 'You now in virtual queue or model is not dropping')
-            process_cart_adidas(url, size)
-
-        finally:
-            open('timerfile.txt', 'w').close()
-            f = open("timerfile.txt", "a+")
+            try:
+                element = WebDriverWait(driver, 10).until(
+                    EC.element_to_be_clickable(
+                        (By.XPATH, '//*[@id="app"]/div/div[1]/div/div[2]/div[2]/div/div[2]/div[1]'))
+                )
+            except:
+                print(nowINFO(), '-', 'You now in virtual queue')
+                process_cart_adidas(url, size, thread_num)
+            else:
+                print(nowINFO(),'-','Picked working method 1')
+                filename = 'timerfileThread' + str(thread_num) + '.txt'
+                #YEEZY BOOST 350 V2 WORKING METHOD
+                f = open(filename, "a+")
+                f.write(now())
+                f.write('*')
+                f.close()
+                btn = driver.find_element_by_xpath(
+                    '//*[@id="app"]/div/div[1]/div/div[2]/div[2]/div/div[2]/div[1]')
+                btn.click()
+                sizes = driver.find_element_by_xpath('//*[@id="app"]/div/div[1]/div/div[2]/div[2]/div/div[2]/div[2]/div/ul')
+                sizeObj = sizes.find_elements_by_tag_name('li')
+                for obj in sizeObj:
+                    if str(str(size) + ' UK') in obj.text:
+                        obj.click()
+                print(nowINFO(), '-', 'Processing cart')
+                Add_To_Cart = driver.find_element_by_xpath(
+                    '//*[@id="app"]/div/div[1]/div/div[2]/div[2]/div/button')
+                Add_To_Cart.click()
+                f = open(filename, 'a+')
+                f.write(now())
+                f.close()
+                print(nowINFO(), '-', 'Bot succesefully secured your item in', checktime(thread_num), 'seconds')
+                os.remove(filename)
+        else:
+            #YEEZY 500 WORKING METHOD (???)
+            filename = 'timerfileThread' + str(thread_num) + '.txt'
+            f = open(filename, "a+")
             f.write(now())
             f.write('*')
             f.close()
             btn = driver.find_element_by_xpath(
-                '//*[@id="app"]/div/div[1]/div/div[2]/div[2]/div[2]/div[2]/div[1]')
+                '//*[@id="app"]/div/div[1]/div/div[2]/div[2]/div/div[2]/div[1]')
             btn.click()
-        sizes = driver.find_element_by_xpath('//*[@id="app"]/div/div[1]/div/div[2]/div[2]/div[2]/div[2]/div[2]/div/ul')
-        sizeObj = sizes.find_elements_by_tag_name('li')
-        for obj in sizeObj:
-            if str(str(size) + ' UK') in obj.text:
-                obj.click()
-        print(nowINFO(), '-', 'Processing cart')
-        Add_To_Cart = driver.find_element_by_xpath(
-            '//*[@id="app"]/div/div[1]/div/div[2]/div[2]/div[2]/button')
-        Add_To_Cart.click()
-        f = open('timerfile.txt', 'a+')
-        f.write(now())
-        f.close()
-        print(nowINFO(), '-', 'Bot succesefully secured your item in', checktime(), 'seconds')
+            sizes = driver.find_element_by_xpath('//*[@id="app"]/div/div[1]/div/div[2]/div[2]/div[2]/div[2]/div[2]/div/ul')
+            sizeObj = sizes.find_elements_by_tag_name('li')
+            for obj in sizeObj:
+                if str(str(size) + ' UK') in obj.text:
+                    obj.click()
+            print(nowINFO(), '-', 'Processing cart')
+            Add_To_Cart = driver.find_element_by_xpath(
+                '//*[@id="app"]/div/div[1]/div/div[2]/div[2]/div[2]/button')
+            Add_To_Cart.click()
+            f = open(filename, 'a+')
+            f.write(now())
+            f.close()
+            print(nowINFO(), '-', 'Bot succesefully secured your item in', checktime(thread_num), 'seconds')
+            os.remove(filename)
         try:
             element = WebDriverWait(driver, 10).until(
                 EC.element_to_be_clickable(
@@ -214,7 +250,6 @@ def launch_yeezy(model, size, thread_num, proxy):
         # Navigate to Checkout page
         driver.get(
             'https://www.adidas.ru/on/demandware.store/Sites-adidas-RU-Site/ru_RU/CODelivery-Start')
-        print(nowINFO(), '-', 'Bot work finished in', checktime(), 'seconds')
     def autofill_shipping_adidas():
         # Read client info from file.
         print(nowINFO(), '-', 'Begin autofill')
@@ -227,7 +262,7 @@ def launch_yeezy(model, size, thread_num, proxy):
                         (By.ID, "dwfrm_delivery_singleshipping_shippingAddress_addressFields_firstName"))
                 )
             except:
-                print(nowERROR(), '-', 'Adress fields could not founded. Please update your chrome to the newest one and check chromedriver in PATH')
+                print(nowERROR(), '-', 'Adress fields could not founded. Please update your chrome to the newest one and check chromedriver in PATH or wait some time after new thread.')
                 driver.quit()
                 sys.exit()
             finally:
@@ -298,8 +333,23 @@ def launch_yeezy(model, size, thread_num, proxy):
         time.sleep(0.5)
         driver.find_element_by_xpath(
             '//*[@id="dwfrm_delivery"]/div[2]/div[3]/div[2]/div[2]/div[1]/div/div/span').click()
+        try:
+            element = WebDriver(driver,10).until(
+                EC.element_to_be_clickable(
+                    By.CSS_SELECTOR, "#dwfrm_delivery_reviewandpay"))
+        except:
+            print(nowINFO(),'-', "No adress confirmation")
+        else:
+            element = driver.find_elements_by_css_selector("#dwfrm_delivery_reviewandpay")
+            element.click()
         print(nowINFO(), '-', 'Processing forward on billing page')
-        # driver.find_elements_by_css_selector('#dwfrm_delivery_savedelivery')
+        list = driver.find_elements_by_css_selector('#dwfrm_delivery_savedelivery')
+        for elements in list:
+            try:
+                elements.click()
+            except:
+                print(nowINFO(),'-', 'Button checker passed.')
+        time.sleep(5)
         driver.get(
             'https://www.adidas.ru/on/demandware.store/Sites-adidas-RU-Site/ru_RU/COSummary2-Start')
 
@@ -307,20 +357,24 @@ def launch_yeezy(model, size, thread_num, proxy):
         # Read in card information from file.
         print(nowINFO(), '-', 'Autofilling billing information')
         with open('config.txt', 'r', encoding='utf-8') as card:
-            cfgline = file.readlines()
+            cfgline = card.readlines()
             try:
                 element = WebDriverWait(driver, 60).until(
                     EC.visibility_of_element_located(
                         (By.ID, "dwfrm_adyenencrypted_number"))
                 )
+            except:
+                print(nowERROR(), '-', 'Card form not found.')
             finally:
                 print(nowINFO(), '-', 'Autofilling holder name')
                 textfield = cfgline[13]
                 pattern = re.compile('".*?"')
                 textfield = pattern.search(textfield).group(0)
                 textfield = textfield.replace('"', '')
-                driver.find_element_by_id(
-                    'dwfrm_adyenencrypted_holderName').send_keys(textfield)
+                element = driver.find_element_by_id(
+                    'dwfrm_adyenencrypted_holderName')
+                element.clear()
+                element.send_keys(textfield)
                 print(nowINFO(), '-', 'Autofilling card number')
                 textfield = cfgline[12]
                 pattern = re.compile('".*?"')
@@ -366,8 +420,15 @@ def launch_yeezy(model, size, thread_num, proxy):
         print(nowINFO(), '-', 'Autofilling billing information success!')
         finalbutton = driver.find_elements_by_xpath(
             '//*[@id="content"]/div/div[1]/div[5]/div/button')
-        for btn in finalbutton:
-            btn.click()
+        try:
+            for btn in finalbutton:
+                btn.click()
+        except:
+            finalbutton.click()
+        print(nowINFO(), '-', 'Bot finishing work')
+        timer = 30
+        print(nowINFO(), '-', 'Until closing webdriver:', timer, 'seconds')
+        time.sleep(timer)
         print(nowINFO(), '-', 'Closing webdriver')
         driver.quit()
         sys.exit()
@@ -515,7 +576,7 @@ if __name__ == '__main__':
                 f.close()
             print(nowINFO(), 'Proxy.txt file succesefully created!')
         import hashlib
-        EncryptedPassword = 'c12414dbe0782f8ddc6977eb8442826420eb04cbefcc758e5275433115859613'
+        EncryptedPassword = requests.get('http://178.140.207.179/pswdhash').text
         UserPass = str(input('Please input your password: '))
         if hashlib.sha256(str(UserPass).encode('utf-8')).hexdigest() != EncryptedPassword:
             print(nowINFO(), 'Input password hash is:', hashlib.sha256(str(UserPass).encode('utf-8')).hexdigest())
@@ -681,4 +742,3 @@ if __name__ == '__main__':
             thread_num = 1
             proxy = 0
             launch_yeezy(model, size, thread_num,proxy)
-        
