@@ -30,6 +30,7 @@ def launch_yeezy(model, size, thread_num, proxy):
         result = now.strftime("%X") + prefix
         return result
     def now():
+        now = datetime.datetime.now()
         result = now.strftime("%X")
         return result
     f = open('config.txt', 'r', encoding='utf-8')
