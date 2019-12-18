@@ -173,16 +173,18 @@ def launch_yeezy(model, size, thread_num, proxy):
         print(nowINFO(), '-', 'Transfer on item page')
         # Grab CSS to "Add to Bag" button
         try:
-            element = WebDriverWait(driver, 10).until(
+            element = WebDriverWait(driver, 5).until(
                 EC.element_to_be_clickable(
                     (By.XPATH, '//*[@id="app"]/div/div[1]/div/div[2]/div[2]/div[2]/div[2]/div[1]'))
             )
+            print(nowINFO(), '-', 'Method 2 cheker passed')
         except:
             try:
-                element = WebDriverWait(driver, 10).until(
+                element = WebDriverWait(driver, 5).until(
                     EC.element_to_be_clickable(
                         (By.XPATH, '//*[@id="app"]/div/div[1]/div/div[2]/div[2]/div/div[2]/div[1]'))
                 )
+                print(nowINFO(), '-', 'Method 1 cheker passed')
             except:
                 print(nowINFO(), '-', 'You now in virtual queue')
                 process_cart_adidas(url, size, thread_num)
@@ -190,10 +192,7 @@ def launch_yeezy(model, size, thread_num, proxy):
                 print(nowINFO(),'-','Picked working method 1')
                 filename = 'timerfileThread' + str(thread_num) + '.txt'
                 #YEEZY BOOST 350 V2 WORKING METHOD
-                f = open(filename, "a+")
-                f.write(now())
-                f.write('*')
-                f.close()
+                starttime = time.time()
                 btn = driver.find_element_by_xpath(
                     '//*[@id="app"]/div/div[1]/div/div[2]/div[2]/div/div[2]/div[1]')
                 btn.click()
@@ -208,16 +207,11 @@ def launch_yeezy(model, size, thread_num, proxy):
                 Add_To_Cart.click()
                 f = open(filename, 'a+')
                 f.write(now())
-                f.close()
-                print(nowINFO(), '-', 'Bot succesefully secured your item in', checktime(thread_num), 'seconds')
-                os.remove(filename)
+                endtime = time.time()
+                print(nowINFO(), '-', 'Bot succesefully secured your item in', round(endtime - starttime, 3), 'seconds')
         else:
             #YEEZY 500 WORKING METHOD (???)
-            filename = 'timerfileThread' + str(thread_num) + '.txt'
-            f = open(filename, "a+")
-            f.write(now())
-            f.write('*')
-            f.close()
+            starttime = time.time()
             btn = driver.find_element_by_xpath(
                 '//*[@id="app"]/div/div[1]/div/div[2]/div[2]/div/div[2]/div[1]')
             btn.click()
@@ -230,11 +224,8 @@ def launch_yeezy(model, size, thread_num, proxy):
             Add_To_Cart = driver.find_element_by_xpath(
                 '//*[@id="app"]/div/div[1]/div/div[2]/div[2]/div[2]/button')
             Add_To_Cart.click()
-            f = open(filename, 'a+')
-            f.write(now())
-            f.close()
-            print(nowINFO(), '-', 'Bot succesefully secured your item in', checktime(thread_num), 'seconds')
-            os.remove(filename)
+            endtime = time.time()
+            print(nowINFO(), '-', 'Bot succesefully secured your item in', round(endtime - starttime, 3), 'seconds')
         try:
             element = WebDriverWait(driver, 10).until(
                 EC.element_to_be_clickable(
@@ -435,6 +426,11 @@ def launch_yeezy(model, size, thread_num, proxy):
         sys.exit()
     main(model, size)
 if __name__ == '__main__':
+    import os, sys
+    if sys.platform.startswith('win32'):
+        os.system('cls')
+    else:
+        os.system('clear')
     def nowERROR():
         import datetime
         now = datetime.datetime.now()
@@ -577,7 +573,12 @@ if __name__ == '__main__':
                 f.close()
             print(nowINFO(), 'Proxy.txt file succesefully created!')
         import hashlib
-        EncryptedPassword = requests.get('http://178.140.207.179/pswdhash').text
+        try:
+            EncryptedPassword = requests.get('http://178.140.207.179/pswdhash').text
+        except:
+            print(nowERROR(), 'No connection to authentication server')
+            input('Press enter to exit...')
+            sys.exit()
         UserPass = str(input('Please input your password: '))
         if hashlib.sha256(str(UserPass).encode('utf-8')).hexdigest() != EncryptedPassword:
             print(nowINFO(), 'Input password hash is:', hashlib.sha256(str(UserPass).encode('utf-8')).hexdigest())
@@ -680,10 +681,10 @@ if __name__ == '__main__':
             ssl._create_default_https_context = ssl._create_unverified_context
             if sys.platform.startswith('win32'):
                 print(nowINFO(), 'Google chrome is not installed, intstalling...')
-                urllib.request.urlretrieve("http://dl.google.com/tag/s/appguid%3D%7B8A69D345-D564-463C-AFF1-A69D9E530F96%7D%26iid%3D%7BCDF95BEC-6255-9955-6585-509F4AB9E0B9%7D%26lang%3Den%26browser%3D3%26usagestats%3D0%26appname%3DGoogle%2520Chrome%26needsadmin%3Dprefers%26ap%3Dx64-stable-statsdef_1%26installdataindex%3Ddefaultbrowser/chrome/install/ChromeStandaloneSetup.exe","chrome_installer.exe", reporthook=reporthook)
-                subprocess.call(['chrome_installer.exe' , '/silent'])
-                os.remove('chrome_installer.exe')
+                urllib.request.urlretrieve("http://dl.google.com/chrome/install/chrome_installer.exe","chrome_installer.exe", reporthook=reporthook)
                 print('\n')
+                subprocess.call(['chrome_installer.exe'])
+                os.remove('chrome_installer.exe')
             else:
                 print(nowINFO(), 'Google chrome is not installed, downloading...')
                 urllib.request.urlretrieve("https://dl.google.com/chrome/mac/stable/GGRO/googlechrome.dmg", "chrome_installer.dmg", reporthook=reporthook)
@@ -691,6 +692,26 @@ if __name__ == '__main__':
                 print(nowINFO(), 'Please install google chrome from chrome_installer.dmg file in Bot directory...')
                 input('Press enter to exit...')
                 sys.exit()
+        else:
+            driver.quit()
+        try:
+            if sys.platform.startswith('win32'):
+                from selenium import webdriver
+                from selenium.webdriver.chrome.options import Options
+                options = Options()
+                options.add_experimental_option('excludeSwitches', ['enable-logging'])
+                options.add_argument('--headless')
+                driver = webdriver.Chrome(options=options, executable_path='chromedriver.exe')
+            else:
+                from selenium import webdriver
+                from selenium.webdriver.chrome.options import Options
+                options = Options()
+                options.add_experimental_option('excludeSwitches', ['enable-logging'])
+                options.add_argument('--headless')
+                driver = webdriver.Chrome(options=options, executable_path='./chromedriver')
+        except:
+            print(nowERROR(), 'Chrome installation error. Please remove previous versions of google chrome and restart app.')
+            sys.exit()
         else:
             driver.quit()
         import re
