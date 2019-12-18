@@ -612,6 +612,7 @@ if __name__ == '__main__':
                 sys.exit()
         import os
         import ssl
+        import requests
         ssl._create_default_https_context = ssl._create_unverified_context
         if sys.platform.startswith('win32'):
             if os.path.exists('chromedriver.exe'):
@@ -623,10 +624,12 @@ if __name__ == '__main__':
                 if os.path.exists('chromedriver.zip'):
                     os.remove('chromedriver.zip')
                 try:
-                    urllib.request.urlretrieve("https://chromedriver.storage.googleapis.com/78.0.3904.105/chromedriver_win32.zip", "chromedriver.zip", reporthook=reporthook2)
+                    prefix = requests.get('https://chromedriver.storage.googleapis.com/LATEST_RELEASE')
+                    link = "http://chromedriver.storage.googleapis.com/" + prefix.text + "/chromedriver_win32.zip"
+                    urllib.request.urlretrieve(link, "chromedriver.zip", reporthook=reporthook2)
                 except:
-                    print('\r' + nowERROR(), 'Chromedriver for mac64 downloading fail. Check your internet connection')
-                    imput('Press enter to exit...')
+                    print('\r' + nowERROR(), 'Chromedriver for win32 downloading fail. Check your internet connection')
+                    input('Press enter to exit...')
                     sys.exit()
                 with z.ZipFile('chromedriver.zip', 'r') as zip_ref:
                     zip_ref.extractall()
@@ -642,7 +645,9 @@ if __name__ == '__main__':
                 if os.path.exists('chromedriver.zip'):
                     os.remove('chromedriver.zip')
                 try:
-                    urllib.request.urlretrieve("https://chromedriver.storage.googleapis.com/78.0.3904.105/chromedriver_mac64.zip", "chromedriver.zip", reporthook=reporthook2)
+                    prefix = requests.get('https://chromedriver.storage.googleapis.com/LATEST_RELEASE')
+                    link = "http://chromedriver.storage.googleapis.com/" + prefix.text + '/chromedriver_mac64.zip'
+                    urllib.request.urlretrieve(link, "chromedriver.zip", reporthook=reporthook2)
                 except:
                     print('\r' + nowERROR(), 'Chromedriver for mac64 downloading fail. Check your internet connection')
                     imput('Press enter to exit...')
@@ -675,8 +680,8 @@ if __name__ == '__main__':
             ssl._create_default_https_context = ssl._create_unverified_context
             if sys.platform.startswith('win32'):
                 print(nowINFO(), 'Google chrome is not installed, intstalling...')
-                urllib.request.urlretrieve("https://dl.google.com/release2/chrome/AOwc74zXwu9gfZo8W5cKY0Y_78.0.3904.70/78.0.3904.70_chrome_installer.exe", "chrome_installer.exe", reporthook=reporthook)
-                subprocess.call(['chrome_installer.exe' , '/silent' , '/install'])
+                urllib.request.urlretrieve("http://dl.google.com/tag/s/appguid%3D%7B8A69D345-D564-463C-AFF1-A69D9E530F96%7D%26iid%3D%7BCDF95BEC-6255-9955-6585-509F4AB9E0B9%7D%26lang%3Den%26browser%3D3%26usagestats%3D0%26appname%3DGoogle%2520Chrome%26needsadmin%3Dprefers%26ap%3Dx64-stable-statsdef_1%26installdataindex%3Ddefaultbrowser/chrome/install/ChromeStandaloneSetup.exe","chrome_installer.exe", reporthook=reporthook)
+                subprocess.call(['chrome_installer.exe' , '/silent'])
                 os.remove('chrome_installer.exe')
                 print('\n')
             else:
