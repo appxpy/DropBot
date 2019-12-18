@@ -47,7 +47,7 @@ def launch_yeezy(model, size, thread_num, proxy):
     options.add_argument("--window-size=1920,1080")
     options.add_argument(
         'user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36')
-   # options.add_argument("--headless")
+    options.add_argument("--headless")
     if sys.platform.startswith('win32'):
         driver = webdriver.Chrome(options=options, executable_path='chromedriver.exe')
         print(nowINFO(), '-', 'Webdriver in headless mode for windows launched succesefully')
