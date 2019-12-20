@@ -1,4 +1,4 @@
-def launch_yeezy(model, size, thread_num, proxy):
+def launch_yeezy(model, size, thread_num, proxy, sizeus):
     from selenium import webdriver
     from selenium.webdriver.chrome.options import Options
     from selenium.webdriver.common.by import By
@@ -63,23 +63,10 @@ def launch_yeezy(model, size, thread_num, proxy):
             "Upgrade-Insecure-Requests": "1",
             "User-Agent": ua
         }
-    def checktime(thread_num):
-        filename = 'timerfileThread' + str(thread_num) + '.txt'
-        f = open(filename, 'r')
-        s = f.read()
-        timelist = []
-        strtimelist = s.split('*')
-        for date in strtimelist:
-            time = datetime.datetime.strptime(date,"%H:%M:%S")
-            timelist.append(time)
-        delta = timelist[1] - timelist[0]
-        f.close()
-        open(filename, 'w').close()
-        return delta.total_seconds()
 
-    def main(model, size):
+    def main(model, size, sizeus):
         print(nowINFO(), '-', 'Use selected model:', model)
-        print(nowINFO(), '-', 'Use selected size:', size)
+        print(nowINFO(), '-', 'Use selected size:', sizeus)
         print(nowINFO(), '-', 'Bot started')
         sneaker_bot(model, size)
 
@@ -90,7 +77,7 @@ def launch_yeezy(model, size, thread_num, proxy):
         RawSize = ShoeSize + BaseSize
         url = 'https://www.adidas.ru/yeezy/' + model + \
             '.html?forceSelSize=' + model + '_' + str(int(RawSize))
-        print(nowINFO(), '-', 'Url created')
+        print(nowINFO(), '-', 'Url created', url)
         return url
 
     def check_stock(model):
@@ -117,12 +104,11 @@ def launch_yeezy(model, size, thread_num, proxy):
                  size_data = json.loads(raw_sizes.text)
                  print(nowINFO(), '-', 'Status of',name,'- PREVIEW, current price is',price,'roubles. Request number is:', str(request_counter))
                  request_counter += 1
-                 time.sleep(3)
+                 time.sleep(30)
         except:
             print(nowERROR(), '-', 'API or Internet connection error occured')
-            print(nowERROR(), '-', 'Bot stopped with exit code 1')
-            driver.quit()
-            sys.exit()
+            print(nowERROR(), '-', 'Bot stopped with exit code 1, restarting...')
+            check_stock(model)
         print(nowINFO(), '-', 'Recieved response from server API with code',
               raw_sizes.status_code)
         print(nowINFO(), '-', 'Availability status IN_STOCK')
@@ -153,7 +139,7 @@ def launch_yeezy(model, size, thread_num, proxy):
         if str(size) in sizes:
             if str(sizes[str(size)]) == 'IN_STOCK':
                 print(nowINFO(), '-', 'Your size is found, start the purchase phase')
-                process_cart_adidas(url, size, thread_num)
+                process_cart_adidas(url, sizeus, thread_num)
                 autofill_shipping_adidas()
                 autofill_card_adidas()
             else:
@@ -173,59 +159,28 @@ def launch_yeezy(model, size, thread_num, proxy):
         print(nowINFO(), '-', 'Transfer on item page')
         # Grab CSS to "Add to Bag" button
         try:
-            element = WebDriverWait(driver, 5).until(
-                EC.element_to_be_clickable(
-                    (By.XPATH, '//*[@id="app"]/div/div[1]/div/div[2]/div[2]/div[2]/div[2]/div[1]'))
-            )
-            print(nowINFO(), '-', 'Method 2 cheker passed')
-        except:
-            try:
-                element = WebDriverWait(driver, 5).until(
+            element = WebDriverWait(driver, 10).until(
                     EC.element_to_be_clickable(
-                        (By.XPATH, '//*[@id="app"]/div/div[1]/div/div[2]/div[2]/div/div[2]/div[1]'))
-                )
-                print(nowINFO(), '-', 'Method 1 cheker passed')
-            except:
-                print(nowINFO(), '-', 'You now in virtual queue')
-                process_cart_adidas(url, size, thread_num)
-            else:
-                print(nowINFO(),'-','Picked working method 1')
-                filename = 'timerfileThread' + str(thread_num) + '.txt'
-                #YEEZY BOOST 350 V2 WORKING METHOD
-                starttime = time.time()
-                btn = driver.find_element_by_xpath(
-                    '//*[@id="app"]/div/div[1]/div/div[2]/div[2]/div/div[2]/div[1]')
-                btn.click()
-                sizes = driver.find_element_by_xpath('//*[@id="app"]/div/div[1]/div/div[2]/div[2]/div/div[2]/div[2]/div/ul')
-                sizeObj = sizes.find_elements_by_tag_name('li')
+                        (By.XPATH, '//div[starts-with(@class,"src-components-___sizes-dropdown__sizesDropdown")]')))
+            print(nowINFO(), '-', 'Element founded!')
+        except:
+            print(nowINFO(), '-', 'You now in virtual queue, please wait')
+            process_cart_adidas(url, size, thread_num)
+        else:
+            element = driver.find_element_by_xpath('//div[starts-with(@class,"src-components-___sizes-dropdown__sizesDropdown")]')
+            element.click()
+            starttime = time.time()
+            sizes = driver.find_elements_by_xpath('//div[starts-with(@class,"src-components-___sizes-dropdown__sizes")]')
+            for sizess in sizes:
+                sizeObj = sizess.find_elements_by_tag_name('li')
                 for obj in sizeObj:
                     if str(str(size) + ' UK') in obj.text:
                         obj.click()
-                print(nowINFO(), '-', 'Processing cart')
-                Add_To_Cart = driver.find_element_by_xpath(
-                    '//*[@id="app"]/div/div[1]/div/div[2]/div[2]/div/button')
-                Add_To_Cart.click()
-                f = open(filename, 'a+')
-                f.write(now())
-                endtime = time.time()
-                print(nowINFO(), '-', 'Bot succesefully secured your item in', round(endtime - starttime, 3), 'seconds')
-        else:
-            #YEEZY 500 WORKING METHOD (???)
-            starttime = time.time()
-            btn = driver.find_element_by_xpath(
-                '//*[@id="app"]/div/div[1]/div/div[2]/div[2]/div/div[2]/div[1]')
-            btn.click()
-            sizes = driver.find_element_by_xpath('//*[@id="app"]/div/div[1]/div/div[2]/div[2]/div[2]/div[2]/div[2]/div/ul')
-            sizeObj = sizes.find_elements_by_tag_name('li')
-            for obj in sizeObj:
-                if str(str(size) + ' UK') in obj.text:
-                    obj.click()
-            print(nowINFO(), '-', 'Processing cart')
-            Add_To_Cart = driver.find_element_by_xpath(
-                '//*[@id="app"]/div/div[1]/div/div[2]/div[2]/div[2]/button')
+            print(nowINFO(),'-', 'Processing cart')
+            Add_To_Cart = driver.find_element_by_xpath('//button[starts-with(@class,"src-components-___add-to-bag-form__addToBagButton___")]')
             Add_To_Cart.click()
             endtime = time.time()
-            print(nowINFO(), '-', 'Bot succesefully secured your item in', round(endtime - starttime, 3), 'seconds')
+            print(nowINFO(), '-', 'Bot succesefully secured your item in', round(endtime - starttime, 3))
         try:
             element = WebDriverWait(driver, 10).until(
                 EC.element_to_be_clickable(
@@ -424,7 +379,7 @@ def launch_yeezy(model, size, thread_num, proxy):
         print(nowINFO(), '-', 'Closing webdriver')
         driver.quit()
         sys.exit()
-    main(model, size)
+    main(model, size, sizeus)
 if __name__ == '__main__':
     import os, sys
     if sys.platform.startswith('win32'):
@@ -446,7 +401,7 @@ if __name__ == '__main__':
     def reporthook(count, blockSize, totalSize):
       percent = int(count*blockSize*100/totalSize)
       prefix = nowINFO()
-      sys.stdout.write("\r" + prefix + 'Chrome installer downloading' + "...%d%%" % percent)
+      sys.stdout.write("\r" + prefix + ' Chrome installer downloading' + "...%d%%" % percent)
       sys.stdout.flush()
     def reporthook2(count, blockSize, totalSize):
       percent = int(count*blockSize*100/totalSize)
@@ -758,14 +713,26 @@ if __name__ == '__main__':
                 thread_num = 0
                 for size in sizes:
                     thread_num += 1
+                    sizeus = size
+                    size = str(float(size) - 0.5)
+                    sizerev = str(size[::-1])
+                    if sizerev[0] == '0':
+                        size = int(float(size))
+                    size = str(size)
                     proxy = prx[thread_num - 1].replace('\n', '')
                     if '\n' in proxy:
                         proxy = proxy.replace('\n', '')
                     print(nowINFO(), 'Initializing thread with ID:', thread_num)
-                    proc = Thread(target=launch_yeezy, args=(model,size,thread_num,proxy))
+                    proc = Thread(target=launch_yeezy, args=(model,size,thread_num,proxy, sizeus))
                     proc.start()
         else:
             size = sizes
+            sizeus = size
+            size = str(float(size) - 0.5)
+            sizerev = str(size[::-1])
+            if sizerev[0] == '0':
+                size = int(float(size))
+            size = str(size)
             thread_num = 1
             proxy = 0
-            launch_yeezy(model, size, thread_num,proxy)
+            launch_yeezy(model, size, thread_num,proxy, sizeus)
