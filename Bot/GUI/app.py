@@ -882,8 +882,8 @@ class Ui_DropBot(object):
         self.actionEdit_proxy_config.setText(_translate("DropBot", "Edit proxy config"))
         self.actionDark.setText(_translate("DropBot", "Dark"))
         self.actionLight.setText(_translate("DropBot", "Light"))
-        self.ProfileComboBox.highlighted.connect(self.loadSave)
     def loadSave(self):
+        print('loadSave function')
         try:
             file = open('save.json', 'r', encoding='utf-8').read()
         except:
@@ -897,27 +897,44 @@ class Ui_DropBot(object):
             log = nowINFOMAIN() + ' Save file founded, loading profiles.'
             self.LogOutput.append(log)
         try:
-            jsondata = json.loads(file)
+            jsondata = json.loads(file, encoding = 'utf-8')
         except:
             log = nowERRORMAIN() + ' Save file corrupted, creating new one...'
             self.LogOutput.append(log)
-            file = open("save.json", "w+", encoding='utf-8')
+            file = open("save.json", "r+", encoding='utf-8')
             json.dump({'Profiles': []}, file)
-            jsondata = json.loads(file)
+            try:
+                jsondata = json.loads(file.read(), encoding='utf-8')
+            except:
+                file.close()
+                open('save.json', 'w', encoding='utf-8').close()
+                file = open("save.json", "r+", encoding='utf-8')
+                json.dump({'Profiles': []}, file)
+                file.close()
+                self.loadSave()
             file.close()
         else:
             if file == '{"Profiles": []}':
-                log = nowERRORMAIN() + ' No profiles founded, create a new one.'
+                log = nowERRORMAIN() + ' No profiles founded, please, create a new one.'
                 self.LogOutput.append(log)
             else:
-                log = nowINFOMAIN() + ' Save file succesefully decoded.'
+                print(jsondata)
+                profilenames = []
+                for dicts in jsondata['Profiles']:
+                    profilenames.append(dicts['profilename'])
+                self.ProfileComboBox.clear()
+                self.ProfileComboBox.addItems(profilenames)
+                log = nowINFOMAIN() + ' Profiles succesefully updated!'
                 self.LogOutput.append(log)
+
     def profileedit(self):
         dialog = QtWidgets.QDialog()
         dialog.ui = Ui_ProfileManager()
         dialog.ui.setupUi(dialog)
+        dialog.ui.Save.clicked.connect(self.loadSave)
         dialog.exec_()
         dialog.show()
+
 
 
 
@@ -1619,10 +1636,68 @@ class Ui_ProfileManager(object):
         self.year.setItemText(9, _translate("ProfileManager", "2029"))
         self.year.setItemText(10, _translate("ProfileManager", "2030"))
         self.Reset.setText(_translate("ProfileManager", "   Reset   "))
+        self.Reset.clicked.connect(self.resetSettings)
         self.Save.setText(_translate("ProfileManager", "   Save   "))
+        self.Save.setEnabled(False)
         self.Save.clicked.connect(self.saveProfile)
         self.Cancel.setText(_translate("ProfileManager", "   Cancel   "))
         self.Cancel.clicked.connect(ProfileManager.accept)
+        self.profilename.textChanged.connect(self.checkText)
+        self.firstname.textChanged.connect(self.checkText)
+        self.lastname.textChanged.connect(self.checkText)
+        self.email.textChanged.connect(self.checkText)
+        self.telephone.textChanged.connect(self.checkText)
+        self.address.textChanged.connect(self.checkText)
+        self.apartament.textChanged.connect(self.checkText)
+        self.house.textChanged.connect(self.checkText)
+        self.city.textChanged.connect(self.checkText)
+        self.zipcode.textChanged.connect(self.checkText)
+        self.number.textChanged.connect(self.checkText)
+        self.owner.textChanged.connect(self.checkText)
+        self.lineEdit_2.textChanged.connect(self.checkText)
+    def resetSettings(self):
+        self.profilename.clear()
+        self.firstname.clear()
+        self.lastname.clear()
+        self.email.clear()
+        self.telephone.clear()
+        self.address.clear()
+        self.apartament.clear()
+        self.house.clear()
+        self.city.clear()
+        self.zipcode.clear()
+        self.number.clear()
+        self.owner.clear()
+        self.lineEdit_2.clear()
+        self.month.setCurrentIndex(0)
+        self.year.setCurrentIndex(0)
+        try:
+            open('save.json', 'w', encoding='utf-8').close()
+        except Exception as e:
+            print(e)
+    def checkText(self):
+        fields = []
+        fields.append(self.profilename.text())
+        fields.append(self.firstname.text())
+        fields.append(self.lastname.text())
+        fields.append(self.email.text())
+        fields.append(self.telephone.text())
+        fields.append(self.address.text())
+        fields.append(self.apartament.text())
+        fields.append(self.house.text())
+        fields.append(self.city.text())
+        fields.append(self.zipcode.text())
+        fields.append(self.number.text())
+        fields.append(self.owner.text())
+        fields.append(self.lineEdit_2.text())
+        err = False
+        for field in fields:
+            if field == '':
+                err = True
+        if err != True:
+            self.Save.setEnabled(True)
+        else:
+            self.Save.setEnabled(False)
     def saveProfile(self, ProfileManager):
         try:
            field1 = self.profilename.text()
@@ -1650,45 +1725,37 @@ class Ui_ProfileManager(object):
             json.loads(f)
         except Exception as e:
             f = open("save.json", "w", encoding='utf-8')
-            json.dump({'Profiles': []}, f)
+            json.dump({'Profiles': []}, f, ensure_ascii=False)
             f.close()
             print(e)
         err = False
         #Check fields
-        for key, value in data.items():
-            if value == '':
-                err = True
-        if err != True:
-            try:
-                write_file = open("save.json", "r+", encoding='utf-8')
-                jsondata = json.loads(write_file.read())
-                jsondata["Profiles"].append(data)
-                write_file.close()
-                open('save.json', 'w', encoding='utf-8').close()
-                write_file = open("save.json", "r+", encoding='utf-8')
-                json.dump(jsondata, write_file, indent=4)
-                self.profilename.clear()
-                self.firstname.clear()
-                self.lastname.clear()
-                self.email.clear()
-                self.telephone.clear()
-                self.address.clear()
-                self.apartament.clear()
-                self.house.clear()
-                self.city.clear()
-                self.zipcode.clear()
-                self.number.clear()
-                self.owner.clear()
-                self.lineEdit_2.clear()
-                self.month.setCurrentIndex(0)
-                self.year.setCurrentIndex(0)
-                write_file.close()
-            except Exception as e:
-                print(e)
-            else:
-                ui = Ui_DropBot()
-                ui.setupUi(DropBot)
-                ui.loadSave()
+        try:
+            write_file = open("save.json", "r+", encoding='utf-8')
+            jsondata = json.loads(write_file.read())
+            jsondata["Profiles"].append(data)
+            write_file.close()
+            open('save.json', 'w', encoding='utf-8').close()
+            write_file = open("save.json", "r+", encoding='utf-8')
+            json.dump(jsondata, write_file, indent=4, ensure_ascii=False)
+            self.profilename.clear()
+            self.firstname.clear()
+            self.lastname.clear()
+            self.email.clear()
+            self.telephone.clear()
+            self.address.clear()
+            self.apartament.clear()
+            self.house.clear()
+            self.city.clear()
+            self.zipcode.clear()
+            self.number.clear()
+            self.owner.clear()
+            self.lineEdit_2.clear()
+            self.month.setCurrentIndex(0)
+            self.year.setCurrentIndex(0)
+            write_file.close()
+        except Exception as e:
+            print(e)
 if __name__ == "__main__":
     import sys
     import qdarkstyle
@@ -1697,6 +1764,10 @@ if __name__ == "__main__":
     app.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
     ui = Ui_DropBot()
     ui.setupUi(DropBot)
+    log = nowINFOMAIN() + ' DropBot initializing.'
+    ui.LogOutput.append(log)
     DropBot.show()
+    log = nowINFOMAIN() + ' DropBot succesefully initialized!'
+    ui.LogOutput.append(log)
     ui.loadSave()
     sys.exit(app.exec_())
