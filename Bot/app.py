@@ -25,7 +25,7 @@ def launch_yeezy(model, size, thread_num, proxy, sizeus):
         now = datetime.datetime.now()
         if len(str(thread_num)) >= 2:
             prefix = str(' - [ID:' + str(thread_num) + '/ERROR]')
-        else:
+        else: 
             prefix = str(' - [ID:0' + str(thread_num) + '/ERROR]')
         result = now.strftime("%X") + prefix
         return result

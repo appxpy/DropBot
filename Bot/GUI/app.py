@@ -1,9 +1,4 @@
 # -*- coding: utf-8 -*-
-
-# Form implementation generated from reading ui file 'V1.ui'
-#
-# Created by: PyQt5 UI code generator 5.14.0
-#
 # WARNING! All changes made in this file will be lost!
 
 
@@ -15,6 +10,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
+import numpy as np
 import time
 import random
 import requests
@@ -23,6 +19,7 @@ import time
 import re
 import datetime
 import sys
+from functools import partial
 def nowINFOMAIN():
     now = datetime.datetime.now()
     prefix = str(' - [ID:MAIN/INFO] -')
@@ -35,6 +32,11 @@ def nowERRORMAIN():
     return result
 
 class Ui_DropBot(object):
+    SizeRangeInit = np.arange(3, 15, 0.5)
+    SizeRange = []
+    for item in SizeRangeInit:
+        item = str(format(item, '.10g')) + ' US'
+        SizeRange.append(item)
     LocalVars = locals()
     def setupUi(self, DropBot):
         DropBot.setObjectName("DropBot")
@@ -388,6 +390,7 @@ class Ui_DropBot(object):
         self.SizeComboBox.setIconSize(QtCore.QSize(16, 16))
         self.SizeComboBox.setFrame(True)
         self.SizeComboBox.setObjectName("SizeComboBox")
+        self.SizeComboBox.addItems(self.SizeRange)
         self.SizeButtonsLayout.addWidget(self.SizeComboBox)
         self.EditSize = QtWidgets.QPushButton(self.centralwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Expanding)
@@ -739,6 +742,7 @@ class Ui_DropBot(object):
         self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
         self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.scrollAreaWidgetContents)
         self.verticalLayout_2.setObjectName("verticalLayout_2")
+        self.verticalLayout_2.setAlignment(QtCore.Qt.AlignTop)
         self.THREAD1 = QtWidgets.QHBoxLayout()
         self.THREAD1.setObjectName("THREAD1")
         self.ID1 = QtWidgets.QLabel(self.scrollAreaWidgetContents)
@@ -893,19 +897,19 @@ class Ui_DropBot(object):
 "</style></head><body style=\" font-family:\'Ubuntu\'; font-size:10pt; font-weight:400; font-style:normal;\">\n"
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:\'Ubuntu\';\"><br /></p></body></html>"))
         self.TaskManagerLabel.setText(_translate("DropBot", "Task Manager"))
-        self.PROXY0.setText(_translate("DropBot", "      PROXY"))
+        self.PROXY0.setText(_translate("DropBot", "PROXY"))
         self.SITE0.setText(_translate("DropBot", "SITE"))
         self.SIZE1.setText(_translate("DropBot", "12 US"))
         self.ID0.setText(_translate("DropBot", "   ID"))
-        self.MODEL0.setText(_translate("DropBot", "     MODEL"))
+        self.MODEL0.setText(_translate("DropBot", "MODEL"))
         self.REMOVE0.setText(_translate("DropBot", " "))
         self.ID1.setText(_translate("DropBot", "[1]"))
         self.MODEL1.setText(_translate("DropBot", "123456"))
         self.STATUS1.setText(_translate("DropBot", "example"))
         self.PROXY1.setText(_translate("DropBot", "123.123.123.123"))
         self.SITE1.setText(_translate("DropBot", "example.com"))
-        self.SIZE0.setText(_translate("DropBot", "         SIZE"))
-        self.STATUS0.setText(_translate("DropBot", "      STATUS"))
+        self.SIZE0.setText(_translate("DropBot", "SIZE"))
+        self.STATUS0.setText(_translate("DropBot", "STATUS"))
         self.menuFile.setTitle(_translate("DropBot", "File"))
         self.menuHelp.setTitle(_translate("DropBot", "Help"))
         self.menuTheme.setTitle(_translate("DropBot", "Settings"))
@@ -988,28 +992,64 @@ class Ui_DropBot(object):
         dialog.setWindowIcon(QtGui.QIcon('icon2.png'))
         dialog.exec_()
         dialog.show()
-    def RemoveTask(self, removeID):
-        print('task remove function running from task', removeID)
+    def RemoveTask(self, ID):
+        LocalVars = locals()
+        LAYOUT_NAME = 'THREAD' + ID
+        def deleteItems(layout):
+            if layout is not None:
+                while layout.count():
+                    item = layout.takeAt(0)
+                    widget = item.widget()
+                    if widget is not None:
+                       widget.deleteLater()
+                    else:
+                        deleteItems(item.layout())
+        deleteItems(self.LocalVars[LAYOUT_NAME])
+        try:
+            file = open('save.json', 'r', encoding='utf-8')
+            jsondata = json.loads(file.read(), encoding='utf-8')
+            file.close()
+        except:
+            self.loadSave()
+        it = 0
+        for task in jsondata['Tasks']:
+            print(it)
+            if task['taskID'] == ID:
+                print(task)
+                del jsondata['Tasks'][it]
+                print(jsondata)
+                file = open('save.json', 'w')
+                json.dump(jsondata, file, indent=4, ensure_ascii=False)
+            else:
+                it += 1
+    def unfill(self):
+        def deleteItems(layout):
+            if layout is not None:
+                while layout.count():
+                    item = layout.takeAt(0)
+                    widget = item.widget()
+                    if widget is not None:
+                       widget.deleteLater()
+                    else:
+                        deleteItems(item.layout())
+        deleteItems(self.verticalLayout_2)
     def AddTaskToFile(self):
         LocalVars = locals()
-        file = open('save.json', 'r')
+        file = open('save.json', 'r', encoding='utf-8')
         try:
             jsondata = json.loads(file.read(), encoding='utf-8')
         except:
             self.loadSave()
         currentProfile = self.ProfileComboBox.currentText()
-        if currentProfile == '':
-            print('no profiles founded :/')
-        else:
-            print(currentProfile)
+        if currentProfile != '':
             for profile in jsondata['Profiles']:
+                print(profile['profilename'])
                 if profile['profilename'] == currentProfile:
                     print(profile['profilename'])
                     model = self.ModelLineEdit.text()
-                    if model != '' and len(list(model)) == 6:
+                    if model != '':
                         site = 'adidas.com'
-########################size = self.SizeComboBox.currentText()###STAGE 3 PROCEED####################################################################
-                        size = '9.5 US'
+                        size = self.SizeComboBox.currentText()###STAGE 3 PROCEED####################################################################
                         taskCount = self.TaskCountLineEdit.text()
                         if taskCount != '':
                             try:
@@ -1048,7 +1088,7 @@ class Ui_DropBot(object):
                                             for ID in list(range(currentID, currentID + taskCount)):
                                                 ID += 1
                                                 print(ID)
-                                                data = {'taskID': str(ID), 'model': model, 'proxyConfig': proxyConfig, 'size' : size, 'site': site}
+                                                data = {'taskID': str(ID), 'model': model, 'proxyConfig': proxyConfig, 'size' : size, 'site': site, 'status' : 'Created'}
                                                 data.update(profileData)
                                                 jsondata['Tasks'].append(data)
                                             file = open('save.json', 'r+', encoding='utf-8')
@@ -1057,126 +1097,144 @@ class Ui_DropBot(object):
                                         except Exception as e:
                                             print(e)
                                             self.loadSave()
+                                            self.AddTaskToFile()
                                         else:
-                                            file = open('save.json','r', encoding='utf-8')
-                                            jsondata = json.loads(file.read(), encoding='utf-8')
-                                            for dict in jsondata['Tasks']:
-                                                ID = 'ID' + str(dict['taskID']) 
-                                                #THREAD IDENTIFY
-                                                THREAD = 'THREAD' + str(dict['taskID'])
-                                                #PROXY IDENTIFY
-                                                if str(dict['proxyConfig']) == 'None':
-                                                    ProxyValue = '    -None-    '
-                                                else:
-                                                    ProxyValue = str(dict['proxyConfig'])
-                                                PROXY = 'PROXY' + str(dict['taskID'])
-                                                #SIZE IDENTIFY
-                                                SIZE = 'SIZE' + str(dict['taskID'])
-                                                SizeValue = str(dict['size'])
-                                                #MODEL IDENTIFY
-                                                MODEL = 'MODEL' + str(dict['taskID'])
-                                                modelValue = str(dict['model'])
-                                                #SITE IDENTIFY LAST LABEL LocalVars[SITE]
-                                                SITE = 'SITE' + str(dict['taskID'])
-                                                siteValue = str(dict['site'])
-                                                print('Data collected,' , ID)
-                                                self.LocalVars[THREAD] = QtWidgets.QHBoxLayout()
-                                                self.LocalVars[THREAD].setObjectName(THREAD)
-                                                self.LocalVars[ID] = QtWidgets.QLabel(self.scrollAreaWidgetContents)
-                                                sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
-                                                sizePolicy.setHorizontalStretch(0)
-                                                sizePolicy.setVerticalStretch(0)
-                                                sizePolicy.setHeightForWidth(self.LocalVars[ID].sizePolicy().hasHeightForWidth())
-                                                self.LocalVars[ID].setSizePolicy(sizePolicy)
-                                                self.LocalVars[ID].setContextMenuPolicy(QtCore.Qt.NoContextMenu)
-                                                self.LocalVars[ID].setLayoutDirection(QtCore.Qt.LeftToRight)
-                                                self.LocalVars[ID].setStyleSheet("")
-                                                self.LocalVars[ID].setAlignment(QtCore.Qt.AlignCenter)
-                                                self.LocalVars[ID].setObjectName(str(ID))
-                                                IDIndex = '[' + str(dict['taskID']) + ']'
-                                                self.LocalVars[ID].setText(IDIndex)
-                                                self.LocalVars[THREAD].addWidget(self.LocalVars[ID])
-                                                self.LocalVars[PROXY] = QtWidgets.QLabel(self.scrollAreaWidgetContents)
-                                                sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
-                                                sizePolicy.setHorizontalStretch(0)
-                                                sizePolicy.setVerticalStretch(0)
-                                                sizePolicy.setHeightForWidth(self.LocalVars[PROXY].sizePolicy().hasHeightForWidth())
-                                                self.LocalVars[PROXY].setSizePolicy(sizePolicy)
-                                                self.LocalVars[PROXY].setContextMenuPolicy(QtCore.Qt.NoContextMenu)
-                                                self.LocalVars[PROXY].setLayoutDirection(QtCore.Qt.LeftToRight)
-                                                self.LocalVars[PROXY].setStyleSheet("")
-                                                self.LocalVars[PROXY].setAlignment(QtCore.Qt.AlignCenter)
-                                                self.LocalVars[PROXY].setObjectName(PROXY)
-                                                self.LocalVars[PROXY].setText(ProxyValue)
-                                                self.LocalVars[THREAD].addWidget(self.LocalVars[PROXY])
-                                                self.LocalVars[SIZE] = QtWidgets.QLabel(self.scrollAreaWidgetContents)
-                                                sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
-                                                sizePolicy.setHorizontalStretch(0)
-                                                sizePolicy.setVerticalStretch(0)
-                                                sizePolicy.setHeightForWidth(self.LocalVars[SIZE].sizePolicy().hasHeightForWidth())
-                                                self.LocalVars[SIZE].setSizePolicy(sizePolicy)
-                                                self.LocalVars[SIZE].setContextMenuPolicy(QtCore.Qt.NoContextMenu)
-                                                self.LocalVars[SIZE].setLayoutDirection(QtCore.Qt.LeftToRight)
-                                                self.LocalVars[SIZE].setStyleSheet("")
-                                                self.LocalVars[SIZE].setAlignment(QtCore.Qt.AlignCenter)
-                                                self.LocalVars[SIZE].setObjectName(str(SIZE))
-                                                self.LocalVars[SIZE].setText(SizeValue)
-                                                self.LocalVars[THREAD].addWidget(self.LocalVars[SIZE])
-                                                self.LocalVars[MODEL] = QtWidgets.QLabel(self.scrollAreaWidgetContents)
-                                                sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
-                                                sizePolicy.setHorizontalStretch(0)
-                                                sizePolicy.setVerticalStretch(0)
-                                                sizePolicy.setHeightForWidth(self.LocalVars[MODEL].sizePolicy().hasHeightForWidth())
-                                                self.LocalVars[MODEL].setSizePolicy(sizePolicy)
-                                                self.LocalVars[MODEL].setContextMenuPolicy(QtCore.Qt.NoContextMenu)
-                                                self.LocalVars[MODEL].setLayoutDirection(QtCore.Qt.LeftToRight)
-                                                self.LocalVars[MODEL].setStyleSheet("")
-                                                self.LocalVars[MODEL].setAlignment(QtCore.Qt.AlignCenter)
-                                                self.LocalVars[MODEL].setObjectName(str(MODEL))
-                                                self.LocalVars[MODEL].setText(modelValue)
-                                                self.LocalVars[THREAD].addWidget(self.LocalVars[MODEL])
-                                                self.LocalVars[SITE] = QtWidgets.QLabel(self.scrollAreaWidgetContents)
-                                                sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
-                                                sizePolicy.setHorizontalStretch(0)
-                                                sizePolicy.setVerticalStretch(0)
-                                                sizePolicy.setHeightForWidth(self.LocalVars[SITE].sizePolicy().hasHeightForWidth())
-                                                self.LocalVars[SITE].setSizePolicy(sizePolicy)
-                                                self.LocalVars[SITE].setContextMenuPolicy(QtCore.Qt.NoContextMenu)
-                                                self.LocalVars[SITE].setLayoutDirection(QtCore.Qt.LeftToRight)
-                                                self.LocalVars[SITE].setStyleSheet("")
-                                                self.LocalVars[SITE].setAlignment(QtCore.Qt.AlignCenter)
-                                                self.LocalVars[SITE].setObjectName(SITE)
-                                                self.LocalVars[SITE].setText(siteValue)
-                                                self.LocalVars[THREAD].addWidget(self.LocalVars[SITE])
-                                                self.STATUS1 = QtWidgets.QLabel(self.scrollAreaWidgetContents)
-                                                sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
-                                                sizePolicy.setHorizontalStretch(0)
-                                                sizePolicy.setVerticalStretch(0)
-                                                sizePolicy.setHeightForWidth(self.STATUS1.sizePolicy().hasHeightForWidth())
-                                                self.STATUS1.setSizePolicy(sizePolicy)
-                                                self.STATUS1.setContextMenuPolicy(QtCore.Qt.NoContextMenu)
-                                                self.STATUS1.setLayoutDirection(QtCore.Qt.LeftToRight)
-                                                self.STATUS1.setStyleSheet("")
-                                                self.STATUS1.setAlignment(QtCore.Qt.AlignCenter)
-                                                self.STATUS1.setObjectName("STATUS1")
-                                                self.LocalVars[THREAD].addWidget(self.STATUS1)
-                                                self.REMOVE1 = QtWidgets.QPushButton(self.scrollAreaWidgetContents)
-                                                self.REMOVE1.setEnabled(True)
-                                                sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
-                                                sizePolicy.setHorizontalStretch(0)
-                                                sizePolicy.setVerticalStretch(0)
-                                                sizePolicy.setHeightForWidth(self.REMOVE1.sizePolicy().hasHeightForWidth())
-                                                self.REMOVE1.setSizePolicy(sizePolicy)
-                                                self.REMOVE1.setContextMenuPolicy(QtCore.Qt.NoContextMenu)
-                                                self.REMOVE1.setLayoutDirection(QtCore.Qt.LeftToRight)
-                                                self.REMOVE1.setStyleSheet("")
-                                                self.REMOVE1.setText("")
-                                                self.REMOVE1.setObjectName("REMOVE1")
-                                                self.LocalVars[THREAD].addWidget(self.REMOVE1)
-                                                self.REMOVE1.clicked.connect(self.RemoveTask)
-                                                self.verticalLayout_2.addLayout(self.LocalVars[THREAD])
-                                                self.LocalVars[THREAD].setAlignment(QtCore.Qt.AlignTop)
-                                                
+                                            self.rldTasks()
+    def rldTasks(self):
+        LocalVars = locals()
+        self.unfill()
+        try:
+            file = open('save.json','r', encoding='utf-8')
+            jsondata = json.loads(file.read(), encoding='utf-8')
+            for dict in jsondata['Tasks']:
+                ID = 'ID' + str(dict['taskID']) 
+                IDint = str(dict['taskID'])
+                #THREAD IDENTIFY
+                THREAD = 'THREAD' + str(dict['taskID'])
+                #PROXY IDENTIFY
+                if str(dict['proxyConfig']) == 'None':
+                    ProxyValue = '    -None-    '
+                else:
+                    ProxyValue = str(dict['proxyConfig'])
+                PROXY = 'PROXY' + str(dict['taskID'])
+                #SIZE IDENTIFY
+                SIZE = 'SIZE' + str(dict['taskID'])
+                SizeValue = str(dict['size'])
+                #MODEL IDENTIFY
+                MODEL = 'MODEL' + str(dict['taskID'])
+                modelValue = str(dict['model'])
+                #SITE IDENTIFY LAST LABEL LocalVars[SITE]
+                SITE = 'SITE' + str(dict['taskID'])
+                siteValue = str(dict['site'])
+                #STATUS *CHANGEBLE*
+                STATUS = 'STATUS' + str(dict['taskID'])
+                statusValue = str(dict['status'])
+                #REMOVE TASK BUTTON
+                REMOVE = 'REMOVE' + str(dict['taskID'])
+                print('Data collected,' , ID)
+                print(PROXY, SIZE, STATUS, REMOVE)
+                self.LocalVars[THREAD] = QtWidgets.QHBoxLayout()
+                self.LocalVars[THREAD].setObjectName(THREAD)
+                self.LocalVars[ID] = QtWidgets.QLabel(self.scrollAreaWidgetContents)
+                sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+                sizePolicy.setHorizontalStretch(0)
+                sizePolicy.setVerticalStretch(0)
+                sizePolicy.setHeightForWidth(self.LocalVars[ID].sizePolicy().hasHeightForWidth())
+                self.LocalVars[ID].setSizePolicy(sizePolicy)
+                self.LocalVars[ID].setContextMenuPolicy(QtCore.Qt.NoContextMenu)
+                self.LocalVars[ID].setLayoutDirection(QtCore.Qt.LeftToRight)
+                self.LocalVars[ID].setStyleSheet("")
+                self.LocalVars[ID].setAlignment(QtCore.Qt.AlignCenter)
+                self.LocalVars[ID].setObjectName(str(ID))
+                IDIndex = '[' + str(dict['taskID']) + ']'
+                self.LocalVars[ID].setText(IDIndex)
+                self.LocalVars[THREAD].addWidget(self.LocalVars[ID])
+                self.LocalVars[PROXY] = QtWidgets.QLabel(self.scrollAreaWidgetContents)
+                sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+                sizePolicy.setHorizontalStretch(0)
+                sizePolicy.setVerticalStretch(0)
+                sizePolicy.setHeightForWidth(self.LocalVars[PROXY].sizePolicy().hasHeightForWidth())
+                self.LocalVars[PROXY].setSizePolicy(sizePolicy)
+                self.LocalVars[PROXY].setContextMenuPolicy(QtCore.Qt.NoContextMenu)
+                self.LocalVars[PROXY].setLayoutDirection(QtCore.Qt.LeftToRight)
+                self.LocalVars[PROXY].setStyleSheet("")
+                self.LocalVars[PROXY].setAlignment(QtCore.Qt.AlignCenter)
+                self.LocalVars[PROXY].setObjectName(PROXY)
+                self.LocalVars[PROXY].setText(ProxyValue)
+                self.LocalVars[THREAD].addWidget(self.LocalVars[PROXY])
+                self.LocalVars[SIZE] = QtWidgets.QLabel(self.scrollAreaWidgetContents)
+                sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+                sizePolicy.setHorizontalStretch(0)
+                sizePolicy.setVerticalStretch(0)
+                sizePolicy.setHeightForWidth(self.LocalVars[SIZE].sizePolicy().hasHeightForWidth())
+                self.LocalVars[SIZE].setSizePolicy(sizePolicy)
+                self.LocalVars[SIZE].setContextMenuPolicy(QtCore.Qt.NoContextMenu)
+                self.LocalVars[SIZE].setLayoutDirection(QtCore.Qt.LeftToRight)
+                self.LocalVars[SIZE].setStyleSheet("")
+                self.LocalVars[SIZE].setAlignment(QtCore.Qt.AlignCenter)
+                self.LocalVars[SIZE].setObjectName(str(SIZE))
+                self.LocalVars[SIZE].setText(SizeValue)
+                self.LocalVars[THREAD].addWidget(self.LocalVars[SIZE])
+                self.LocalVars[MODEL] = QtWidgets.QLabel(self.scrollAreaWidgetContents)
+                sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+                sizePolicy.setHorizontalStretch(0)
+                sizePolicy.setVerticalStretch(0)
+                sizePolicy.setHeightForWidth(self.LocalVars[MODEL].sizePolicy().hasHeightForWidth())
+                self.LocalVars[MODEL].setSizePolicy(sizePolicy)
+                self.LocalVars[MODEL].setContextMenuPolicy(QtCore.Qt.NoContextMenu)
+                self.LocalVars[MODEL].setLayoutDirection(QtCore.Qt.LeftToRight)
+                self.LocalVars[MODEL].setStyleSheet("")
+                self.LocalVars[MODEL].setAlignment(QtCore.Qt.AlignCenter)
+                self.LocalVars[MODEL].setObjectName(str(MODEL))
+                self.LocalVars[MODEL].setText(modelValue)
+                self.LocalVars[THREAD].addWidget(self.LocalVars[MODEL])
+                self.LocalVars[SITE] = QtWidgets.QLabel(self.scrollAreaWidgetContents)
+                sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+                sizePolicy.setHorizontalStretch(0)
+                sizePolicy.setVerticalStretch(0)
+                sizePolicy.setHeightForWidth(self.LocalVars[SITE].sizePolicy().hasHeightForWidth())
+                self.LocalVars[SITE].setSizePolicy(sizePolicy)
+                self.LocalVars[SITE].setContextMenuPolicy(QtCore.Qt.NoContextMenu)
+                self.LocalVars[SITE].setLayoutDirection(QtCore.Qt.LeftToRight)
+                self.LocalVars[SITE].setStyleSheet("")
+                self.LocalVars[SITE].setAlignment(QtCore.Qt.AlignCenter)
+                self.LocalVars[SITE].setObjectName(SITE)
+                self.LocalVars[SITE].setText(siteValue)
+                self.LocalVars[THREAD].addWidget(self.LocalVars[SITE])
+                self.LocalVars[STATUS] = QtWidgets.QLabel(self.scrollAreaWidgetContents)
+                sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+                sizePolicy.setHorizontalStretch(0)
+                sizePolicy.setVerticalStretch(0)
+                sizePolicy.setHeightForWidth(self.LocalVars[STATUS].sizePolicy().hasHeightForWidth())
+                self.LocalVars[STATUS].setSizePolicy(sizePolicy)
+                self.LocalVars[STATUS].setContextMenuPolicy(QtCore.Qt.NoContextMenu)
+                self.LocalVars[STATUS].setLayoutDirection(QtCore.Qt.LeftToRight)
+                self.LocalVars[STATUS].setStyleSheet("")
+                self.LocalVars[STATUS].setAlignment(QtCore.Qt.AlignCenter)
+                self.LocalVars[STATUS].setObjectName(STATUS)
+                self.LocalVars[STATUS].setText(str(statusValue))
+                self.LocalVars[THREAD].addWidget(self.LocalVars[STATUS])
+                self.LocalVars[REMOVE] = QtWidgets.QPushButton(self.scrollAreaWidgetContents)
+                self.LocalVars[REMOVE].setEnabled(True)
+                sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+                sizePolicy.setHorizontalStretch(0)
+                sizePolicy.setVerticalStretch(0)
+                sizePolicy.setHeightForWidth(self.LocalVars[REMOVE].sizePolicy().hasHeightForWidth())
+                self.LocalVars[REMOVE].setSizePolicy(sizePolicy)
+                self.LocalVars[REMOVE].setContextMenuPolicy(QtCore.Qt.NoContextMenu)
+                self.LocalVars[REMOVE].setLayoutDirection(QtCore.Qt.LeftToRight)
+                self.LocalVars[REMOVE].setStyleSheet("")
+                self.LocalVars[REMOVE].setText(str(dict['taskID']))
+                self.LocalVars[REMOVE].setStyleSheet("color: transparent;")
+                self.LocalVars[REMOVE].setObjectName(REMOVE)
+                self.LocalVars[THREAD].addWidget(self.LocalVars[REMOVE])
+                self.LocalVars[REMOVE].clicked.connect(partial(self.RemoveTask, IDint))
+                self.verticalLayout_2.addLayout(self.LocalVars[THREAD])
+                self.LocalVars[THREAD].setAlignment(QtCore.Qt.AlignTop)
+        except Exception as e:
+            print(e)
+            open('save.json', 'w', encoding='utf-8').close()
+            self.loadSave()
 
 ###########################################################PROFILE MANAGER#####################################################################################################################
 
