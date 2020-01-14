@@ -35,6 +35,7 @@ def nowERRORMAIN():
     return result
 
 class Ui_DropBot(object):
+    LocalVars = locals()
     def setupUi(self, DropBot):
         DropBot.setObjectName("DropBot")
         DropBot.resize(1300, 793)
@@ -218,12 +219,12 @@ class Ui_DropBot(object):
         self.DropBotLabel = QtWidgets.QLabel(self.centralwidget)
         font = QtGui.QFont()
         font.setFamily("Ubuntu")
-        font.setPointSize(35)
+        font.setPointSize(25)
         font.setBold(False)
         font.setItalic(False)
         font.setWeight(50)
         self.DropBotLabel.setFont(font)
-        self.DropBotLabel.setStyleSheet("font: 35pt \"Ubuntu\";")
+        self.DropBotLabel.setStyleSheet("font: 25pt \"Ubuntu\";")
         self.DropBotLabel.setAlignment(QtCore.Qt.AlignCenter)
         self.DropBotLabel.setObjectName("DropBotLabel")
         self.leftLayout.addWidget(self.DropBotLabel)
@@ -241,13 +242,13 @@ class Ui_DropBot(object):
         self.ProfileLabel.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
         font.setFamily("Ubuntu")
-        font.setPointSize(16)
+        font.setPointSize(10)
         font.setBold(False)
         font.setItalic(False)
         font.setUnderline(False)
         font.setWeight(50)
         self.ProfileLabel.setFont(font)
-        self.ProfileLabel.setStyleSheet("font: 16pt \"Ubuntu\";")
+        self.ProfileLabel.setStyleSheet("font: 10pt \"Ubuntu\";")
         self.ProfileLabel.setAlignment(QtCore.Qt.AlignCenter)
         self.ProfileLabel.setObjectName("ProfileLabel")
         self.TextLabelLayout.addWidget(self.ProfileLabel)
@@ -259,13 +260,13 @@ class Ui_DropBot(object):
         self.ModelLabel.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
         font.setFamily("Ubuntu")
-        font.setPointSize(16)
+        font.setPointSize(10)
         font.setBold(False)
         font.setItalic(False)
         font.setUnderline(False)
         font.setWeight(50)
         self.ModelLabel.setFont(font)
-        self.ModelLabel.setStyleSheet("font: 16pt \"Ubuntu\";")
+        self.ModelLabel.setStyleSheet("font: 10pt \"Ubuntu\";")
         self.ModelLabel.setAlignment(QtCore.Qt.AlignCenter)
         self.ModelLabel.setObjectName("ModelLabel")
         self.TextLabelLayout.addWidget(self.ModelLabel)
@@ -277,13 +278,13 @@ class Ui_DropBot(object):
         self.SizeLabel.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
         font.setFamily("Ubuntu")
-        font.setPointSize(16)
+        font.setPointSize(10)
         font.setBold(False)
         font.setItalic(False)
         font.setUnderline(False)
         font.setWeight(50)
         self.SizeLabel.setFont(font)
-        self.SizeLabel.setStyleSheet("font: 16pt \"Ubuntu\";")
+        self.SizeLabel.setStyleSheet("font: 10pt \"Ubuntu\";")
         self.SizeLabel.setAlignment(QtCore.Qt.AlignCenter)
         self.SizeLabel.setObjectName("SizeLabel")
         self.TextLabelLayout.addWidget(self.SizeLabel)
@@ -295,13 +296,13 @@ class Ui_DropBot(object):
         self.TaskCountLabel.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
         font.setFamily("Ubuntu")
-        font.setPointSize(16)
+        font.setPointSize(10)
         font.setBold(False)
         font.setItalic(False)
         font.setUnderline(False)
         font.setWeight(50)
         self.TaskCountLabel.setFont(font)
-        self.TaskCountLabel.setStyleSheet("font: 16pt \"Ubuntu\";")
+        self.TaskCountLabel.setStyleSheet("font: 10pt \"Ubuntu\";")
         self.TaskCountLabel.setAlignment(QtCore.Qt.AlignCenter)
         self.TaskCountLabel.setObjectName("TaskCountLabel")
         self.TextLabelLayout.addWidget(self.TaskCountLabel)
@@ -313,13 +314,13 @@ class Ui_DropBot(object):
         self.ProxyConfigLabel.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
         font.setFamily("Ubuntu")
-        font.setPointSize(16)
+        font.setPointSize(10)
         font.setBold(False)
         font.setItalic(False)
         font.setUnderline(False)
         font.setWeight(50)
         self.ProxyConfigLabel.setFont(font)
-        self.ProxyConfigLabel.setStyleSheet("font: 16pt \"Ubuntu\";")
+        self.ProxyConfigLabel.setStyleSheet("font: 10pt \"Ubuntu\";")
         self.ProxyConfigLabel.setAlignment(QtCore.Qt.AlignCenter)
         self.ProxyConfigLabel.setObjectName("ProxyConfigLabel")
         self.TextLabelLayout.addWidget(self.ProxyConfigLabel)
@@ -464,7 +465,7 @@ class Ui_DropBot(object):
         self.CreateTaskButton.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
         font.setFamily("Ubuntu")
-        font.setPointSize(16)
+        font.setPointSize(10)
         font.setBold(True)
         font.setWeight(75)
         self.CreateTaskButton.setFont(font)
@@ -572,7 +573,7 @@ class Ui_DropBot(object):
         self.LogOutput.setPalette(palette)
         font = QtGui.QFont()
         font.setFamily("Ubuntu")
-        font.setPointSize(10)
+        font.setPointSize(8)
         self.LogOutput.setFont(font)
         self.LogOutput.setFocusPolicy(QtCore.Qt.NoFocus)
         self.LogOutput.setContextMenuPolicy(QtCore.Qt.NoContextMenu)
@@ -599,12 +600,12 @@ class Ui_DropBot(object):
         self.TaskManagerLabel.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
         font.setFamily("Ubuntu")
-        font.setPointSize(35)
+        font.setPointSize(25)
         font.setBold(False)
         font.setItalic(False)
         font.setWeight(50)
         self.TaskManagerLabel.setFont(font)
-        self.TaskManagerLabel.setStyleSheet("font: 35pt \"Ubuntu\";")
+        self.TaskManagerLabel.setStyleSheet("font: 25pt \"Ubuntu\";")
         self.TaskManagerLabel.setAlignment(QtCore.Qt.AlignCenter)
         self.TaskManagerLabel.setObjectName("TaskManagerLabel")
         self.RightLayout.addWidget(self.TaskManagerLabel)
@@ -619,7 +620,7 @@ class Ui_DropBot(object):
         self.ID0.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
         font.setFamily("Ubuntu")
-        font.setPointSize(12)
+        font.setPointSize(10)
         self.ID0.setFont(font)
         self.ID0.setContextMenuPolicy(QtCore.Qt.NoContextMenu)
         self.ID0.setLayoutDirection(QtCore.Qt.LeftToRight)
@@ -634,7 +635,7 @@ class Ui_DropBot(object):
         self.PROXY0.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
         font.setFamily("Ubuntu")
-        font.setPointSize(12)
+        font.setPointSize(10)
         self.PROXY0.setFont(font)
         self.PROXY0.setContextMenuPolicy(QtCore.Qt.NoContextMenu)
         self.PROXY0.setLayoutDirection(QtCore.Qt.LeftToRight)
@@ -649,7 +650,7 @@ class Ui_DropBot(object):
         self.SIZE0.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
         font.setFamily("Ubuntu")
-        font.setPointSize(12)
+        font.setPointSize(10)
         self.SIZE0.setFont(font)
         self.SIZE0.setContextMenuPolicy(QtCore.Qt.NoContextMenu)
         self.SIZE0.setLayoutDirection(QtCore.Qt.LeftToRight)
@@ -664,7 +665,7 @@ class Ui_DropBot(object):
         self.MODEL0.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
         font.setFamily("Ubuntu")
-        font.setPointSize(12)
+        font.setPointSize(10)
         self.MODEL0.setFont(font)
         self.MODEL0.setContextMenuPolicy(QtCore.Qt.NoContextMenu)
         self.MODEL0.setLayoutDirection(QtCore.Qt.LeftToRight)
@@ -679,7 +680,7 @@ class Ui_DropBot(object):
         self.SITE0.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
         font.setFamily("Ubuntu")
-        font.setPointSize(12)
+        font.setPointSize(10)
         self.SITE0.setFont(font)
         self.SITE0.setContextMenuPolicy(QtCore.Qt.NoContextMenu)
         self.SITE0.setLayoutDirection(QtCore.Qt.LeftToRight)
@@ -695,7 +696,7 @@ class Ui_DropBot(object):
         self.STATUS0.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
         font.setFamily("Ubuntu")
-        font.setPointSize(12)
+        font.setPointSize(10)
         self.STATUS0.setFont(font)
         self.STATUS0.setContextMenuPolicy(QtCore.Qt.NoContextMenu)
         self.STATUS0.setLayoutDirection(QtCore.Qt.LeftToRight)
@@ -710,7 +711,7 @@ class Ui_DropBot(object):
         self.REMOVE0.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
         font.setFamily("Ubuntu")
-        font.setPointSize(12)
+        font.setPointSize(10)
         self.REMOVE0.setFont(font)
         self.REMOVE0.setContextMenuPolicy(QtCore.Qt.NoContextMenu)
         self.REMOVE0.setLayoutDirection(QtCore.Qt.LeftToRight)
@@ -718,28 +719,29 @@ class Ui_DropBot(object):
         self.REMOVE0.setObjectName("REMOVE0")
         self.horizontalLayout_4.addWidget(self.REMOVE0)
         self.RightLayout.addLayout(self.horizontalLayout_4)
-        self.Frame = QtWidgets.QFrame(self.centralwidget)
-        self.Frame.setContextMenuPolicy(QtCore.Qt.NoContextMenu)
-        self.Frame.setStyleSheet(".QFrame {border: 0.5px solid #32414B; border-radius: 20%;}\n"
+        self.scrollArea = QtWidgets.QScrollArea(self.centralwidget)
+        self.scrollArea.setWidgetResizable(True)
+        self.scrollArea.setStyleSheet(".QScrollArea {border: 0.5px solid #32414B; border-radius: 20%;}\n"
 ".QPushButton{height: 24px; width: 24px; background-color: rgb(228, 70, 70); background-image: url(bin.png);\n"
 "border: 1px solid rgb(228, 70, 70);\n"
-"margin-left: auto; margin-right: auto;\n"
+"margin-left: 10px; margin-right: auto;\n"
 "border-radius: 15px;\n"
 "background-repeat:no-repeat;\n"
 "background-position:center;}\n"
 ".QPushButton:hover {\n"
 "border: 2px solid white;\n"
 "}\n"
-".QLabel {font: 12pt \"Ubuntu\";}\n"
+".QLabel {font: 10pt \"Ubuntu\";}\n"
 "")
-        self.Frame.setFrameShape(QtWidgets.QFrame.StyledPanel)
-        self.Frame.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.Frame.setObjectName("Frame")
-        self.verticalLayout = QtWidgets.QVBoxLayout(self.Frame)
-        self.verticalLayout.setObjectName("verticalLayout")
+        self.scrollArea.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        self.scrollArea.setObjectName("scrollArea")
+        self.scrollAreaWidgetContents = QtWidgets.QWidget()
+        self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
+        self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.scrollAreaWidgetContents)
+        self.verticalLayout_2.setObjectName("verticalLayout_2")
         self.THREAD1 = QtWidgets.QHBoxLayout()
         self.THREAD1.setObjectName("THREAD1")
-        self.ID1 = QtWidgets.QLabel(self.Frame)
+        self.ID1 = QtWidgets.QLabel(self.scrollAreaWidgetContents)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -751,7 +753,7 @@ class Ui_DropBot(object):
         self.ID1.setAlignment(QtCore.Qt.AlignCenter)
         self.ID1.setObjectName("ID1")
         self.THREAD1.addWidget(self.ID1)
-        self.PROXY1 = QtWidgets.QLabel(self.Frame)
+        self.PROXY1 = QtWidgets.QLabel(self.scrollAreaWidgetContents)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -763,7 +765,7 @@ class Ui_DropBot(object):
         self.PROXY1.setAlignment(QtCore.Qt.AlignCenter)
         self.PROXY1.setObjectName("PROXY1")
         self.THREAD1.addWidget(self.PROXY1)
-        self.SIZE1 = QtWidgets.QLabel(self.Frame)
+        self.SIZE1 = QtWidgets.QLabel(self.scrollAreaWidgetContents)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -775,7 +777,7 @@ class Ui_DropBot(object):
         self.SIZE1.setAlignment(QtCore.Qt.AlignCenter)
         self.SIZE1.setObjectName("SIZE1")
         self.THREAD1.addWidget(self.SIZE1)
-        self.MODEL1 = QtWidgets.QLabel(self.Frame)
+        self.MODEL1 = QtWidgets.QLabel(self.scrollAreaWidgetContents)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -787,7 +789,7 @@ class Ui_DropBot(object):
         self.MODEL1.setAlignment(QtCore.Qt.AlignCenter)
         self.MODEL1.setObjectName("MODEL1")
         self.THREAD1.addWidget(self.MODEL1)
-        self.SITE1 = QtWidgets.QLabel(self.Frame)
+        self.SITE1 = QtWidgets.QLabel(self.scrollAreaWidgetContents)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -799,7 +801,7 @@ class Ui_DropBot(object):
         self.SITE1.setAlignment(QtCore.Qt.AlignCenter)
         self.SITE1.setObjectName("SITE1")
         self.THREAD1.addWidget(self.SITE1)
-        self.STATUS1 = QtWidgets.QLabel(self.Frame)
+        self.STATUS1 = QtWidgets.QLabel(self.scrollAreaWidgetContents)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -811,7 +813,7 @@ class Ui_DropBot(object):
         self.STATUS1.setAlignment(QtCore.Qt.AlignCenter)
         self.STATUS1.setObjectName("STATUS1")
         self.THREAD1.addWidget(self.STATUS1)
-        self.REMOVE1 = QtWidgets.QPushButton(self.Frame)
+        self.REMOVE1 = QtWidgets.QPushButton(self.scrollAreaWidgetContents)
         self.REMOVE1.setEnabled(True)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -824,9 +826,9 @@ class Ui_DropBot(object):
         self.REMOVE1.setText("")
         self.REMOVE1.setObjectName("REMOVE1")
         self.THREAD1.addWidget(self.REMOVE1)
-        self.verticalLayout.addLayout(self.THREAD1)
-        self.THREAD1.setAlignment(QtCore.Qt.AlignTop)
-        self.RightLayout.addWidget(self.Frame)
+        self.verticalLayout_2.addLayout(self.THREAD1)
+        self.scrollArea.setWidget(self.scrollAreaWidgetContents)
+        self.RightLayout.addWidget(self.scrollArea)
         self.horizontalLayout.addLayout(self.RightLayout)
         DropBot.setCentralWidget(self.centralwidget)
         self.menuBar = QtWidgets.QMenuBar(DropBot)
@@ -884,25 +886,26 @@ class Ui_DropBot(object):
         self.EditProfile.clicked.connect(self.profileedit)
         self.ProxyConfigEdit.setText(_translate("DropBot", "   Edit   "))
         self.CreateTaskButton.setText(_translate("DropBot", "ADD TASK"))
+        self.CreateTaskButton.clicked.connect(self.AddTaskToFile)
         self.LogOutput.setHtml(_translate("DropBot", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
 "</style></head><body style=\" font-family:\'Ubuntu\'; font-size:10pt; font-weight:400; font-style:normal;\">\n"
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:\'Ubuntu\';\"><br /></p></body></html>"))
         self.TaskManagerLabel.setText(_translate("DropBot", "Task Manager"))
-        self.PROXY0.setText(_translate("DropBot", "     PROXY"))
+        self.PROXY0.setText(_translate("DropBot", "      PROXY"))
         self.SITE0.setText(_translate("DropBot", "SITE"))
         self.SIZE1.setText(_translate("DropBot", "12 US"))
         self.ID0.setText(_translate("DropBot", "   ID"))
-        self.MODEL0.setText(_translate("DropBot", "          MODEL"))
-        self.REMOVE0.setText(_translate("DropBot", "REMOVE TASK"))
+        self.MODEL0.setText(_translate("DropBot", "     MODEL"))
+        self.REMOVE0.setText(_translate("DropBot", " "))
         self.ID1.setText(_translate("DropBot", "[1]"))
         self.MODEL1.setText(_translate("DropBot", "123456"))
         self.STATUS1.setText(_translate("DropBot", "example"))
         self.PROXY1.setText(_translate("DropBot", "123.123.123.123"))
         self.SITE1.setText(_translate("DropBot", "example.com"))
-        self.SIZE0.setText(_translate("DropBot", "           SIZE"))
-        self.STATUS0.setText(_translate("DropBot", "STATUS"))
+        self.SIZE0.setText(_translate("DropBot", "         SIZE"))
+        self.STATUS0.setText(_translate("DropBot", "      STATUS"))
         self.menuFile.setTitle(_translate("DropBot", "File"))
         self.menuHelp.setTitle(_translate("DropBot", "Help"))
         self.menuTheme.setTitle(_translate("DropBot", "Settings"))
@@ -915,12 +918,12 @@ class Ui_DropBot(object):
         self.actionEdit_proxy_config.setText(_translate("DropBot", "Edit proxy config"))
         self.actionDark.setText(_translate("DropBot", "Dark"))
         self.actionLight.setText(_translate("DropBot", "Light"))
+        self.ProxyConfigComboBox.addItem('None')
     def loadSave(self):
-        print('loadSave function')
         try:
             file = open('save.json', 'r', encoding='utf-8').read()
         except:
-            log = nowERRORMAIN() + ' Save file not found, creating new one...\n'
+            log = nowERRORMAIN() + ' Save file not found, creating new one...'
             self.LogOutput.append(log)
             open('save.json', 'w', encoding='utf-8').close()
             data = open('save.json', 'r', encoding='utf-8')
@@ -931,16 +934,20 @@ class Ui_DropBot(object):
             self.LogOutput.append(log)
         try:
             jsondata = json.loads(file, encoding = 'utf-8')
+            jsondata['Tasks']
+            jsondata['Profiles']
         except:
             file = open("save.json", "r+", encoding='utf-8')
-            json.dump({'Profiles': []}, file)
+            json.dump({'Profiles': [], 'Tasks' : []}, file)
             try:
                 jsondata = json.loads(file.read(), encoding='utf-8')
+                jsondata['Tasks']
+                jsondata['Profiles']
             except:
                 file.close()
                 open('save.json', 'w', encoding='utf-8').close()
                 file = open("save.json", "r+", encoding='utf-8')
-                json.dump({'Profiles': []}, file)
+                json.dump({'Profiles': [], 'Tasks' : []}, file)
                 file.close()
                 self.LogOutput.clear()
                 log = nowERRORMAIN() + ' Save file corrupted, creating new one...'
@@ -948,18 +955,27 @@ class Ui_DropBot(object):
                 self.loadSave()
             file.close()
         else:
-            if file == '{"Profiles": []}':
+            if file == '{"Profiles": [], "Tasks" : []}':
                 log = nowERRORMAIN() + ' No profiles founded, please, create a new one.'
                 self.LogOutput.append(log)
             else:
-                print(jsondata)
-                profilenames = []
-                for dicts in jsondata['Profiles']:
-                    profilenames.append(dicts['profilename'])
-                self.ProfileComboBox.clear()
-                self.ProfileComboBox.addItems(profilenames)
-                log = nowINFOMAIN() + ' Profiles succesefully updated!'
-                self.LogOutput.append(log)
+                try:
+                    profilenames = []
+                    for dicts in jsondata['Profiles']:
+                        profilenames.append(dicts['profilename'])
+                    self.ProfileComboBox.clear()
+                    self.ProfileComboBox.addItems(profilenames)
+                    log = nowINFOMAIN() + ' Profiles succesefully updated!'
+                    self.LogOutput.append(log)
+                except:
+                    open('save.json', 'w', encoding='utf-8').close()
+                    file = open("save.json", "r+", encoding='utf-8')
+                    json.dump({'Profiles': [], 'Tasks' : []}, file)
+                    file.close()
+                    self.LogOutput.clear()
+                    log = nowERRORMAIN() + ' Save file corrupted, creating new one...'
+                    self.LogOutput.append(log)
+                    self.loadSave()
     def resetProfiles(self):
         self.ProfileComboBox.clear()
     def profileedit(self):
@@ -967,12 +983,200 @@ class Ui_DropBot(object):
         dialog.ui = Ui_ProfileManager()
         dialog.ui.setupUi(dialog)
         dialog.ui.Save.clicked.connect(self.loadSave)
+        dialog.ui.Reset.clicked.connect(self.loadSave)
         dialog.ui.Reset.clicked.connect(self.resetProfiles)
+        dialog.setWindowIcon(QtGui.QIcon('icon2.png'))
         dialog.exec_()
         dialog.show()
-
-
-
+    def RemoveTask(self, removeID):
+        print('task remove function running from task', removeID)
+    def AddTaskToFile(self):
+        LocalVars = locals()
+        file = open('save.json', 'r')
+        try:
+            jsondata = json.loads(file.read(), encoding='utf-8')
+        except:
+            self.loadSave()
+        currentProfile = self.ProfileComboBox.currentText()
+        if currentProfile == '':
+            print('no profiles founded :/')
+        else:
+            print(currentProfile)
+            for profile in jsondata['Profiles']:
+                if profile['profilename'] == currentProfile:
+                    print(profile['profilename'])
+                    model = self.ModelLineEdit.text()
+                    if model != '' and len(list(model)) == 6:
+                        site = 'adidas.com'
+########################size = self.SizeComboBox.currentText()###STAGE 3 PROCEED####################################################################
+                        size = '9.5 US'
+                        taskCount = self.TaskCountLineEdit.text()
+                        if taskCount != '':
+                            try:
+                                int(taskCount)
+                            except:
+                                self.TaskCountLineEdit.clear()
+                            else:
+                                taskCount = int(taskCount)
+                                if taskCount != 0:
+                                    if self.ProxyConfigComboBox.currentText() == 'None':
+                                        proxyConfig = "None"
+                                    else:
+                                        proxyConfig = self.ProxyConfigComboBox.currentText()
+                                    #ADD TASK STAGE
+                                    file = open('save.json', 'r')
+                                    jsondata = json.loads(file.read(), encoding='utf-8')
+                                    file.close()
+                                    try:
+                                        profileData = jsondata['Profiles']
+                                        currentTasks = jsondata['Tasks']
+                                        for dict in profileData:
+                                            if dict['profilename'] == currentProfile:
+                                                profileData = dict
+                                                print(dict)
+                                    except:
+                                        self.loadSave()
+                                    else:
+                                        try:
+                                            if currentTasks != []:
+                                                currentID = []
+                                                for value in currentTasks:
+                                                    currentID.append(value)
+                                                currentID = len(list(currentID))
+                                            else:
+                                                currentID = 0
+                                            for ID in list(range(currentID, currentID + taskCount)):
+                                                ID += 1
+                                                print(ID)
+                                                data = {'taskID': str(ID), 'model': model, 'proxyConfig': proxyConfig, 'size' : size, 'site': site}
+                                                data.update(profileData)
+                                                jsondata['Tasks'].append(data)
+                                            file = open('save.json', 'r+', encoding='utf-8')
+                                            json.dump(jsondata, file, indent=4, ensure_ascii=False)
+                                            file.close()
+                                        except Exception as e:
+                                            print(e)
+                                            self.loadSave()
+                                        else:
+                                            file = open('save.json','r', encoding='utf-8')
+                                            jsondata = json.loads(file.read(), encoding='utf-8')
+                                            for dict in jsondata['Tasks']:
+                                                ID = 'ID' + str(dict['taskID']) 
+                                                #THREAD IDENTIFY
+                                                THREAD = 'THREAD' + str(dict['taskID'])
+                                                #PROXY IDENTIFY
+                                                if str(dict['proxyConfig']) == 'None':
+                                                    ProxyValue = '    -None-    '
+                                                else:
+                                                    ProxyValue = str(dict['proxyConfig'])
+                                                PROXY = 'PROXY' + str(dict['taskID'])
+                                                #SIZE IDENTIFY
+                                                SIZE = 'SIZE' + str(dict['taskID'])
+                                                SizeValue = str(dict['size'])
+                                                #MODEL IDENTIFY
+                                                MODEL = 'MODEL' + str(dict['taskID'])
+                                                modelValue = str(dict['model'])
+                                                #SITE IDENTIFY LAST LABEL LocalVars[SITE]
+                                                SITE = 'SITE' + str(dict['taskID'])
+                                                siteValue = str(dict['site'])
+                                                print('Data collected,' , ID)
+                                                self.LocalVars[THREAD] = QtWidgets.QHBoxLayout()
+                                                self.LocalVars[THREAD].setObjectName(THREAD)
+                                                self.LocalVars[ID] = QtWidgets.QLabel(self.scrollAreaWidgetContents)
+                                                sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+                                                sizePolicy.setHorizontalStretch(0)
+                                                sizePolicy.setVerticalStretch(0)
+                                                sizePolicy.setHeightForWidth(self.LocalVars[ID].sizePolicy().hasHeightForWidth())
+                                                self.LocalVars[ID].setSizePolicy(sizePolicy)
+                                                self.LocalVars[ID].setContextMenuPolicy(QtCore.Qt.NoContextMenu)
+                                                self.LocalVars[ID].setLayoutDirection(QtCore.Qt.LeftToRight)
+                                                self.LocalVars[ID].setStyleSheet("")
+                                                self.LocalVars[ID].setAlignment(QtCore.Qt.AlignCenter)
+                                                self.LocalVars[ID].setObjectName(str(ID))
+                                                IDIndex = '[' + str(dict['taskID']) + ']'
+                                                self.LocalVars[ID].setText(IDIndex)
+                                                self.LocalVars[THREAD].addWidget(self.LocalVars[ID])
+                                                self.LocalVars[PROXY] = QtWidgets.QLabel(self.scrollAreaWidgetContents)
+                                                sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+                                                sizePolicy.setHorizontalStretch(0)
+                                                sizePolicy.setVerticalStretch(0)
+                                                sizePolicy.setHeightForWidth(self.LocalVars[PROXY].sizePolicy().hasHeightForWidth())
+                                                self.LocalVars[PROXY].setSizePolicy(sizePolicy)
+                                                self.LocalVars[PROXY].setContextMenuPolicy(QtCore.Qt.NoContextMenu)
+                                                self.LocalVars[PROXY].setLayoutDirection(QtCore.Qt.LeftToRight)
+                                                self.LocalVars[PROXY].setStyleSheet("")
+                                                self.LocalVars[PROXY].setAlignment(QtCore.Qt.AlignCenter)
+                                                self.LocalVars[PROXY].setObjectName(PROXY)
+                                                self.LocalVars[PROXY].setText(ProxyValue)
+                                                self.LocalVars[THREAD].addWidget(self.LocalVars[PROXY])
+                                                self.LocalVars[SIZE] = QtWidgets.QLabel(self.scrollAreaWidgetContents)
+                                                sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+                                                sizePolicy.setHorizontalStretch(0)
+                                                sizePolicy.setVerticalStretch(0)
+                                                sizePolicy.setHeightForWidth(self.LocalVars[SIZE].sizePolicy().hasHeightForWidth())
+                                                self.LocalVars[SIZE].setSizePolicy(sizePolicy)
+                                                self.LocalVars[SIZE].setContextMenuPolicy(QtCore.Qt.NoContextMenu)
+                                                self.LocalVars[SIZE].setLayoutDirection(QtCore.Qt.LeftToRight)
+                                                self.LocalVars[SIZE].setStyleSheet("")
+                                                self.LocalVars[SIZE].setAlignment(QtCore.Qt.AlignCenter)
+                                                self.LocalVars[SIZE].setObjectName(str(SIZE))
+                                                self.LocalVars[SIZE].setText(SizeValue)
+                                                self.LocalVars[THREAD].addWidget(self.LocalVars[SIZE])
+                                                self.LocalVars[MODEL] = QtWidgets.QLabel(self.scrollAreaWidgetContents)
+                                                sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+                                                sizePolicy.setHorizontalStretch(0)
+                                                sizePolicy.setVerticalStretch(0)
+                                                sizePolicy.setHeightForWidth(self.LocalVars[MODEL].sizePolicy().hasHeightForWidth())
+                                                self.LocalVars[MODEL].setSizePolicy(sizePolicy)
+                                                self.LocalVars[MODEL].setContextMenuPolicy(QtCore.Qt.NoContextMenu)
+                                                self.LocalVars[MODEL].setLayoutDirection(QtCore.Qt.LeftToRight)
+                                                self.LocalVars[MODEL].setStyleSheet("")
+                                                self.LocalVars[MODEL].setAlignment(QtCore.Qt.AlignCenter)
+                                                self.LocalVars[MODEL].setObjectName(str(MODEL))
+                                                self.LocalVars[MODEL].setText(modelValue)
+                                                self.LocalVars[THREAD].addWidget(self.LocalVars[MODEL])
+                                                self.LocalVars[SITE] = QtWidgets.QLabel(self.scrollAreaWidgetContents)
+                                                sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+                                                sizePolicy.setHorizontalStretch(0)
+                                                sizePolicy.setVerticalStretch(0)
+                                                sizePolicy.setHeightForWidth(self.LocalVars[SITE].sizePolicy().hasHeightForWidth())
+                                                self.LocalVars[SITE].setSizePolicy(sizePolicy)
+                                                self.LocalVars[SITE].setContextMenuPolicy(QtCore.Qt.NoContextMenu)
+                                                self.LocalVars[SITE].setLayoutDirection(QtCore.Qt.LeftToRight)
+                                                self.LocalVars[SITE].setStyleSheet("")
+                                                self.LocalVars[SITE].setAlignment(QtCore.Qt.AlignCenter)
+                                                self.LocalVars[SITE].setObjectName(SITE)
+                                                self.LocalVars[SITE].setText(siteValue)
+                                                self.LocalVars[THREAD].addWidget(self.LocalVars[SITE])
+                                                self.STATUS1 = QtWidgets.QLabel(self.scrollAreaWidgetContents)
+                                                sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+                                                sizePolicy.setHorizontalStretch(0)
+                                                sizePolicy.setVerticalStretch(0)
+                                                sizePolicy.setHeightForWidth(self.STATUS1.sizePolicy().hasHeightForWidth())
+                                                self.STATUS1.setSizePolicy(sizePolicy)
+                                                self.STATUS1.setContextMenuPolicy(QtCore.Qt.NoContextMenu)
+                                                self.STATUS1.setLayoutDirection(QtCore.Qt.LeftToRight)
+                                                self.STATUS1.setStyleSheet("")
+                                                self.STATUS1.setAlignment(QtCore.Qt.AlignCenter)
+                                                self.STATUS1.setObjectName("STATUS1")
+                                                self.LocalVars[THREAD].addWidget(self.STATUS1)
+                                                self.REMOVE1 = QtWidgets.QPushButton(self.scrollAreaWidgetContents)
+                                                self.REMOVE1.setEnabled(True)
+                                                sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+                                                sizePolicy.setHorizontalStretch(0)
+                                                sizePolicy.setVerticalStretch(0)
+                                                sizePolicy.setHeightForWidth(self.REMOVE1.sizePolicy().hasHeightForWidth())
+                                                self.REMOVE1.setSizePolicy(sizePolicy)
+                                                self.REMOVE1.setContextMenuPolicy(QtCore.Qt.NoContextMenu)
+                                                self.REMOVE1.setLayoutDirection(QtCore.Qt.LeftToRight)
+                                                self.REMOVE1.setStyleSheet("")
+                                                self.REMOVE1.setText("")
+                                                self.REMOVE1.setObjectName("REMOVE1")
+                                                self.LocalVars[THREAD].addWidget(self.REMOVE1)
+                                                self.REMOVE1.clicked.connect(self.RemoveTask)
+                                                self.verticalLayout_2.addLayout(self.LocalVars[THREAD])
+                                                self.LocalVars[THREAD].setAlignment(QtCore.Qt.AlignTop)
+                                                
 
 ###########################################################PROFILE MANAGER#####################################################################################################################
 
@@ -1160,7 +1364,7 @@ class Ui_ProfileManager(object):
         self.label_2.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
         font.setFamily("Ubuntu")
-        font.setPointSize(12)
+        font.setPointSize(10)
         self.label_2.setFont(font)
         self.label_2.setStyleSheet("")
         self.label_2.setObjectName("label_2")
@@ -1173,7 +1377,7 @@ class Ui_ProfileManager(object):
         self.label_4.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
         font.setFamily("Ubuntu")
-        font.setPointSize(12)
+        font.setPointSize(10)
         self.label_4.setFont(font)
         self.label_4.setObjectName("label_4")
         self.verticalLayout.addWidget(self.label_4)
@@ -1185,7 +1389,7 @@ class Ui_ProfileManager(object):
         self.label_3.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
         font.setFamily("Ubuntu")
-        font.setPointSize(12)
+        font.setPointSize(10)
         self.label_3.setFont(font)
         self.label_3.setObjectName("label_3")
         self.verticalLayout.addWidget(self.label_3)
@@ -1197,7 +1401,7 @@ class Ui_ProfileManager(object):
         self.label_5.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
         font.setFamily("Ubuntu")
-        font.setPointSize(12)
+        font.setPointSize(10)
         self.label_5.setFont(font)
         self.label_5.setObjectName("label_5")
         self.verticalLayout.addWidget(self.label_5)
@@ -1209,7 +1413,7 @@ class Ui_ProfileManager(object):
         self.label_6.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
         font.setFamily("Ubuntu")
-        font.setPointSize(12)
+        font.setPointSize(10)
         self.label_6.setFont(font)
         self.label_6.setObjectName("label_6")
         self.verticalLayout.addWidget(self.label_6)
@@ -1221,7 +1425,7 @@ class Ui_ProfileManager(object):
         self.label_8.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
         font.setFamily("Ubuntu")
-        font.setPointSize(12)
+        font.setPointSize(10)
         self.label_8.setFont(font)
         self.label_8.setObjectName("label_8")
         self.verticalLayout.addWidget(self.label_8)
@@ -1233,7 +1437,7 @@ class Ui_ProfileManager(object):
         self.label_9.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
         font.setFamily("Ubuntu")
-        font.setPointSize(12)
+        font.setPointSize(10)
         self.label_9.setFont(font)
         self.label_9.setObjectName("label_9")
         self.verticalLayout.addWidget(self.label_9)
@@ -1245,7 +1449,7 @@ class Ui_ProfileManager(object):
         self.label_10.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
         font.setFamily("Ubuntu")
-        font.setPointSize(12)
+        font.setPointSize(10)
         self.label_10.setFont(font)
         self.label_10.setObjectName("label_10")
         self.verticalLayout.addWidget(self.label_10)
@@ -1257,7 +1461,7 @@ class Ui_ProfileManager(object):
         self.label_11.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
         font.setFamily("Ubuntu")
-        font.setPointSize(12)
+        font.setPointSize(10)
         self.label_11.setFont(font)
         self.label_11.setObjectName("label_11")
         self.verticalLayout.addWidget(self.label_11)
@@ -1269,7 +1473,7 @@ class Ui_ProfileManager(object):
         self.label_12.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
         font.setFamily("Ubuntu")
-        font.setPointSize(12)
+        font.setPointSize(10)
         self.label_12.setFont(font)
         self.label_12.setObjectName("label_12")
         self.verticalLayout.addWidget(self.label_12)
@@ -1492,7 +1696,7 @@ class Ui_ProfileManager(object):
         self.label_17.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
         font.setFamily("Ubuntu")
-        font.setPointSize(12)
+        font.setPointSize(10)
         self.label_17.setFont(font)
         self.label_17.setObjectName("label_17")
         self.verticalLayout_5.addWidget(self.label_17)
@@ -1504,7 +1708,7 @@ class Ui_ProfileManager(object):
         self.label_16.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
         font.setFamily("Ubuntu")
-        font.setPointSize(12)
+        font.setPointSize(10)
         self.label_16.setFont(font)
         self.label_16.setObjectName("label_16")
         self.verticalLayout_5.addWidget(self.label_16)
@@ -1516,7 +1720,7 @@ class Ui_ProfileManager(object):
         self.label_15.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
         font.setFamily("Ubuntu")
-        font.setPointSize(12)
+        font.setPointSize(10)
         self.label_15.setFont(font)
         self.label_15.setObjectName("label_15")
         self.verticalLayout_5.addWidget(self.label_15)
@@ -1528,7 +1732,7 @@ class Ui_ProfileManager(object):
         self.label_13.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
         font.setFamily("Ubuntu")
-        font.setPointSize(12)
+        font.setPointSize(10)
         self.label_13.setFont(font)
         self.label_13.setObjectName("label_13")
         self.verticalLayout_5.addWidget(self.label_13)
@@ -1543,6 +1747,10 @@ class Ui_ProfileManager(object):
         self.number.setSizePolicy(sizePolicy)
         self.number.setStyleSheet("height: 20px;")
         self.number.setObjectName("number")
+        font = QtGui.QFont()
+        font.setFamily("Ubuntu")
+        font.setPointSize(10)
+        self.number.setFont(font)
         self.verticalLayout_4.addWidget(self.number)
         self.owner = QtWidgets.QLineEdit(ProfileManager)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
@@ -1552,6 +1760,10 @@ class Ui_ProfileManager(object):
         self.owner.setSizePolicy(sizePolicy)
         self.owner.setStyleSheet("height: 20px;")
         self.owner.setObjectName("owner")
+        font = QtGui.QFont()
+        font.setFamily("Ubuntu")
+        font.setPointSize(10)
+        self.owner.setFont(font)
         self.verticalLayout_4.addWidget(self.owner)
         self.horizontalLayout_3 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_3.setContentsMargins(0, 0, 0, 0)
@@ -1605,12 +1817,13 @@ class Ui_ProfileManager(object):
         self.lineEdit_2.setSizePolicy(sizePolicy)
         self.lineEdit_2.setStyleSheet("height: 20px;")
         self.lineEdit_2.setObjectName("lineEdit_2")
+        self.lineEdit_2.setEchoMode(QtWidgets.QLineEdit.Password)
         self.verticalLayout_4.addWidget(self.lineEdit_2)
         self.horizontalLayout_2.addLayout(self.verticalLayout_4)
         self.verticalLayout_2.addLayout(self.horizontalLayout_2)
         self.horizontalLayout_4 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_4.setObjectName("horizontalLayout_4")
-        self.Reset = QtWidgets.QPushButton(ProfileManager)
+        self.Reset = QtWidgets.QPushButton(ProfileManager, default=False, autoDefault=False)
         self.Reset.setStyleSheet("")
         self.Reset.setObjectName("Reset")
         self.horizontalLayout_4.addWidget(self.Reset)
@@ -1621,7 +1834,7 @@ class Ui_ProfileManager(object):
         self.Save = QtWidgets.QPushButton(ProfileManager)
         self.Save.setObjectName("Save")
         self.horizontalLayout_5.addWidget(self.Save)
-        self.Cancel = QtWidgets.QPushButton(ProfileManager)
+        self.Cancel = QtWidgets.QPushButton(ProfileManager, default=False, autoDefault=False)
         self.Cancel.setObjectName("Cancel")
         self.horizontalLayout_5.addWidget(self.Cancel)
         self.horizontalLayout_4.addLayout(self.horizontalLayout_5)
@@ -1671,7 +1884,7 @@ class Ui_ProfileManager(object):
         self.year.setItemText(8, _translate("ProfileManager", "2028"))
         self.year.setItemText(9, _translate("ProfileManager", "2029"))
         self.year.setItemText(10, _translate("ProfileManager", "2030"))
-        self.Reset.setText(_translate("ProfileManager", "   Reset   "))
+        self.Reset.setText(_translate("ProfileManager", "   Reset all profiles and tasks   "))
         self.Reset.clicked.connect(self.resetSettings)
         self.Save.setText(_translate("ProfileManager", "   Save   "))
         self.Save.setEnabled(False)
@@ -1761,35 +1974,48 @@ class Ui_ProfileManager(object):
             json.loads(f)
         except Exception as e:
             f = open("save.json", "w", encoding='utf-8')
-            json.dump({'Profiles': []}, f, ensure_ascii=False)
+            json.dump({'Profiles': [], 'Tasks': []}, f, ensure_ascii=False)
             f.close()
             print(e)
-        err = False
-        #Check fields
         try:
             write_file = open("save.json", "r+", encoding='utf-8')
             jsondata = json.loads(write_file.read())
-            jsondata["Profiles"].append(data)
-            write_file.close()
-            open('save.json', 'w', encoding='utf-8').close()
-            write_file = open("save.json", "r+", encoding='utf-8')
-            json.dump(jsondata, write_file, indent=4, ensure_ascii=False)
-            self.profilename.clear()
-            self.firstname.clear()
-            self.lastname.clear()
-            self.email.clear()
-            self.telephone.clear()
-            self.address.clear()
-            self.apartament.clear()
-            self.house.clear()
-            self.city.clear()
-            self.zipcode.clear()
-            self.number.clear()
-            self.owner.clear()
-            self.lineEdit_2.clear()
-            self.month.setCurrentIndex(0)
-            self.year.setCurrentIndex(0)
-            write_file.close()
+            err = False
+            if jsondata['Profiles'] != []:
+                for profile in jsondata['Profiles']:
+                    try:
+                        if profile['profilename'] == data['profilename']:
+                            err = True
+                    except:
+                        err = False
+            else:
+                err = False
+            if err == False:
+                jsondata['Profiles'].append(data)
+                write_file.close()
+                print(jsondata)
+                open('save.json', 'w', encoding='utf-8').close()
+                write_file = open("save.json", "r+", encoding='utf-8')
+                json.dump(jsondata, write_file, indent=4, ensure_ascii=False)
+                self.profilename.clear()
+                self.firstname.clear()
+                self.lastname.clear()
+                self.email.clear()
+                self.telephone.clear()
+                self.address.clear()
+                self.apartament.clear()
+                self.house.clear()
+                self.city.clear()
+                self.zipcode.clear()
+                self.number.clear()
+                self.owner.clear()
+                self.lineEdit_2.clear()
+                self.month.setCurrentIndex(0)
+                self.year.setCurrentIndex(0)
+                write_file.close()
+            else:
+                print('sasiska')
+                self.profilename.clear()
         except Exception as e:
             print(e)
 if __name__ == "__main__":
@@ -1812,7 +2038,9 @@ if __name__ == "__main__":
     DropBot = QtWidgets.QMainWindow()
     ui = Ui_DropBot()
     ui.setupUi(DropBot)
+    DropBot.setWindowIcon(QtGui.QIcon('icon2.png'))
     dark()
+    QtGui.QFontDatabase.addApplicationFont("Ubuntu-R.ttf")
     log = nowINFOMAIN() + ' DropBot initializing.'
     ui.LogOutput.append(log)
     ui.actionDark.triggered.connect(dark)
