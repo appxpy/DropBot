@@ -971,6 +971,7 @@ class Ui_DropBot(object):
                     self.ProfileComboBox.addItems(profilenames)
                     log = nowINFOMAIN() + ' Profiles succesefully updated!'
                     self.LogOutput.append(log)
+                    self.rldTasks()
                 except:
                     open('save.json', 'w', encoding='utf-8').close()
                     file = open("save.json", "r+", encoding='utf-8')
@@ -994,6 +995,8 @@ class Ui_DropBot(object):
         dialog.show()
     def RemoveTask(self, ID):
         LocalVars = locals()
+        log = nowINFOMAIN() + ' Removing task with ID ' + ID + ' from task manager' 
+        self.LogOutput.append(log)
         LAYOUT_NAME = 'THREAD' + ID
         def deleteItems(layout):
             if layout is not None:
@@ -1011,17 +1014,17 @@ class Ui_DropBot(object):
             file.close()
         except:
             self.loadSave()
-        it = 0
+        iteration = 0
         for task in jsondata['Tasks']:
-            print(it)
+            print(iteration)
             if task['taskID'] == ID:
                 print(task)
-                del jsondata['Tasks'][it]
+                del jsondata['Tasks'][iteration]
                 print(jsondata)
                 file = open('save.json', 'w')
                 json.dump(jsondata, file, indent=4, ensure_ascii=False)
             else:
-                it += 1
+                iteration += 1
     def unfill(self):
         def deleteItems(layout):
             if layout is not None:
@@ -1101,6 +1104,8 @@ class Ui_DropBot(object):
                                         else:
                                             self.rldTasks()
     def rldTasks(self):
+        log = nowINFOMAIN() + ' Tasks initialization started'
+        self.LogOutput.append(log)
         LocalVars = locals()
         self.unfill()
         try:
@@ -1131,8 +1136,8 @@ class Ui_DropBot(object):
                 statusValue = str(dict['status'])
                 #REMOVE TASK BUTTON
                 REMOVE = 'REMOVE' + str(dict['taskID'])
-                print('Data collected,' , ID)
-                print(PROXY, SIZE, STATUS, REMOVE)
+                log = nowINFOMAIN() + ' Task with ID ' + IDint + ' initialized' 
+                self.LogOutput.append(log)
                 self.LocalVars[THREAD] = QtWidgets.QHBoxLayout()
                 self.LocalVars[THREAD].setObjectName(THREAD)
                 self.LocalVars[ID] = QtWidgets.QLabel(self.scrollAreaWidgetContents)
