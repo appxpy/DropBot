@@ -2270,17 +2270,18 @@ class Ui_authform(object):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.AuthorizeFormTab), _translate("authform", "Auth"))
         self.label_4.setText(_translate("authform", "   API Server   "))
         self.label_5.setText(_translate("authform", "   DropBot Server   "))
-        self.label_6.setText(_translate("authform", "   Google API   "))
+        self.label_6.setText(_translate("authform", "   API Google   "))
         self.server2Status.setText(_translate("authform", "Loading.."))
         self.server1Status.setText(_translate("authform", "Loading.."))
         self.server3Status.setText(_translate("authform", "Loading.."))
         self.pushButton.setText(_translate("authform", "Update"))
+        self.pushButton.clicked.connect(self.pushButton.hide)
         self.pushButton.clicked.connect(self.checkConnection)
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.ServerStatusTab), _translate("authform", "Servers status"))
     def Buttonexit(self):
         sys.exit()
     def checkConnection(self):
-        self.pushButton.setEnabled(False)
+        app.processEvents()
         time.sleep(0.1)
         url1 = 'http://api.dropbot.site'
         url2 = 'http://dropbot.site'
@@ -2339,7 +2340,7 @@ class Ui_authform(object):
             self.label_7.setStyleSheet("color: green;")
             self.label_7.setText('   ONLINE   ')
             self.submit.setEnabled(True)
-        self.pushButton.setEnabled(True)
+        self.pushButton.show()
     def authSuccess(self):
         def dark():
             import qdarkstyle
