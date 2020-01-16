@@ -2280,6 +2280,8 @@ class Ui_authform(object):
     def Buttonexit(self):
         sys.exit()
     def checkConnection(self):
+        self.pushButton.setEnabled(False)
+        time.sleep(0.1)
         url1 = 'http://api.dropbot.site'
         url2 = 'http://dropbot.site'
         url3 = 'http://sheets.google.com'
@@ -2337,6 +2339,7 @@ class Ui_authform(object):
             self.label_7.setStyleSheet("color: green;")
             self.label_7.setText('   ONLINE   ')
             self.submit.setEnabled(True)
+        self.pushButton.setEnabled(True)
     def authSuccess(self):
         def dark():
             import qdarkstyle
