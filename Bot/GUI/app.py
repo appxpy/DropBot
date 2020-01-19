@@ -32,13 +32,14 @@ def nowERRORMAIN():
     return result
 
 class Ui_DropBot(object):
-    SizeRangeInit = np.arange(3, 15, 0.5)
+    SizeRangeInit = np.arange(3.5, 15, 0.5)
     SizeRange = []
     for item in SizeRangeInit:
         item = str(format(item, '.10g')) + ' US'
         SizeRange.append(item)
     LocalVars = locals()
     def setupUi(self, DropBot):
+        global LogOutput
         DropBot.setObjectName("DropBot")
         DropBot.resize(1300, 793)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
@@ -887,6 +888,7 @@ class Ui_DropBot(object):
         self.ProxyConfigLabel.setText(_translate("DropBot", "Proxy config:"))
         self.EditProfile.setText(_translate("DropBot", "   Edit   "))
         self.EditSize.setText(_translate("DropBot", "   Help   "))
+        self.EditSize.clicked.connect(self.SizeHelp)
         self.EditProfile.clicked.connect(self.profileedit)
         self.ProxyConfigEdit.setText(_translate("DropBot", "   Edit   "))
         self.CreateTaskButton.setText(_translate("DropBot", "ADD TASK"))
@@ -993,6 +995,21 @@ class Ui_DropBot(object):
         dialog.setWindowIcon(QtGui.QIcon('icon2.png'))
         dialog.exec_()
         dialog.show()
+    def authDialog(self):
+        global authform
+        authform = QtWidgets.QDialog()
+        authform.ui = Ui_authform()
+        authform.ui.setupUi(authform)
+        authform.ui.checkConnection()
+        authform.setWindowIcon(QtGui.QIcon('icon2.png'))
+        authform.show()
+    def SizeHelp(self):
+        sizeHelp = QtWidgets.QDialog()
+        sizeHelp.ui = Ui_SizeChart()
+        sizeHelp.ui.setupUi(sizeHelp)
+        sizeHelp.setWindowIcon(QtGui.QIcon('icon2.png'))
+        sizeHelp.exec_()
+        sizeHelp.show()
     def RemoveTask(self, ID):
         LocalVars = locals()
         log = nowINFOMAIN() + ' Removing task with ID ' + ID + ' from task manager' 
@@ -1104,8 +1121,6 @@ class Ui_DropBot(object):
                                         else:
                                             self.rldTasks()
     def rldTasks(self):
-        log = nowINFOMAIN() + ' Tasks initialization started'
-        self.LogOutput.append(log)
         LocalVars = locals()
         self.unfill()
         try:
@@ -1136,8 +1151,6 @@ class Ui_DropBot(object):
                 statusValue = str(dict['status'])
                 #REMOVE TASK BUTTON
                 REMOVE = 'REMOVE' + str(dict['taskID'])
-                log = nowINFOMAIN() + ' Task with ID ' + IDint + ' initialized' 
-                self.LogOutput.append(log)
                 self.LocalVars[THREAD] = QtWidgets.QHBoxLayout()
                 self.LocalVars[THREAD].setObjectName(THREAD)
                 self.LocalVars[ID] = QtWidgets.QLabel(self.scrollAreaWidgetContents)
@@ -2081,6 +2094,9 @@ class Ui_ProfileManager(object):
                 self.profilename.clear()
         except Exception as e:
             print(e)
+
+
+
 class Ui_authform(object):
     def setupUi(self, authform):
         authform.setObjectName("authform")
@@ -2144,6 +2160,7 @@ class Ui_authform(object):
         self.login.setContextMenuPolicy(QtCore.Qt.NoContextMenu)
         self.login.setStyleSheet("width: 100px;")
         self.login.setObjectName("login")
+        self.login.textEdited.connect(self.checkText)
         self.gridLayout.addWidget(self.login, 0, 1, 1, 1)
         self.label_2 = QtWidgets.QLabel(self.AuthorizeFormTab)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
@@ -2164,6 +2181,7 @@ class Ui_authform(object):
         self.password.setStyleSheet("width: 100px;")
         self.password.setEchoMode(QtWidgets.QLineEdit.Password)
         self.password.setObjectName("password")
+        self.password.textEdited.connect(self.checkText)
         self.gridLayout.addWidget(self.password, 2, 1, 1, 1)
         spacerItem1 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         self.gridLayout.addItem(spacerItem1, 1, 1, 1, 1)
@@ -2259,12 +2277,14 @@ class Ui_authform(object):
 
     def retranslateUi(self, authform):
         _translate = QtCore.QCoreApplication.translate
-        authform.setWindowTitle(_translate("authform", "DropBot Authorizing."))
+        authform.setWindowTitle(_translate("authform", "DropBot Authorizing"))
         self.label.setText(_translate("authform", "Please authorize to DropBot.site"))
         self.label_7.setText(_translate("authform", "   Loading...   "))
         self.label_3.setText(_translate("authform", "Password"))
         self.label_2.setText(_translate("authform", "Login"))
         self.submit.setText(_translate("authform", "Submit"))
+        self.submit.setEnabled(False)
+        self.submit.clicked.connect(self.authClient)
         self.cancel.setText(_translate("authform", "Cancel"))
         self.cancel.clicked.connect(self.Buttonexit)
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.AuthorizeFormTab), _translate("authform", "Auth"))
@@ -2278,14 +2298,58 @@ class Ui_authform(object):
         self.pushButton.clicked.connect(self.pushButton.hide)
         self.pushButton.clicked.connect(self.checkConnection)
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.ServerStatusTab), _translate("authform", "Servers status"))
+    def checkText(self):
+        loginField = self.login.text()
+        passwordField = self.password.text()
+        if loginField != '' and passwordField != '':
+            self.submit.setEnabled(True)
+        else:
+            self.submit.setEnabled(False)
     def Buttonexit(self):
         sys.exit()
+    def authClient(self):
+        self.label.setStyleSheet("color: rgb(255, 185, 21);")
+        self.label.setText('Loading...') 
+        app.processEvents()
+        apiUrl = 'http://api.dropbot.site/'
+        loginArg = self.login.text()
+        passwordArg = self.password.text()
+        finalUrl = apiUrl + '?' + 'login=' + loginArg + '&' + 'password=' + passwordArg
+        req = requests.get(finalUrl)
+        data = eval(req.text)
+        if data['status'] == 200:
+            global name
+            name = str(data['name'])
+            message = 'Welcome back, ' + name
+            self.label.setText(message)
+            self.label.setStyleSheet('color: green;')
+            app.processEvents()
+            time.sleep(0.5)
+            self.authSuccess()
+        else:
+            self.login.clear()
+            self.password.clear()
+            self.label.setText('Incorrect login or password')
+            self.label.setStyleSheet('color: red;')
+            self.submit.setEnabled(False)
+            app.processEvents()
+            self.checkConnection()
+            time.sleep(5)
+            self.label.setText('Please authorize to DropBot.site')
+            self.label.setStyleSheet('')
+
     def checkConnection(self):
         app.processEvents()
-        time.sleep(0.1)
-        url1 = 'http://api.dropbot.site'
-        url2 = 'http://dropbot.site'
-        url3 = 'http://sheets.google.com'
+        self.server1Status.setStyleSheet("color: rgb(255, 185, 21);")
+        self.server2Status.setStyleSheet("color: rgb(255, 185, 21);")
+        self.server3Status.setStyleSheet("color: rgb(255, 185, 21);")
+        self.server1Status.setText('Loading...') 
+        self.server2Status.setText('Loading...')   
+        self.server3Status.setText('Loading...')
+        app.processEvents()
+        url1 = 'http://api.dropbot.site/auth/index.html'
+        url2 = 'https://server224.hosting.reg.ru/'
+        url3 = 'https://sheets.google.com'
         err = 0
         try:
             req = requests.get(url1)
@@ -2293,98 +2357,750 @@ class Ui_authform(object):
             err = 1
             self.server1Status.setStyleSheet("color: red;")
             self.server1Status.setText('OFFLINE')
+            app.processEvents()
         else:
-            if req.status_code != 200:
+            if req.status_code != requests.codes.ok:
                 err = 1
                 self.server1Status.setStyleSheet("color: red;")
                 errtext = 'OFFLINE (CODE ' + str(req.status_code) + ')'
                 self.server1Status.setText(errtext)  
+                app.processEvents()
             else: 
                 self.server1Status.setStyleSheet("color: green;")
                 self.server1Status.setText('ONLINE')
+                app.processEvents()
         try:
             req = requests.get(url2)
         except:
             err = 1
             self.server2Status.setStyleSheet("color: red;")
             self.server2Status.setText('OFFLINE')     
+            app.processEvents()
         else:
-            if req.status_code != 200:
+            if req.status_code != requests.codes.ok:
                 err = 1
                 self.server2Status.setStyleSheet("color: red;")
                 errtext = 'OFFLINE (CODE ' + str(req.status_code) + ')'
                 self.server2Status.setText(errtext)
+                app.processEvents()
             else:
                 self.server2Status.setStyleSheet("color: green;")
-                self.server2Status.setText('ONLINE')              
+                self.server2Status.setText('ONLINE') 
+                app.processEvents()            
         try:
             req = requests.get(url3)
         except:
             err = 1
             self.server3Status.setStyleSheet("color: red;")
             self.server3Status.setText('OFFLINE')
+            app.processEvents()
         else:
-            if req.status_code != 200:
+            if req.status_code != requests.codes.ok:
                 err = 1
                 self.server3Status.setStyleSheet("color: red;")
                 errtext = 'OFFLINE (CODE ' + str(req.status_code) + ')'
                 self.server3Status.setText(errtext)
+                app.processEvents()
             else:
                 self.server3Status.setStyleSheet("color: green;")
                 self.server3Status.setText('ONLINE')
         if err == 1:
             self.label_7.setStyleSheet("color: red;")
             self.label_7.setText('   OFFLINE   ')
-            self.submit.setEnabled(False)
+            app.processEvents()
         else:
             self.label_7.setStyleSheet("color: green;")
             self.label_7.setText('   ONLINE   ')
-            self.submit.setEnabled(True)
+            app.processEvents()
         self.pushButton.show()
     def authSuccess(self):
-        def dark():
-            import qdarkstyle
-            app.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
-            log = nowINFOMAIN() + ' Switched to dark theme.'
-            ui.LogOutput.append(log)
-        def light():
-            from PyQt5.QtCore import QFile, QTextStream
-            import breeze_resources
-            file = QFile(":/light.qss")
-            file.open(QFile.ReadOnly | QFile.Text)
-            stream = QTextStream(file)
-            app.setStyleSheet(stream.readAll())
-            log = nowINFOMAIN() +  'Switched to light theme.'
-            ui.LogOutput.append(log)
-        import sys
-        app = QtWidgets.QApplication(sys.argv)
-        DropBot = QtWidgets.QMainWindow()
-        ui = Ui_DropBot()
-        ui.setupUi(DropBot)
-        DropBot.setWindowIcon(QtGui.QIcon('icon2.png'))
-        dark()
-        QtGui.QFontDatabase.addApplicationFont("Ubuntu-R.ttf")
-        log = nowINFOMAIN() + ' Auth return code: SUCCESS'
-        ui.LogOutput.append(log)
-        log = nowINFOMAIN() + ' DropBot initializing.'
-        ui.LogOutput.append(log)
-        ui.actionDark.triggered.connect(dark)
-        ui.actionLight.triggered.connect(light)
+        authform.close()
         DropBot.show()
-        log = nowINFOMAIN() + ' DropBot succesefully initialized!'
+        log = nowINFOMAIN() + ' Auth for ' + name + ' was succesefull' 
         ui.LogOutput.append(log)
-        ui.loadSave()
-        sys.exit(app.exec_())
+class Ui_SizeChart(object):
+    def setupUi(self, SizeChart):
+        SizeChart.setObjectName("SizeChart")
+        SizeChart.resize(823, 685)
+        SizeChart.setMinimumSize(QtCore.QSize(823, 685))
+        SizeChart.setMaximumSize(QtCore.QSize(823, 685))
+        self.verticalLayout = QtWidgets.QVBoxLayout(SizeChart)
+        self.verticalLayout.setObjectName("verticalLayout")
+        self.label = QtWidgets.QLabel(SizeChart)
+        font = QtGui.QFont()
+        font.setFamily("Ubuntu")
+        font.setPointSize(28)
+        self.label.setFont(font)
+        self.label.setAlignment(QtCore.Qt.AlignCenter)
+        self.label.setObjectName("label")
+        self.verticalLayout.addWidget(self.label)
+        self.textBrowser = QtWidgets.QTextBrowser(SizeChart)
+        font = QtGui.QFont()
+        font.setFamily("Ubuntu")
+        font.setPointSize(12)
+        self.textBrowser.setFont(font)
+        self.textBrowser.setContextMenuPolicy(QtCore.Qt.NoContextMenu)
+        self.textBrowser.setLayoutDirection(QtCore.Qt.LeftToRight)
+        self.textBrowser.setStyleSheet("")
+        self.textBrowser.setFrameShape(QtWidgets.QFrame.NoFrame)
+        self.textBrowser.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContents)
+        self.textBrowser.setTextInteractionFlags(QtCore.Qt.NoTextInteraction)
+        self.textBrowser.setObjectName("textBrowser")
+        self.verticalLayout.addWidget(self.textBrowser)
+        self.horizontalLayout = QtWidgets.QHBoxLayout()
+        self.horizontalLayout.setObjectName("horizontalLayout")
+        spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.horizontalLayout.addItem(spacerItem)
+        spacerItem1 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.horizontalLayout.addItem(spacerItem1)
+        spacerItem2 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.horizontalLayout.addItem(spacerItem2)
+        self.pushButton = QtWidgets.QPushButton(SizeChart)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.pushButton.sizePolicy().hasHeightForWidth())
+        self.pushButton.setSizePolicy(sizePolicy)
+        self.pushButton.setObjectName("pushButton")
+        self.horizontalLayout.addWidget(self.pushButton)
+        self.verticalLayout.addLayout(self.horizontalLayout)
 
+        self.retranslateUi(SizeChart)
+        QtCore.QMetaObject.connectSlotsByName(SizeChart)
+
+    def retranslateUi(self, SizeChart):
+        _translate = QtCore.QCoreApplication.translate
+        SizeChart.setWindowTitle(_translate("SizeChart", "Dialog"))
+        self.label.setText(_translate("SizeChart", "International shoe convertion chart"))
+        self.textBrowser.setHtml(_translate("SizeChart", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+"p, li { white-space: pre-wrap; }\n"
+"</style></head><body style=\" font-family:\'Ubuntu\'; font-size:12pt; font-weight:400; font-style:normal;\">\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:\'Ubuntu\';\"><br /></p>\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt;\">Adult Mens and Womens Shoe Size Conversion Table<br /></span><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#ff6600;\">M/W indicates Men\'s or Women\'s Sizes. Other systems are for either gender.</span></p>\n"
+"<table border=\"2\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px;\" align=\"center\" cellspacing=\"0\" cellpadding=\"4\">\n"
+"<tr>\n"
+"<td colspan=\"2\" bgcolor=\"#ffcc66\">\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; font-weight:600; color:#0000ff; background-color:#ffcc66;\">System</span></p></td>\n"
+"<td colspan=\"16\" bgcolor=\"#ffcc66\">\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; font-weight:600; color:#0000ff; background-color:#ffcc66;\">Sizes</span></p></td>\n"
+"<td colspan=\"2\" bgcolor=\"#ffcc66\">\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; font-weight:600; color:#0000ff; background-color:#ffcc66;\">System</span></p></td></tr>\n"
+"<tr>\n"
+"<td colspan=\"2\" bgcolor=\"#ffffcc\">\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; font-weight:600; color:#000000; background-color:#ffffcc;\">Europe</span></p></td>\n"
+"<td bgcolor=\"#ffffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffcc;\">35</span></p></td>\n"
+"<td bgcolor=\"#ffffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffcc;\">35½</span></p></td>\n"
+"<td bgcolor=\"#ffffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffcc;\">36</span></p></td>\n"
+"<td bgcolor=\"#ffffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffcc;\">37</span></p></td>\n"
+"<td bgcolor=\"#ffffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffcc;\">37½</span></p></td>\n"
+"<td bgcolor=\"#ffffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffcc;\">38</span></p></td>\n"
+"<td bgcolor=\"#ffffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffcc;\">38½</span></p></td>\n"
+"<td bgcolor=\"#ffffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffcc;\">39</span></p></td>\n"
+"<td bgcolor=\"#ffffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffcc;\">40</span></p></td>\n"
+"<td bgcolor=\"#ffffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffcc;\">41</span></p></td>\n"
+"<td bgcolor=\"#ffffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffcc;\">42</span></p></td>\n"
+"<td bgcolor=\"#ffffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffcc;\">43</span></p></td>\n"
+"<td bgcolor=\"#ffffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffcc;\">44</span></p></td>\n"
+"<td bgcolor=\"#ffffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffcc;\">45</span></p></td>\n"
+"<td bgcolor=\"#ffffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffcc;\">46½</span></p></td>\n"
+"<td bgcolor=\"#ffffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffcc;\">48½</span></p></td>\n"
+"<td colspan=\"2\" bgcolor=\"#ffffcc\">\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; font-weight:600; color:#000000; background-color:#ffffcc;\">Europe</span></p></td></tr>\n"
+"<tr>\n"
+"<td colspan=\"2\" bgcolor=\"#ccccff\">\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; font-weight:600; color:#000000; background-color:#ccccff;\">Mexico</span></p></td>\n"
+"<td bgcolor=\"#ccccff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ccccff;\"> </span></p></td>\n"
+"<td bgcolor=\"#ccccff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ccccff;\"> </span></p></td>\n"
+"<td bgcolor=\"#ccccff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ccccff;\"> </span></p></td>\n"
+"<td bgcolor=\"#ccccff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ccccff;\"> </span></p></td>\n"
+"<td bgcolor=\"#ccccff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ccccff;\"> </span></p></td>\n"
+"<td bgcolor=\"#ccccff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ccccff;\">4.5</span></p></td>\n"
+"<td bgcolor=\"#ccccff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ccccff;\">5</span></p></td>\n"
+"<td bgcolor=\"#ccccff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ccccff;\">5.5</span></p></td>\n"
+"<td bgcolor=\"#ccccff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ccccff;\">6</span></p></td>\n"
+"<td bgcolor=\"#ccccff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ccccff;\">6.5</span></p></td>\n"
+"<td bgcolor=\"#ccccff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ccccff;\">7</span></p></td>\n"
+"<td bgcolor=\"#ccccff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ccccff;\">7.5</span></p></td>\n"
+"<td bgcolor=\"#ccccff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ccccff;\">9</span></p></td>\n"
+"<td bgcolor=\"#ccccff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ccccff;\">10</span></p></td>\n"
+"<td bgcolor=\"#ccccff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ccccff;\">11</span></p></td>\n"
+"<td bgcolor=\"#ccccff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ccccff;\">12.5</span></p></td>\n"
+"<td colspan=\"2\" bgcolor=\"#ccccff\">\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; font-weight:600; color:#000000; background-color:#ccccff;\">Mexico</span></p></td></tr>\n"
+"<tr>\n"
+"<td rowspan=\"2\" bgcolor=\"#ffccff\">\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; font-weight:600; color:#000000; background-color:#ffccff;\">Japan</span></p></td>\n"
+"<td bgcolor=\"#ffccff\">\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; font-weight:600; color:#000000; background-color:#ffccff;\">M</span></p></td>\n"
+"<td bgcolor=\"#ffccff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffccff;\">21.5</span></p></td>\n"
+"<td bgcolor=\"#ffccff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffccff;\">22</span></p></td>\n"
+"<td bgcolor=\"#ffccff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffccff;\">22.5</span></p></td>\n"
+"<td bgcolor=\"#ffccff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffccff;\">23</span></p></td>\n"
+"<td bgcolor=\"#ffccff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffccff;\">23.5</span></p></td>\n"
+"<td bgcolor=\"#ffccff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffccff;\">24</span></p></td>\n"
+"<td bgcolor=\"#ffccff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffccff;\">24.5</span></p></td>\n"
+"<td bgcolor=\"#ffccff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffccff;\">25</span></p></td>\n"
+"<td bgcolor=\"#ffccff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffccff;\">25.5</span></p></td>\n"
+"<td bgcolor=\"#ffccff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffccff;\">26</span></p></td>\n"
+"<td bgcolor=\"#ffccff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffccff;\">26.5</span></p></td>\n"
+"<td bgcolor=\"#ffccff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffccff;\">27.5</span></p></td>\n"
+"<td bgcolor=\"#ffccff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffccff;\">28.5</span></p></td>\n"
+"<td bgcolor=\"#ffccff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffccff;\">29.5</span></p></td>\n"
+"<td bgcolor=\"#ffccff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffccff;\">30.5</span></p></td>\n"
+"<td bgcolor=\"#ffccff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffccff;\">31.5</span></p></td>\n"
+"<td bgcolor=\"#ffccff\">\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; font-weight:600; color:#000000; background-color:#ffccff;\">Japan</span></p></td>\n"
+"<td bgcolor=\"#ffccff\">\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; font-weight:600; color:#000000; background-color:#ffccff;\">M</span></p></td></tr>\n"
+"<tr>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; font-weight:600; color:#000000; background-color:#ffffff;\">W</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">21</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">21.5</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">22</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">22.5</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">23</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">23.5</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">24</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">24.5</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">25</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">25.5</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">26</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">27</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">28</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">29</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">30</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">31</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; font-weight:600; color:#000000; background-color:#ffffff;\">Japan</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; font-weight:600; color:#000000; background-color:#ffffff;\">W</span></p></td></tr>\n"
+"<tr>\n"
+"<td rowspan=\"2\" bgcolor=\"#ffcc99\">\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; font-weight:600; color:#000000; background-color:#ffcc99;\">U.K.</span></p></td>\n"
+"<td bgcolor=\"#ffcc99\">\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; font-weight:600; color:#000000; background-color:#ffcc99;\">M</span></p></td>\n"
+"<td bgcolor=\"#ffcc99\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffcc99;\">3</span></p></td>\n"
+"<td bgcolor=\"#ffcc99\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffcc99;\">3½</span></p></td>\n"
+"<td bgcolor=\"#ffcc99\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffcc99;\">4</span></p></td>\n"
+"<td bgcolor=\"#ffcc99\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffcc99;\">4½</span></p></td>\n"
+"<td bgcolor=\"#ffcc99\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffcc99;\">5</span></p></td>\n"
+"<td bgcolor=\"#ffcc99\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffcc99;\">5½</span></p></td>\n"
+"<td bgcolor=\"#ffcc99\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffcc99;\">6</span></p></td>\n"
+"<td bgcolor=\"#ffcc99\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffcc99;\">6½</span></p></td>\n"
+"<td bgcolor=\"#ffcc99\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffcc99;\">7</span></p></td>\n"
+"<td bgcolor=\"#ffcc99\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffcc99;\">7½</span></p></td>\n"
+"<td bgcolor=\"#ffcc99\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffcc99;\">8</span></p></td>\n"
+"<td bgcolor=\"#ffcc99\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffcc99;\">8½</span></p></td>\n"
+"<td bgcolor=\"#ffcc99\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffcc99;\">10</span></p></td>\n"
+"<td bgcolor=\"#ffcc99\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffcc99;\">11</span></p></td>\n"
+"<td bgcolor=\"#ffcc99\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffcc99;\">12</span></p></td>\n"
+"<td bgcolor=\"#ffcc99\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffcc99;\">13½</span></p></td>\n"
+"<td bgcolor=\"#ffcc99\">\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; font-weight:600; color:#000000; background-color:#ffcc99;\">U.K.</span></p></td>\n"
+"<td bgcolor=\"#ffcc99\">\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; font-weight:600; color:#000000; background-color:#ffcc99;\">M</span></p></td></tr>\n"
+"<tr>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; font-weight:600; color:#000000; background-color:#ffffff;\">W</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">2½</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">3</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">3½</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">4</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">4½</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">5</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">5½</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">6</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">6½</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">7</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">7½</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">8</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">9½</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">10½</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">11½</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">13</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; font-weight:600; color:#000000; background-color:#ffffff;\">U.K.</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; font-weight:600; color:#000000; background-color:#ffffff;\">W</span></p></td></tr>\n"
+"<tr>\n"
+"<td rowspan=\"2\" bgcolor=\"#ffffcc\">\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; font-weight:600; color:#000000; background-color:#ffffcc;\">Australia</span></p></td>\n"
+"<td bgcolor=\"#ffffcc\">\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; font-weight:600; color:#000000; background-color:#ffffcc;\">M</span></p></td>\n"
+"<td bgcolor=\"#ffffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffcc;\">3</span></p></td>\n"
+"<td bgcolor=\"#ffffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffcc;\">3½</span></p></td>\n"
+"<td bgcolor=\"#ffffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffcc;\">4</span></p></td>\n"
+"<td bgcolor=\"#ffffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffcc;\">4½</span></p></td>\n"
+"<td bgcolor=\"#ffffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffcc;\">5</span></p></td>\n"
+"<td bgcolor=\"#ffffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffcc;\">5½</span></p></td>\n"
+"<td bgcolor=\"#ffffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffcc;\">6</span></p></td>\n"
+"<td bgcolor=\"#ffffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffcc;\">6½</span></p></td>\n"
+"<td bgcolor=\"#ffffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffcc;\">7</span></p></td>\n"
+"<td bgcolor=\"#ffffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffcc;\">7½</span></p></td>\n"
+"<td bgcolor=\"#ffffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffcc;\">8</span></p></td>\n"
+"<td bgcolor=\"#ffffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffcc;\">8½</span></p></td>\n"
+"<td bgcolor=\"#ffffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffcc;\">10</span></p></td>\n"
+"<td bgcolor=\"#ffffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffcc;\">11</span></p></td>\n"
+"<td bgcolor=\"#ffffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffcc;\">12</span></p></td>\n"
+"<td bgcolor=\"#ffffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffcc;\">13½</span></p></td>\n"
+"<td bgcolor=\"#ffffcc\">\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; font-weight:600; color:#000000; background-color:#ffffcc;\">Australia</span></p></td>\n"
+"<td bgcolor=\"#ffffcc\">\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; font-weight:600; color:#000000; background-color:#ffffcc;\">M</span></p></td></tr>\n"
+"<tr>\n"
+"<td bgcolor=\"#cccccc\">\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; font-weight:600; color:#000000; background-color:#cccccc;\">W</span></p></td>\n"
+"<td bgcolor=\"#cccccc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#cccccc;\">3½</span></p></td>\n"
+"<td bgcolor=\"#cccccc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#cccccc;\">4</span></p></td>\n"
+"<td bgcolor=\"#cccccc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#cccccc;\">4½</span></p></td>\n"
+"<td bgcolor=\"#cccccc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#cccccc;\">5</span></p></td>\n"
+"<td bgcolor=\"#cccccc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#cccccc;\">5½</span></p></td>\n"
+"<td bgcolor=\"#cccccc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#cccccc;\">6</span></p></td>\n"
+"<td bgcolor=\"#cccccc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#cccccc;\">6½</span></p></td>\n"
+"<td bgcolor=\"#cccccc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#cccccc;\">7</span></p></td>\n"
+"<td bgcolor=\"#cccccc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#cccccc;\">7½</span></p></td>\n"
+"<td bgcolor=\"#cccccc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#cccccc;\">8</span></p></td>\n"
+"<td bgcolor=\"#cccccc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#cccccc;\">8½</span></p></td>\n"
+"<td bgcolor=\"#cccccc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#cccccc;\">9</span></p></td>\n"
+"<td bgcolor=\"#cccccc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#cccccc;\">10½</span></p></td>\n"
+"<td bgcolor=\"#cccccc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#cccccc;\">11½</span></p></td>\n"
+"<td bgcolor=\"#cccccc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#cccccc;\">12½</span></p></td>\n"
+"<td bgcolor=\"#cccccc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#cccccc;\">14</span></p></td>\n"
+"<td bgcolor=\"#cccccc\">\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; font-weight:600; color:#000000; background-color:#cccccc;\">Australia</span></p></td>\n"
+"<td bgcolor=\"#cccccc\">\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; font-weight:600; color:#000000; background-color:#cccccc;\">W</span></p></td></tr>\n"
+"<tr>\n"
+"<td rowspan=\"2\" bgcolor=\"#9999cc\">\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; font-weight:600; color:#000000; background-color:#9999cc;\">U.S. &amp; Canada</span></p></td>\n"
+"<td bgcolor=\"#9999cc\">\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; font-weight:600; color:#000000; background-color:#9999cc;\">M</span></p></td>\n"
+"<td bgcolor=\"#9999cc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#9999cc;\">3½</span></p></td>\n"
+"<td bgcolor=\"#9999cc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#9999cc;\">4</span></p></td>\n"
+"<td bgcolor=\"#9999cc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#9999cc;\">4½</span></p></td>\n"
+"<td bgcolor=\"#9999cc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#9999cc;\">5</span></p></td>\n"
+"<td bgcolor=\"#9999cc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#9999cc;\">5½</span></p></td>\n"
+"<td bgcolor=\"#9999cc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#9999cc;\">6</span></p></td>\n"
+"<td bgcolor=\"#9999cc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#9999cc;\">6½</span></p></td>\n"
+"<td bgcolor=\"#9999cc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#9999cc;\">7</span></p></td>\n"
+"<td bgcolor=\"#9999cc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#9999cc;\">7½</span></p></td>\n"
+"<td bgcolor=\"#9999cc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#9999cc;\">8</span></p></td>\n"
+"<td bgcolor=\"#9999cc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#9999cc;\">8½</span></p></td>\n"
+"<td bgcolor=\"#9999cc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#9999cc;\">9</span></p></td>\n"
+"<td bgcolor=\"#9999cc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#9999cc;\">10½</span></p></td>\n"
+"<td bgcolor=\"#9999cc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#9999cc;\">11½</span></p></td>\n"
+"<td bgcolor=\"#9999cc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#9999cc;\">12½</span></p></td>\n"
+"<td bgcolor=\"#9999cc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#9999cc;\">14</span></p></td>\n"
+"<td bgcolor=\"#9999cc\">\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; font-weight:600; color:#000000; background-color:#9999cc;\">U.S. &amp; Canada</span></p></td>\n"
+"<td bgcolor=\"#9999cc\">\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; font-weight:600; color:#000000; background-color:#9999cc;\">M</span></p></td></tr>\n"
+"<tr>\n"
+"<td bgcolor=\"#ccffcc\">\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; font-weight:600; color:#000000; background-color:#ccffcc;\">W</span></p></td>\n"
+"<td bgcolor=\"#ccffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ccffcc;\">5</span></p></td>\n"
+"<td bgcolor=\"#ccffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ccffcc;\">5½</span></p></td>\n"
+"<td bgcolor=\"#ccffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ccffcc;\">6</span></p></td>\n"
+"<td bgcolor=\"#ccffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ccffcc;\">6½</span></p></td>\n"
+"<td bgcolor=\"#ccffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ccffcc;\">7</span></p></td>\n"
+"<td bgcolor=\"#ccffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ccffcc;\">7½</span></p></td>\n"
+"<td bgcolor=\"#ccffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ccffcc;\">8</span></p></td>\n"
+"<td bgcolor=\"#ccffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ccffcc;\">8½</span></p></td>\n"
+"<td bgcolor=\"#ccffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ccffcc;\">9</span></p></td>\n"
+"<td bgcolor=\"#ccffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ccffcc;\">9½</span></p></td>\n"
+"<td bgcolor=\"#ccffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ccffcc;\">10</span></p></td>\n"
+"<td bgcolor=\"#ccffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ccffcc;\">10.5</span></p></td>\n"
+"<td bgcolor=\"#ccffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ccffcc;\">12</span></p></td>\n"
+"<td bgcolor=\"#ccffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ccffcc;\">13</span></p></td>\n"
+"<td bgcolor=\"#ccffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ccffcc;\">14</span></p></td>\n"
+"<td bgcolor=\"#ccffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ccffcc;\">15.5</span></p></td>\n"
+"<td bgcolor=\"#ccffcc\">\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; font-weight:600; color:#000000; background-color:#ccffcc;\">U.S. &amp; Canada</span></p></td>\n"
+"<td bgcolor=\"#ccffcc\">\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; font-weight:600; color:#000000; background-color:#ccffcc;\">W</span></p></td></tr>\n"
+"<tr>\n"
+"<td bgcolor=\"#ccff99\">\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; font-weight:600; color:#000000; background-color:#ccff99;\">Russia &amp; Ukraine *</span></p></td>\n"
+"<td bgcolor=\"#ccff99\">\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; font-weight:600; color:#000000; background-color:#ccff99;\">W</span></p></td>\n"
+"<td bgcolor=\"#ccff99\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ccff99;\">33½</span></p></td>\n"
+"<td bgcolor=\"#ccff99\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ccff99;\">34</span></p></td>\n"
+"<td bgcolor=\"#ccff99\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ccff99;\"> </span></p></td>\n"
+"<td bgcolor=\"#ccff99\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ccff99;\">35</span></p></td>\n"
+"<td bgcolor=\"#ccff99\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ccff99;\"> </span></p></td>\n"
+"<td bgcolor=\"#ccff99\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ccff99;\">36</span></p></td>\n"
+"<td bgcolor=\"#ccff99\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ccff99;\"> </span></p></td>\n"
+"<td bgcolor=\"#ccff99\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ccff99;\">37</span></p></td>\n"
+"<td bgcolor=\"#ccff99\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ccff99;\"> </span></p></td>\n"
+"<td bgcolor=\"#ccff99\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ccff99;\">38</span></p></td>\n"
+"<td bgcolor=\"#ccff99\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ccff99;\"> </span></p></td>\n"
+"<td bgcolor=\"#ccff99\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ccff99;\">39</span></p></td>\n"
+"<td bgcolor=\"#ccff99\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ccff99;\"> </span></p></td>\n"
+"<td bgcolor=\"#ccff99\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ccff99;\"> </span></p></td>\n"
+"<td bgcolor=\"#ccff99\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ccff99;\"> </span></p></td>\n"
+"<td bgcolor=\"#ccff99\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ccff99;\"> </span></p></td>\n"
+"<td bgcolor=\"#ccff99\">\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; font-weight:600; color:#000000; background-color:#ccff99;\">Russia &amp; Ukraine</span></p></td>\n"
+"<td bgcolor=\"#ccff99\">\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; font-weight:600; color:#000000; background-color:#ccff99;\">W</span></p></td></tr>\n"
+"<tr>\n"
+"<td colspan=\"2\" bgcolor=\"#ffffff\">\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; font-weight:600; color:#000000; background-color:#ffffff;\">Korea</span><span style=\" font-family:\'Ubuntu\'; font-size:8pt; font-weight:600; color:#000000;\"> (mm.)</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">228</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">231</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">235</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">238</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">241</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">245</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">248</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">251</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">254</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">257</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">260</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">267</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">273</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">279</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">286</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">292</span></p></td>\n"
+"<td colspan=\"2\" bgcolor=\"#ffffff\">\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; font-weight:600; color:#000000; background-color:#ffffff;\">Korea</span></p></td></tr>\n"
+"<tr>\n"
+"<td colspan=\"2\" bgcolor=\"#ffcccc\">\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; font-weight:600; color:#000000; background-color:#ffcccc;\">Inches</span></p></td>\n"
+"<td bgcolor=\"#ffcccc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffcccc;\">9</span></p></td>\n"
+"<td bgcolor=\"#ffcccc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffcccc;\">9</span><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000;\">1/8</span></p></td>\n"
+"<td bgcolor=\"#ffcccc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffcccc;\">9¼</span></p></td>\n"
+"<td bgcolor=\"#ffcccc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffcccc;\">9</span><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000;\">3/8</span></p></td>\n"
+"<td bgcolor=\"#ffcccc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffcccc;\">9½</span></p></td>\n"
+"<td bgcolor=\"#ffcccc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffcccc;\">9</span><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000;\">5/8</span></p></td>\n"
+"<td bgcolor=\"#ffcccc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffcccc;\">9¾</span></p></td>\n"
+"<td bgcolor=\"#ffcccc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffcccc;\">9</span><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000;\">7/8</span></p></td>\n"
+"<td bgcolor=\"#ffcccc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffcccc;\">10</span></p></td>\n"
+"<td bgcolor=\"#ffcccc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffcccc;\">10</span><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000;\">1/8</span></p></td>\n"
+"<td bgcolor=\"#ffcccc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffcccc;\">10¼</span></p></td>\n"
+"<td bgcolor=\"#ffcccc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffcccc;\">10½</span></p></td>\n"
+"<td bgcolor=\"#ffcccc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffcccc;\">10¾</span></p></td>\n"
+"<td bgcolor=\"#ffcccc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffcccc;\">11</span></p></td>\n"
+"<td bgcolor=\"#ffcccc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffcccc;\">11¼</span></p></td>\n"
+"<td bgcolor=\"#ffcccc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffcccc;\">11½</span></p></td>\n"
+"<td colspan=\"2\" bgcolor=\"#ffcccc\">\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; font-weight:600; color:#000000; background-color:#ffcccc;\">Inches</span></p></td></tr>\n"
+"<tr>\n"
+"<td colspan=\"2\" bgcolor=\"#ffffcc\">\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; font-weight:600; color:#000000; background-color:#ffffcc;\">Centimeters</span></p></td>\n"
+"<td bgcolor=\"#ffffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffcc;\">22.8</span></p></td>\n"
+"<td bgcolor=\"#ffffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffcc;\">23.1</span></p></td>\n"
+"<td bgcolor=\"#ffffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffcc;\">23.5</span></p></td>\n"
+"<td bgcolor=\"#ffffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffcc;\">23.8</span></p></td>\n"
+"<td bgcolor=\"#ffffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffcc;\">24.1</span></p></td>\n"
+"<td bgcolor=\"#ffffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffcc;\">24.5</span></p></td>\n"
+"<td bgcolor=\"#ffffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffcc;\">24.8</span></p></td>\n"
+"<td bgcolor=\"#ffffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffcc;\">25.1</span></p></td>\n"
+"<td bgcolor=\"#ffffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffcc;\">25.4</span></p></td>\n"
+"<td bgcolor=\"#ffffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffcc;\">25.7</span></p></td>\n"
+"<td bgcolor=\"#ffffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffcc;\">26</span></p></td>\n"
+"<td bgcolor=\"#ffffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffcc;\">26.7</span></p></td>\n"
+"<td bgcolor=\"#ffffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffcc;\">27.3</span></p></td>\n"
+"<td bgcolor=\"#ffffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffcc;\">27.9</span></p></td>\n"
+"<td bgcolor=\"#ffffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffcc;\">28.6</span></p></td>\n"
+"<td bgcolor=\"#ffffcc\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffcc;\">29.2</span></p></td>\n"
+"<td colspan=\"2\" bgcolor=\"#ffffcc\">\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; font-weight:600; color:#000000; background-color:#ffffcc;\">Centimeters</span></p></td></tr>\n"
+"<tr>\n"
+"<td colspan=\"2\" bgcolor=\"#ffffff\">\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; font-weight:600; color:#000000; background-color:#ffffff;\">Mondopoint</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">228</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">231</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">235</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">238</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">241</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">245</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">248</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">251</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">254</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">257</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">260</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">267</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">273</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">279</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">286</span></p></td>\n"
+"<td bgcolor=\"#ffffff\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; color:#000000; background-color:#ffffff;\">292</span></p></td>\n"
+"<td colspan=\"2\" bgcolor=\"#ffffff\">\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Ubuntu\'; font-size:8pt; font-weight:600; color:#000000; background-color:#ffffff;\">Mondopoint</span></p></td></tr></table></body></html>"))
+        self.pushButton.setText(_translate("SizeChart", "Cancel"))
+        self.pushButton.clicked.connect(SizeChart.accept)
 if __name__ == "__main__":
+    def dark():
+        import qdarkstyle
+        app.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
+        log = nowINFOMAIN() + ' Switched to dark theme.'
+        ui.LogOutput.append(log)
+    def light():
+        from PyQt5.QtCore import QFile, QTextStream
+        import breeze_resources
+        file = QFile(":/light.qss")
+        file.open(QFile.ReadOnly | QFile.Text)
+        stream = QTextStream(file)
+        app.setStyleSheet(stream.readAll())
+        log = nowINFOMAIN() +  'Switched to light theme.'
+        ui.LogOutput.append(log)
     import sys
     app = QtWidgets.QApplication(sys.argv)
-    import qdarkstyle
+    DropBot = QtWidgets.QMainWindow()
+    ui = Ui_DropBot()
+    ui.setupUi(DropBot)
+    DropBot.setWindowIcon(QtGui.QIcon('icon2.png'))
+    dark()
     QtGui.QFontDatabase.addApplicationFont("Ubuntu-R.ttf")
-    app.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
-    authform = QtWidgets.QDialog()
-    ui = Ui_authform()
-    ui.setupUi(authform)
-    ui.checkConnection()
-    authform.show()
+    log = nowINFOMAIN() + ' DropBot initializing.'
+    ui.LogOutput.append(log)
+    ui.actionDark.triggered.connect(dark)
+    ui.actionLight.triggered.connect(light)
+    DropBot.hide()
+    log = nowINFOMAIN() + ' DropBot succesefully initialized!'
+    ui.LogOutput.append(log)
+    ui.loadSave()
+    ui.authDialog()
     sys.exit(app.exec_())
