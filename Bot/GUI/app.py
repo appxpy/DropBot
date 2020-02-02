@@ -857,18 +857,20 @@ class Ui_DropBot(object):
             jsondata = json.loads(file, encoding = 'utf-8')
             jsondata['Tasks']
             jsondata['Profiles']
+            jsondata['ProxyConfigs']
         except:
             file = open("save.json", "r+", encoding='utf-8')
-            json.dump({'Profiles': [], 'Tasks' : []}, file)
+            json.dump({'Profiles': [], 'Tasks' : [], 'ProxyConfigs' : []}, file)
             try:
                 jsondata = json.loads(file.read(), encoding='utf-8')
                 jsondata['Tasks']
                 jsondata['Profiles']
+                jsondata['ProxyConfigs']
             except:
                 file.close()
                 open('save.json', 'w', encoding='utf-8').close()
                 file = open("save.json", "r+", encoding='utf-8')
-                json.dump({'Profiles': [], 'Tasks' : []}, file)
+                json.dump({'Profiles': [], 'Tasks' : [], 'ProxyConfigs' : []}, file)
                 file.close()
                 self.LogOutput.clear()
                 log = nowERRORMAIN() + ' Save file corrupted, creating new one...'
@@ -876,7 +878,7 @@ class Ui_DropBot(object):
                 self.loadSave()
             file.close()
         else:
-            if file == '{"Profiles": [], "Tasks" : []}':
+            if file == '{"Profiles": [], "Tasks" : [], "ProxyConfigs" : []}':
                 log = nowERRORMAIN() + ' No profiles founded, please, create a new one.'
                 self.LogOutput.append(log)
             else:
@@ -892,7 +894,7 @@ class Ui_DropBot(object):
                 except:
                     open('save.json', 'w', encoding='utf-8').close()
                     file = open("save.json", "r+", encoding='utf-8')
-                    json.dump({'Profiles': [], 'Tasks' : []}, file)
+                    json.dump({'Profiles': [], 'Tasks' : [], 'ProxyConfigs' : []}, file)
                     file.close()
                     self.LogOutput.clear()
                     log = nowERRORMAIN() + ' Save file corrupted, creating new one...'
@@ -930,6 +932,8 @@ class Ui_DropBot(object):
         proxyConfig.ui = Ui_ProxyConfig()
         proxyConfig.ui.setupUi(proxyConfig)
         proxyConfig.setWindowIcon(QtGui.QIcon('icon2.png'))
+        proxyConfig.ui.pushButton.clicked.connect(self.loadSave)
+        #proxyConfig.ui.pushButton.clicked.connect(proxyConfig.ui.loadsave)
         proxyConfig.exec_()
         proxyConfig.show()
     def RemoveTask(self, ID):
@@ -2013,7 +2017,6 @@ class Ui_ProfileManager(object):
                 self.year.setCurrentIndex(0)
                 write_file.close()
             else:
-                print('sasiska')
                 self.profilename.clear()
         except Exception as e:
             print(e)
@@ -2085,6 +2088,9 @@ class Ui_authform(object):
         self.login.setContextMenuPolicy(QtCore.Qt.NoContextMenu)
         self.login.setStyleSheet("width: 100px;")
         self.login.setObjectName("login")
+        regexp = QtCore.QRegExp('[a-zA-Z_@.]+')
+        validator = QtGui.QRegExpValidator(regexp)
+        self.login.setValidator(validator)
         self.login.textEdited.connect(self.checkText)
         self.gridLayout.addWidget(self.login, 0, 1, 1, 1)
         self.label_2 = QtWidgets.QLabel(self.AuthorizeFormTab)
@@ -2247,9 +2253,9 @@ class Ui_authform(object):
         print('Sending request...')
         req = requests.get(finalUrl)
         print('Request sended')
-        data = eval(req.text)
+        data = json.loads(req.text, encoding='utf-8')
         print('Reading response...')
-        if data['status'] == 200:
+        if req.status_code == 200:
             print('API returned code 200 - success')
             global name
             name = str(data['name'])
@@ -3323,6 +3329,7 @@ class Ui_ProxyConfig(object):
         self.ProxyInput.setUndoRedoEnabled(True)
         self.ProxyInput.setStyleSheet('color: white;')
         self.ProxyInput.setObjectName("ProxyInput")
+        self.ProxyInput.setAcceptRichText(False)
         self.verticalLayout_2.addWidget(self.ProxyInput)
         self.horizontalLayout.addLayout(self.verticalLayout_2)
         self.verticalLayout.addLayout(self.horizontalLayout)
@@ -3349,13 +3356,95 @@ class Ui_ProxyConfig(object):
         self.SeparatorComboBox.setItemText(3, _translate("ProxyConfig", "-"))
         self.ProxyTypeLabel.setText(_translate("ProxyConfig", "Proxy type"))
         self.ProxyTypeComboBox.setItemText(0, _translate("ProxyConfig", "PROXY:PORT"))
-        self.ProxyTypeComboBox.setItemText(1, _translate("ProxyConfig", "PROXY:PORT:LOGIN:PASS"))
+        self.ProxyTypeComboBox.setItemText(1, _translate("ProxyConfig", "USER:PASS@PROXY:PORT"))
         self.ProfileNameLabel.setText(_translate("ProxyConfig", "Profile name"))
+        self.ProfileName.textEdited.connect(self.checkText)
         self.pushButton.setText(_translate("ProxyConfig", "Add proxy profile"))
+        self.pushButton.setEnabled(False)
+        self.pushButton.clicked.connect(self.saveProxyProfile)
         self.label_2.setText(_translate("ProxyConfig", "Please enter your proxies here:"))
         self.cancel.setText(_translate("ProxyConfig", "   Cancel   "))
         self.cancel.clicked.connect(ProxyConfig.accept)
-
+    def checkText(self):
+        text = self.ProfileName.text()
+        if text != '' or None:
+            self.pushButton.setEnabled(True)
+        else:
+            self.pushButton.setEnabled(False)
+    def saveProxyProfile(self, ProxyConfig):
+        self.pushButton.setEnabled(False)
+        currentSeparator = self.SeparatorComboBox.currentText()
+        if currentSeparator == '(Default) String':
+            currentSeparator = '\n'
+        try:
+            profilename = self.ProfileName.text()
+            currentInputProxy = str(self.ProxyInput.toPlainText())
+            proxyType = self.ProxyTypeComboBox.currentText()
+            currentProxyListUnproceed = re.split(currentSeparator, currentInputProxy)
+            currentProxyList = []
+            err = False
+            if proxyType == "PROXY:PORT":
+                proxyType = 'noauth'
+                for item in currentProxyListUnproceed:
+                    currentItem = re.search(r'(\d{1,3}\.){3}\d{1,3}:(\d+)', item)
+                    if currentItem == None:
+                        err = True
+                    else:
+                        currentProxyList.append(currentItem.group(0))
+                if err == True:
+                    log = nowERRORMAIN() + ' Parsing error occured. Check accuracy.'
+                    self.LogOutput.append(log)
+                else:
+                    log = nowINFOMAIN() + ' Parsing succesefull!'
+                    self.LogOutput.append(log)
+                print(currentProxyList)
+                data = {'profilename': profilename, 'proxytype': proxyType, 'proxyList': currentProxyList}
+        except Exception as e:
+            print(e)
+        #Check json syntax and file existance
+        if err == False:
+            try:
+                f = open("save.json", "r", encoding='utf-8').read()
+                json.loads(f)
+            except Exception as e:
+                f = open("save.json", "w", encoding='utf-8')
+                log = nowERRORMAIN() + ' Save file corrupted, creating a new one...'
+                self.LogOutput.append(log)
+                json.dump({'Profiles': [], 'Tasks': [], 'ProxyConfigs': []}, f, ensure_ascii=False)
+                f.close()
+                print(e)
+            try:
+                write_file = open("save.json", "r+", encoding='utf-8')
+                jsondata = json.loads(write_file.read())
+                err = False
+                if jsondata['ProxyConfigs'] != []:
+                    for ProxyProfileName in jsondata['ProxyConfigs']:
+                        try:
+                            if ProxyProfileName['profilename'] == data['profilename']:
+                                err = True
+                        except:
+                            err = False
+                else:
+                    err = False
+                if err == False:
+                    jsondata['ProxyConfigs'].append(data)
+                    write_file.close()
+                    open('save.json', 'w', encoding='utf-8').close()
+                    write_file = open("save.json", "r+", encoding='utf-8')
+                    json.dump(jsondata, write_file, indent=4, ensure_ascii=False)
+                    log = nowINFOMAIN() + ' Save file succesefully updated!'
+                    self.LogOutput.append(log)
+                    self.ProfileName.clear()
+                    self.ProxyInput.clear()
+                    self.SeparatorComboBox.setCurrentIndex(0)
+                    self.ProxyTypeComboBox.setCurrentIndex(0)
+                    write_file.close()
+                else:
+                    log = nowERRORMAIN() + ' Unknown error occured'
+                    self.LogOutput.append(log)
+                    self.profilename.clear()
+            except Exception as e:
+                print(e)
 if __name__ == "__main__":
     def dark():
         import qdarkstyle
