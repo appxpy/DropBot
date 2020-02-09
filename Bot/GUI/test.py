@@ -4,71 +4,97 @@ https://codereview.stackexchange.com/questions/138992/simple-pyqt5-counting-gui
 
 import sys
 import time
-import requests
-import json
 from PyQt5.QtWidgets import QMainWindow, QPushButton, QVBoxLayout, QFrame, QApplication
 from PyQt5.QtCore import pyqtSignal, QObject, QThread
-class Worker2(QObject):
+
+class Counter(QObject):
     '''
     Class intended to be used in a separate thread to generate numbers and send
     them to another thread.
     '''
 
-    request = pyqtSignal(str)
+    newValue = pyqtSignal(str)
     stopped = pyqtSignal()
 
     def __init__(self):
         QObject.__init__(self)
 
-    def run(self):
+    def start(self):
         '''
         Count from 0 to 99 and emit each value to the GUI thread to display.
         '''
-        authform.ui.pushButton.setEnabled(False)
-        authform.ui.label.setStyleSheet("color: rgb(255, 185, 21);")
-        authform.ui.label.setText('Loading...') 
-        apiUrl = 'https://api.dropbot.site/'
-        loginArg = authform.ui.login.text()
-        passwordArg = authform.ui.password.text()
-        finalUrl = apiUrl + '?' + 'login=' + loginArg + '&' + 'password=' + passwordArg
-        print('Sending request...')
-        req = requests.get(finalUrl)
-        print('Request sended')
-        data = json.loads(req.text, encoding='utf-8')
-        print('Reading response...')
-        self.request.emit(str(data))
+        r = 0
+        g = 0
+        b = 0
+        while r < 255:
+            r += 1
+            newcolor = str(r) + ',' + str(g) + ',' + str(b)
+            self.newValue.emit(str(newcolor))
+            time.sleep(.01)
+        while g < 255:
+            g += 1
+            newcolor = str(r) + ',' + str(g) + ',' + str(b)
+            self.newValue.emit(str(newcolor))
+            time.sleep(.01)
+        while r != 0:
+            r -= 1
+            newcolor = str(r) + ',' + str(g) + ',' + str(b)
+            self.newValue.emit(str(newcolor))
+            time.sleep(.01)
+        while b < 255:
+            b += 1
+            newcolor = str(r) + ',' + str(g) + ',' + str(b)
+            self.newValue.emit(str(newcolor))
+            time.sleep(.01)
+        while g != 0:
+            g -= 1
+            newcolor = str(r) + ',' + str(g) + ',' + str(b)
+            self.newValue.emit(str(newcolor))
+            time.sleep(.01)
+        while r < 255:
+            r += 1
+            newcolor = str(r) + ',' + str(g) + ',' + str(b)
+            self.newValue.emit(str(newcolor))
+            time.sleep(.01)
+        self.start()
         self.stopped.emit()
 
 
 class Application(QMainWindow):
-    def startCounting(self):
-        if not self.worker2Thread.isRunning():
-            self.worker2Thread.start()
     def __init__(self):
         QMainWindow.__init__(self)
 
         # Configuring widgets        
         self.button = QPushButton()
-        self.button.setText('99')
+        self.button.setText('Ебни по мозгам')
         self.layout = QVBoxLayout()
         self.layout.addWidget(self.button)
         self.frame = QFrame()
         self.frame.setLayout(self.layout)
         self.setCentralWidget(self.frame)
-
+        self.frame.setStyleSheet('background-color: black;')
         # Configuring separate thread
-        self.worker2Thread = QThread()
-        self.worker2 = Worker2()
-        self.worker2.moveToThread(self.worker2Thread)
+        self.counterThread = QThread()
+        self.counter = Counter()
+        self.counter.moveToThread(self.counterThread)
 
         # Connecting signals
         self.button.clicked.connect(self.startCounting)
-        self.worker2.request.connect(self.button.setText)
-        self.worker2.stopped.connect(self.worker2Thread.quit)
-        self.worker2Thread.started.connect(self.worker2.run)
+        self.button.setStyleSheet('width: 50px; height: 50px; border-radius: 10px; color: white;')
+        self.counter.newValue.connect(self.prikol)
+        self.counter.stopped.connect(self.counterThread.quit)
+        self.counterThread.started.connect(self.counter.start)
 
+    def prikol(self, newValue):
+      print('color: rgb({})'.format(newValue))
+      self.frame.setStyleSheet('background-color: rgb({})'.format(newValue))
+    def startCounting(self):
+        '''
+        Start counting if no other counting is done.
+        '''
 
-
+        if not self.counterThread.isRunning():
+            self.counterThread.start()
 
 
 if __name__ == '__main__':
