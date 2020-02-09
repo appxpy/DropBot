@@ -3,6 +3,7 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import QRunnable, pyqtSlot, pyqtSignal, QObject, QThread, QThreadPool
 import json
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -886,12 +887,37 @@ class Ui_DropBot(object):
                     profilenames = []
                     for dicts in jsondata['Profiles']:
                         profilenames.append(dicts['profilename'])
+                        if dicts['profilename'] == '':
+                            open('save.json', 'w', encoding='utf-8').close()
+                            file = open("save.json", "r+", encoding='utf-8')
+                            json.dump({'Profiles': [], 'Tasks' : [], 'ProxyConfigs' : []}, file)
+                            file.close()
+                            self.LogOutput.clear()
+                            log = nowERRORMAIN() + ' Save file corrupted, creating new one...'
+                            self.LogOutput.append(log)
+                            self.loadSave()
                     self.ProfileComboBox.clear()
                     self.ProfileComboBox.addItems(profilenames)
                     log = nowINFOMAIN() + ' Profiles succesefully updated!'
                     self.LogOutput.append(log)
+                    proxyprofilenames = []
+                    for dicts in jsondata['ProxyConfigs']:
+                        proxyprofilenames.append(dicts['profilename'])
+                        if dicts['profilename'] == '':
+                            open('save.json', 'w', encoding='utf-8').close()
+                            file = open("save.json", "r+", encoding='utf-8')
+                            json.dump({'Profiles': [], 'Tasks' : [], 'ProxyConfigs' : []}, file)
+                            file.close()
+                            self.LogOutput.clear()
+                            log = nowERRORMAIN() + ' Save file corrupted, creating new one...'
+                            self.LogOutput.append(log)
+                            self.loadSave()
+                    proxyprofilenames.append('None')
+                    self.ProxyConfigComboBox.clear()
+                    self.ProxyConfigComboBox.addItems(proxyprofilenames)
                     self.rldTasks()
-                except:
+                except Exception as e:
+                    print(e)
                     open('save.json', 'w', encoding='utf-8').close()
                     file = open("save.json", "r+", encoding='utf-8')
                     json.dump({'Profiles': [], 'Tasks' : [], 'ProxyConfigs' : []}, file)
@@ -914,6 +940,10 @@ class Ui_DropBot(object):
         dialog.show()
     def authDialog(self):
         global authform
+        global threadpool
+        threadpool = QThreadPool()
+        threadpool.setMaxThreadCount(2)
+        print("Multithreading with maximum %d threads" % threadpool.maxThreadCount())
         authform = QtWidgets.QDialog()
         authform.ui = Ui_authform()
         authform.ui.setupUi(authform)
@@ -933,7 +963,6 @@ class Ui_DropBot(object):
         proxyConfig.ui.setupUi(proxyConfig)
         proxyConfig.setWindowIcon(QtGui.QIcon('icon2.png'))
         proxyConfig.ui.pushButton.clicked.connect(self.loadSave)
-        #proxyConfig.ui.pushButton.clicked.connect(proxyConfig.ui.loadsave)
         proxyConfig.exec_()
         proxyConfig.show()
     def RemoveTask(self, ID):
@@ -1502,6 +1531,10 @@ class Ui_ProfileManager(object):
         self.profilename.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter)
         self.profilename.setPlaceholderText("")
         self.profilename.setObjectName("profilename")
+        self.profilename.setMaxLength(15)
+        regexp = QtCore.QRegExp('[a-zA-Z0-9]+')
+        validator = QtGui.QRegExpValidator(regexp)
+        self.profilename.setValidator(validator)
         self.verticalLayout_3.addWidget(self.profilename)
         self.firstname = QtWidgets.QLineEdit(ProfileManager)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
@@ -1929,6 +1962,7 @@ class Ui_ProfileManager(object):
         except Exception as e:
             print(e)
     def checkText(self):
+        self.label_2.setStyleSheet('')
         fields = []
         fields.append(self.profilename.text())
         fields.append(self.firstname.text())
@@ -2018,6 +2052,7 @@ class Ui_ProfileManager(object):
                 write_file.close()
             else:
                 self.profilename.clear()
+                self.label_2.setStyleSheet('color:red;')
         except Exception as e:
             print(e)
 
@@ -2026,6 +2061,11 @@ class Ui_ProfileManager(object):
 ########################################################################BLOCK 6###########################################################################
 
 class Ui_authform(object):
+    def startAuth(self):
+        if not self.worker2Thread.isRunning():
+            self.worker2Thread.start()
+
+
     def setupUi(self, authform):
         authform.setObjectName("authform")
         authform.resize(377, 215)
@@ -2088,7 +2128,7 @@ class Ui_authform(object):
         self.login.setContextMenuPolicy(QtCore.Qt.NoContextMenu)
         self.login.setStyleSheet("width: 100px;")
         self.login.setObjectName("login")
-        regexp = QtCore.QRegExp('[a-zA-Z_@.]+')
+        regexp = QtCore.QRegExp('[a-zA-Z0-9_@.]+')
         validator = QtGui.QRegExpValidator(regexp)
         self.login.setValidator(validator)
         self.login.textEdited.connect(self.checkText)
@@ -2215,7 +2255,25 @@ class Ui_authform(object):
         self.label_2.setText(_translate("authform", "Login"))
         self.submit.setText(_translate("authform", "Submit"))
         self.submit.setEnabled(False)
-        self.submit.clicked.connect(self.authClient)
+        self.submit.clicked.connect(self.disableSubmit)
+
+
+
+
+
+        self.worker2Thread = QThread()
+        self.worker2 = Worker2()
+        self.worker2.moveToThread(self.worker2Thread)
+        # Connecting signals
+        self.submit.clicked.connect(self.startAuth)
+        self.worker2.request.connect(self.authClient)
+        self.worker2.stopped.connect(self.worker2Thread.quit)
+        self.worker2Thread.started.connect(self.worker2.run)
+
+
+
+
+
         self.cancel.setText(_translate("authform", "Cancel"))
         self.cancel.clicked.connect(self.Buttonexit)
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.AuthorizeFormTab), _translate("authform", "Auth"))
@@ -2226,136 +2284,62 @@ class Ui_authform(object):
         self.server1Status.setText(_translate("authform", "Loading.."))
         self.server3Status.setText(_translate("authform", "Loading.."))
         self.pushButton.setText(_translate("authform", "Update"))
-        self.pushButton.clicked.connect(self.pushButton.hide)
         self.pushButton.clicked.connect(self.checkConnection)
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.ServerStatusTab), _translate("authform", "Servers status"))
     
     ########################################################################BLOCK 7###########################################################################
-
+    def disableSubmit(self):
+        self.submit.setEnabled(False)
     def checkText(self):
         loginField = self.login.text()
         passwordField = self.password.text()
-        if loginField != '' and passwordField != '':
+        if loginField != '' and passwordField != '' and 'ONLINE' in self.label_7.text():
             self.submit.setEnabled(True)
         else:
             self.submit.setEnabled(False)
+
     def Buttonexit(self):
         sys.exit()
-    def authClient(self):
-        print('Authentication')
-        self.label.setStyleSheet("color: rgb(255, 185, 21);")
-        self.label.setText('Loading...') 
-        app.processEvents()
-        apiUrl = 'https://api.dropbot.site/'
-        loginArg = self.login.text()
-        passwordArg = self.password.text()
-        finalUrl = apiUrl + '?' + 'login=' + loginArg + '&' + 'password=' + passwordArg
-        print('Sending request...')
-        req = requests.get(finalUrl)
-        print('Request sended')
-        data = json.loads(req.text, encoding='utf-8')
-        print('Reading response...')
-        if req.status_code == 200:
-            print('API returned code 200 - success')
-            global name
-            name = str(data['name'])
-            message = 'Welcome back, ' + name
-            self.label.setText(message)
-            self.label.setStyleSheet('color: green;')
-            app.processEvents()
-            time.sleep(0.5)
-            print('Authentication completed succesefully.')
-            self.authSuccess()
+    def authClient(self, data):
+        try:
+
+            data = json.loads(data, encoding='utf-8')
+        except Exception as e:
+            print(e)
+            self.label_7.setText("   FATAL API ERROR   ")
+            self.label_7.setStyleSheet('color:red')
+            self.checkText()
         else:
-            print('API returned code 403 - fail')
-            print('Authentication failed.')
-            self.login.clear()
-            self.password.clear()
-            self.label.setText('Incorrect login or password')
-            self.label.setStyleSheet('color: red;')
-            self.submit.setEnabled(False)
-            app.processEvents()
-            self.checkConnection()
+            print('Reading response...')
+            if data['name'] != None:
+                print('API returned code 200 - success')
+                global name
+                name = str(data['name'])
+                message = 'Welcome back, ' + name
+                authform.ui.label.setText(message)
+                authform.ui.label.setStyleSheet('color: green;')
+                app.processEvents()
+                time.sleep(0.5)
+                print('Authentication completed succesefully.')
+                authform.ui.authSuccess()
+            else:
+                print('API returned code 403 - fail')
+                print('Authentication failed.')
+                authform.ui.login.clear()
+                authform.ui.password.clear()
+                authform.ui.label.setText('Incorrect login or password')
+                authform.ui.label.setStyleSheet('color: red;')
+                app.processEvents()
+                authform.ui.checkConnection()
 
 ########################################################################BLOCK 8###########################################################################
 
     def checkConnection(self):
-        app.processEvents()
-        self.server1Status.setStyleSheet("color: rgb(255, 185, 21);")
-        self.server2Status.setStyleSheet("color: rgb(255, 185, 21);")
-        self.server3Status.setStyleSheet("color: rgb(255, 185, 21);")
-        self.server1Status.setText('Loading...') 
-        self.server2Status.setText('Loading...')   
-        self.server3Status.setText('Loading...')
-        app.processEvents()
-        url1 = 'https://api.dropbot.site/auth/index.html'
-        url2 = 'https://server224.hosting.reg.ru/'
-        url3 = 'https://sheets.google.com'
-        err = 0
-        try:
-            req = requests.get(url1)
-        except:
-            err = 1
-            self.server1Status.setStyleSheet("color: red;")
-            self.server1Status.setText('OFFLINE')
-            app.processEvents()
-        else:
-            if req.status_code != requests.codes.ok:
-                err = 1
-                self.server1Status.setStyleSheet("color: red;")
-                errtext = 'OFFLINE (CODE ' + str(req.status_code) + ')'
-                self.server1Status.setText(errtext)  
-                app.processEvents()
-            else: 
-                self.server1Status.setStyleSheet("color: green;")
-                self.server1Status.setText('ONLINE')
-                app.processEvents()
-        try:
-            req = requests.get(url2)
-        except:
-            err = 1
-            self.server2Status.setStyleSheet("color: red;")
-            self.server2Status.setText('OFFLINE')     
-            app.processEvents()
-        else:
-            if req.status_code != requests.codes.ok:
-                err = 1
-                self.server2Status.setStyleSheet("color: red;")
-                errtext = 'OFFLINE (CODE ' + str(req.status_code) + ')'
-                self.server2Status.setText(errtext)
-                app.processEvents()
-            else:
-                self.server2Status.setStyleSheet("color: green;")
-                self.server2Status.setText('ONLINE') 
-                app.processEvents()            
-        try:
-            req = requests.get(url3)
-        except:
-            err = 1
-            self.server3Status.setStyleSheet("color: red;")
-            self.server3Status.setText('OFFLINE')
-            app.processEvents()
-        else:
-            if req.status_code != requests.codes.ok:
-                err = 1
-                self.server3Status.setStyleSheet("color: red;")
-                errtext = 'OFFLINE (CODE ' + str(req.status_code) + ')'
-                self.server3Status.setText(errtext)
-                app.processEvents()
-            else:
-                self.server3Status.setStyleSheet("color: green;")
-                self.server3Status.setText('ONLINE')
-        if err == 1:
-            self.label_7.setStyleSheet("color: red;")
-            self.label_7.setText('   OFFLINE   ')
-            app.processEvents()
-        else:
-            self.label_7.setStyleSheet("color: green;")
-            self.label_7.setText('   ONLINE   ')
-            app.processEvents()
-        self.pushButton.show()
+        self.worker1 = Worker1()
+        threadpool.start(self.worker1)
     def authSuccess(self):
-        authform.close()
+        DropBot.setWindowTitle('DropBot | Logged as {} ({})'.format(name, loginArg))
+        authform.accept()
         DropBot.show()
         log = nowINFOMAIN() + ' Auth for ' + name + ' was succesefull' 
         ui.LogOutput.append(log)
@@ -3224,9 +3208,6 @@ class Ui_ProxyConfig(object):
         self.SeparatorComboBox.setStyleSheet("")
         self.SeparatorComboBox.setObjectName("SeparatorComboBox")
         self.SeparatorComboBox.addItem("")
-        self.SeparatorComboBox.addItem("")
-        self.SeparatorComboBox.addItem("")
-        self.SeparatorComboBox.addItem("")
         self.gridLayout.addWidget(self.SeparatorComboBox, 1, 2, 1, 1)
         self.ProxyTypeLabel = QtWidgets.QLabel(ProxyConfig)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
@@ -3251,6 +3232,10 @@ class Ui_ProxyConfig(object):
         self.ProfileName.setContextMenuPolicy(QtCore.Qt.NoContextMenu)
         self.ProfileName.setStyleSheet("")
         self.ProfileName.setObjectName("ProfileName")
+        self.ProfileName.setMaxLength(15)
+        regexp = QtCore.QRegExp('[a-zA-Z0-9]+')
+        validator = QtGui.QRegExpValidator(regexp)
+        self.ProfileName.setValidator(validator)
         self.gridLayout.addWidget(self.ProfileName, 0, 2, 1, 1)
         spacerItem1 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.gridLayout.addItem(spacerItem1, 1, 3, 1, 1)
@@ -3264,7 +3249,6 @@ class Ui_ProxyConfig(object):
         self.ProxyTypeComboBox.setContextMenuPolicy(QtCore.Qt.NoContextMenu)
         self.ProxyTypeComboBox.setStyleSheet("")
         self.ProxyTypeComboBox.setObjectName("ProxyTypeComboBox")
-        self.ProxyTypeComboBox.addItem("")
         self.ProxyTypeComboBox.addItem("")
         self.gridLayout.addWidget(self.ProxyTypeComboBox, 2, 2, 1, 1)
         spacerItem3 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
@@ -3351,12 +3335,8 @@ class Ui_ProxyConfig(object):
         self.label.setText(_translate("ProxyConfig", "Proxy config"))
         self.SeparatorLabel.setText(_translate("ProxyConfig", "Separator"))
         self.SeparatorComboBox.setItemText(0, _translate("ProxyConfig", "(Default) String"))
-        self.SeparatorComboBox.setItemText(1, _translate("ProxyConfig", "*"))
-        self.SeparatorComboBox.setItemText(2, _translate("ProxyConfig", ";"))
-        self.SeparatorComboBox.setItemText(3, _translate("ProxyConfig", "-"))
         self.ProxyTypeLabel.setText(_translate("ProxyConfig", "Proxy type"))
         self.ProxyTypeComboBox.setItemText(0, _translate("ProxyConfig", "PROXY:PORT"))
-        self.ProxyTypeComboBox.setItemText(1, _translate("ProxyConfig", "USER:PASS@PROXY:PORT"))
         self.ProfileNameLabel.setText(_translate("ProxyConfig", "Profile name"))
         self.ProfileName.textEdited.connect(self.checkText)
         self.pushButton.setText(_translate("ProxyConfig", "Add proxy profile"))
@@ -3367,11 +3347,13 @@ class Ui_ProxyConfig(object):
         self.cancel.clicked.connect(ProxyConfig.accept)
     def checkText(self):
         text = self.ProfileName.text()
-        if text != '' or None:
+        if text != '' and text != 'None':
             self.pushButton.setEnabled(True)
+            self.ProfileNameLabel.setStyleSheet('')
         else:
             self.pushButton.setEnabled(False)
     def saveProxyProfile(self, ProxyConfig):
+        err = False
         self.pushButton.setEnabled(False)
         currentSeparator = self.SeparatorComboBox.currentText()
         if currentSeparator == '(Default) String':
@@ -3382,7 +3364,6 @@ class Ui_ProxyConfig(object):
             proxyType = self.ProxyTypeComboBox.currentText()
             currentProxyListUnproceed = re.split(currentSeparator, currentInputProxy)
             currentProxyList = []
-            err = False
             if proxyType == "PROXY:PORT":
                 proxyType = 'noauth'
                 for item in currentProxyListUnproceed:
@@ -3397,7 +3378,6 @@ class Ui_ProxyConfig(object):
                 else:
                     log = nowINFOMAIN() + ' Parsing succesefull!'
                     self.LogOutput.append(log)
-                print(currentProxyList)
                 data = {'profilename': profilename, 'proxytype': proxyType, 'proxyList': currentProxyList}
         except Exception as e:
             print(e)
@@ -3440,11 +3420,140 @@ class Ui_ProxyConfig(object):
                     self.ProxyTypeComboBox.setCurrentIndex(0)
                     write_file.close()
                 else:
-                    log = nowERRORMAIN() + ' Unknown error occured'
-                    self.LogOutput.append(log)
-                    self.profilename.clear()
+                    self.ProfileName.clear()
+                    self.ProfileNameLabel.setStyleSheet('color:red;')
             except Exception as e:
-                print(e)
+                log = nowERRORMAIN() + ' Unknown error occured'
+                self.LogOutput.append(log)
+                self.ProfileName.clear()
+        self.checkText()
+class Worker1(QRunnable):
+    '''
+    Worker thread
+    '''
+    def __init__(self):
+        super(Worker1, self).__init__()
+
+        # Store constructor arguments (re-used for processing)
+
+    @pyqtSlot()
+    def run(self):
+        self.setAutoDelete(True)
+        authform.ui.pushButton.setEnabled(False)
+        authform.ui.submit.setEnabled(False)
+        app.processEvents()
+        authform.ui.server1Status.setStyleSheet("color: rgb(255, 185, 21);")
+        authform.ui.server2Status.setStyleSheet("color: rgb(255, 185, 21);")
+        authform.ui.server3Status.setStyleSheet("color: rgb(255, 185, 21);")
+        authform.ui.server1Status.setText('Loading...') 
+        authform.ui.server2Status.setText('Loading...')   
+        authform.ui.server3Status.setText('Loading...')
+        authform.ui.label_7.setText('   Loading...   ')
+        authform.ui.label_7.setStyleSheet("color: rgb(255, 185, 21);")
+        app.processEvents()
+        url1 = 'https://api.dropbot.site/auth/index.html'
+        url2 = 'https://server224.hosting.reg.ru/'
+        url3 = 'https://sheets.google.com'
+        err = 0
+        try:
+            req = requests.get(url1)
+        except:
+            err = 1
+            authform.ui.server1Status.setStyleSheet("color: red;")
+            authform.ui.server1Status.setText('OFFLINE')
+            app.processEvents()
+        else:
+            if req.status_code != requests.codes.ok:
+                err = 1
+                authform.ui.server1Status.setStyleSheet("color: red;")
+                errtext = 'OFFLINE (CODE ' + str(req.status_code) + ')'
+                authform.ui.server1Status.setText(errtext)  
+                app.processEvents()
+            else: 
+                authform.ui.server1Status.setStyleSheet("color: green;")
+                authform.ui.server1Status.setText('ONLINE')
+                app.processEvents()
+        try:
+            req = requests.get(url2)
+        except:
+            err = 1
+            authform.ui.server2Status.setStyleSheet("color: red;")
+            authform.ui.server2Status.setText('OFFLINE')     
+            app.processEvents()
+        else:
+            if req.status_code != requests.codes.ok:
+                err = 1
+                authform.ui.server2Status.setStyleSheet("color: red;")
+                errtext = 'OFFLINE (CODE ' + str(req.status_code) + ')'
+                authform.ui.server2Status.setText(errtext)
+                app.processEvents()
+            else:
+                authform.ui.server2Status.setStyleSheet("color: green;")
+                authform.ui.server2Status.setText('ONLINE') 
+                app.processEvents()            
+        try:
+            req = requests.get(url3)
+        except:
+            err = 1
+            authform.ui.server3Status.setStyleSheet("color: red;")
+            authform.ui.server3Status.setText('OFFLINE')
+            app.processEvents()
+        else:
+            if req.status_code != requests.codes.ok:
+                err = 1
+                authform.ui.server3Status.setStyleSheet("color: red;")
+                errtext = 'OFFLINE (CODE ' + str(req.status_code) + ')'
+                authform.ui.server3Status.setText(errtext)
+                app.processEvents()
+            else:
+                authform.ui.server3Status.setStyleSheet("color: green;")
+                authform.ui.server3Status.setText('ONLINE')
+        if err == 1:
+            authform.ui.label_7.setStyleSheet("color: red;")
+            authform.ui.label_7.setText('   OFFLINE   ')
+            app.processEvents()
+        else:
+            authform.ui.label_7.setStyleSheet("color: green;")
+            authform.ui.label_7.setText('   ONLINE   ')
+            app.processEvents()
+        authform.ui.pushButton.setEnabled(True)
+        authform.ui.checkText()
+
+class Worker2(QObject):
+    '''
+    Class intended to be used in a separate thread to generate numbers and send
+    them to another thread.
+    '''
+
+    request = pyqtSignal(str)
+    stopped = pyqtSignal()
+
+    def __init__(self):
+        QObject.__init__(self)
+
+    def run(self):
+        '''
+        Count from 0 to 99 and emit each value to the GUI thread to display.
+        '''
+        global loginArg
+        authform.ui.pushButton.setEnabled(False)
+        authform.ui.label.setStyleSheet("color: rgb(255, 185, 21);")
+        authform.ui.label.setText('Loading...') 
+        apiUrl = 'https://api.dropbot.site/'
+        loginArg = authform.ui.login.text()
+        passwordArg = authform.ui.password.text()
+        finalUrl = apiUrl + '?' + 'login=' + loginArg + '&' + 'password=' + passwordArg
+        print('Sending request...')
+        req = requests.get(finalUrl)
+        print('Request sended')
+        data = req.text
+        self.request.emit(str(data))
+        self.stopped.emit()
+
+
+
+
+
 if __name__ == "__main__":
     def dark():
         import qdarkstyle
