@@ -529,7 +529,7 @@ if __name__ == '__main__':
             print(nowINFO(), 'Proxy.txt file succesefully created!')
         import hashlib
         try:
-            EncryptedPassword = requests.get('http://178.140.207.179/pswdhash').text
+            EncryptedPassword = 'd72958fc24e5de0a864b0dcf9d5dd68a8dd94b62851a2b683b94607646ae8caf'
         except:
             print(nowERROR(), 'No connection to authentication server')
             input('Press enter to exit...')

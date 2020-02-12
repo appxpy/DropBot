@@ -23,9 +23,14 @@ class Counter(QObject):
         '''
         Count from 0 to 99 and emit each value to the GUI thread to display.
         '''
-        r = 0
+        r = 255
         g = 0
-        b = 0
+        b = 255
+        while b != 0:
+            b -= 1
+            newcolor = str(r) + ',' + str(g) + ',' + str(b)
+            self.newValue.emit(str(newcolor))
+            time.sleep(.01)
         while r < 255:
             r += 1
             newcolor = str(r) + ',' + str(g) + ',' + str(b)
