@@ -933,8 +933,10 @@ class Ui_DropBot(object):
         dialog.ui = Ui_ProfileManager()
         dialog.ui.setupUi(dialog)
         dialog.ui.Save.clicked.connect(self.loadSave)
-        dialog.ui.Reset.clicked.connect(self.loadSave)
-        dialog.ui.Reset.clicked.connect(self.resetProfiles)
+        dialog.ui.Save.clicked.connect(dialog.ui.loadProfilesToComboBox)
+        dialog.ui.loadProfilesToComboBox()
+        #dialog.ui.Reset.clicked.connect(self.loadSave)
+        #dialog.ui.Reset.clicked.connect(self.resetProfiles)
         dialog.setWindowIcon(QtGui.QIcon('icon2.png'))
         dialog.exec_()
         dialog.show()
@@ -1877,10 +1879,17 @@ class Ui_ProfileManager(object):
         self.verticalLayout_2.addLayout(self.horizontalLayout_2)
         self.horizontalLayout_4 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_4.setObjectName("horizontalLayout_4")
-        self.Reset = QtWidgets.QPushButton(ProfileManager, default=False, autoDefault=False)
-        self.Reset.setStyleSheet("")
-        self.Reset.setObjectName("Reset")
-        self.horizontalLayout_4.addWidget(self.Reset)
+        self.profileSelectComboBox = QtWidgets.QComboBox(ProfileManager)
+        self.profileSelectComboBox.setEditable(False)
+        self.profileSelectComboBox.setObjectName("profileSelectComboBox")
+        self.horizontalLayout_4.addWidget(self.profileSelectComboBox)
+        self.editProfile = QtWidgets.QPushButton(ProfileManager, default=False, autoDefault=False)
+        self.editProfile.setObjectName("editProfile")
+        self.horizontalLayout_4.addWidget(self.editProfile)
+        self.RemoveProfile = QtWidgets.QPushButton(ProfileManager, default=False, autoDefault=False)
+        self.RemoveProfile.setStyleSheet("")
+        self.RemoveProfile.setObjectName("RemoveProfile")
+        self.horizontalLayout_4.addWidget(self.RemoveProfile)
         spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout_4.addItem(spacerItem)
         self.horizontalLayout_5 = QtWidgets.QHBoxLayout()
@@ -1938,8 +1947,10 @@ class Ui_ProfileManager(object):
         self.year.setItemText(8, _translate("ProfileManager", "2028"))
         self.year.setItemText(9, _translate("ProfileManager", "2029"))
         self.year.setItemText(10, _translate("ProfileManager", "2030"))
-        self.Reset.setText(_translate("ProfileManager", "   Reset all profiles and tasks   "))
-        self.Reset.clicked.connect(self.resetSettings)
+        self.editProfile.setText(_translate("ProfileManager", "Edit"))
+        self.editProfile.clicked.connect(self.editProfileFunction)
+        self.RemoveProfile.setText(_translate("ProfileManager", "Remove"))
+        self.RemoveProfile.clicked.connect(self.removeProfile)
         self.Save.setText(_translate("ProfileManager", "   Save   "))
         self.Save.setEnabled(False)
         self.Save.clicked.connect(self.saveProfile)
@@ -1960,7 +1971,107 @@ class Ui_ProfileManager(object):
         self.lineEdit_2.textChanged.connect(self.checkText)
         
         ########################################################################BLOCK 5###########################################################################
+    def removeProfile(self):
+        try:
+            f = open("save.json", "r", encoding='utf-8').read()
+            json.loads(f)
+        except Exception as e:
+            f = open("save.json", "w", encoding='utf-8')
+            json.dump({'Profiles': [], 'Tasks': []}, f, ensure_ascii=False)
+            f.close()
+            print(e)
+        try:
+            file = open("save.json", "r", encoding='utf-8')
+            jsondata = json.loads(file.read())
+            file.close()
+            selectedProfile = self.profileSelectComboBox.currentText()
+            for dict in jsondata['Profiles']:
+                if dict['profilename'] == selectedProfile:
+                    currentProfile = dict
+                    del jsondata['Profiles'][jsondata['Profiles'].index(currentProfile)]
+                    open('save.json', 'w', encoding='utf-8').close()
+                    write_file = open("save.json", "r+", encoding='utf-8')
+                    json.dump(jsondata, write_file, indent=4, ensure_ascii=False)
+                    write_file.close()
+                    self.loadProfilesToComboBox()
+        except:
+            f = open("save.json", "w", encoding='utf-8')
+            json.dump({'Profiles': [], 'Tasks': []}, f, ensure_ascii=False)
+            f.close()
+            print(e)
+    def editProfileFunction(self):
+        try:
+            f = open("save.json", "r", encoding='utf-8').read()
+            json.loads(f)
+        except Exception as e:
+            f = open("save.json", "w", encoding='utf-8')
+            json.dump({'Profiles': [], 'Tasks': []}, f, ensure_ascii=False)
+            f.close()
+            print(e)
+        try:
+            file = open("save.json", "r", encoding='utf-8')
+            jsondata = json.loads(file.read())
+            file.close()
+            selectedProfile = self.profileSelectComboBox.currentText()
+            for dict in jsondata['Profiles']:
+                if dict['profilename'] == selectedProfile:
+                    currentProfile = dict
+                    self.profilename.setText(currentProfile['profilename'])
+                    self.firstname.setText(currentProfile['firstname'])
+                    self.lastname.setText(currentProfile['lastname'])
+                    self.email.setText(currentProfile['email'])
+                    self.telephone.setText(currentProfile['telephone'])
+                    self.address.setText(currentProfile['address'])
+                    self.apartament.setText(currentProfile['apartament'])
+                    self.house.setText(currentProfile['housenum'])
+                    self.city.setText(currentProfile['city'])
+                    self.zipcode.setText(currentProfile['zipcode'])
+                    self.number.setText(currentProfile['cardnum'])
+                    self.owner.setText(currentProfile['cardowner'])
+                    self.lineEdit_2.setText(currentProfile['cvc'])
+                    years = ['2020','2021','2022','2023','2024','2025','2026','2027','2028','2029','2030']
+                    months = ['01','02','03','04','05','06','07','08','09','10','11','12']
+                    
+                    self.month.setCurrentIndex(months.index(currentProfile['month']))
+                    self.year.setCurrentIndex(years.index(currentProfile['year']))
+                    del jsondata['Profiles'][jsondata['Profiles'].index(currentProfile)]
+                    open('save.json', 'w', encoding='utf-8').close()
+                    write_file = open("save.json", "r+", encoding='utf-8')
+                    json.dump(jsondata, write_file, indent=4, ensure_ascii=False)
+                    write_file.close()
+                    self.loadProfilesToComboBox()
+        except Exception as e:
+            f = open("save.json", "w", encoding='utf-8')
+            json.dump({'Profiles': [], 'Tasks': []}, f, ensure_ascii=False)
+            f.close()
+            print(e)
 
+    def loadProfilesToComboBox(self):
+        try:
+            f = open("save.json", "r", encoding='utf-8').read()
+            json.loads(f)
+        except Exception as e:
+            f = open("save.json", "w", encoding='utf-8')
+            json.dump({'Profiles': [], 'Tasks': []}, f, ensure_ascii=False)
+            f.close()
+            print(e)
+        try:
+            file = open("save.json", "r", encoding='utf-8').read()
+            jsondata = json.loads(file)
+            self.profileSelectComboBox.clear()
+            for dict in jsondata['Profiles']:
+                self.profileSelectComboBox.addItem(dict['profilename'])
+            if self.profileSelectComboBox.count() == 0:
+                self.RemoveProfile.setEnabled(False)
+                self.editProfile.setEnabled(False)
+            else:
+                self.RemoveProfile.setEnabled(True)
+                self.editProfile.setEnabled(True)
+        except:
+            f = open("save.json", "w", encoding='utf-8')
+            json.dump({'Profiles': [], 'Tasks': []}, f, ensure_ascii=False)
+            f.close()
+            print(e)
     def resetSettings(self):
         self.profilename.clear()
         self.firstname.clear()
@@ -2038,17 +2149,18 @@ class Ui_ProfileManager(object):
         try:
             write_file = open("save.json", "r+", encoding='utf-8')
             jsondata = json.loads(write_file.read())
-            err = False
+            existance = False
             if jsondata['Profiles'] != []:
                 for profile in jsondata['Profiles']:
                     try:
                         if profile['profilename'] == data['profilename']:
-                            err = True
+                            existance = True
+                            currentProfile = profile
                     except:
                         err = False
             else:
-                err = False
-            if err == False:
+                existance = False
+            if existance == False:
                 jsondata['Profiles'].append(data)
                 write_file.close()
                 open('save.json', 'w', encoding='utf-8').close()
@@ -2071,8 +2183,26 @@ class Ui_ProfileManager(object):
                 self.year.setCurrentIndex(0)
                 write_file.close()
             else:
+                jsondata['Profiles'][jsondata['Profiles'].index(currentProfile)].update(data)
+                open('save.json', 'w', encoding='utf-8').close()
+                write_file = open("save.json", "r+", encoding='utf-8')
+                json.dump(jsondata, write_file, indent=4, ensure_ascii=False)
                 self.profilename.clear()
-                self.label_2.setStyleSheet('color:red;')
+                self.firstname.clear()
+                self.lastname.clear()
+                self.email.clear()
+                self.telephone.clear()
+                self.address.clear()
+                self.apartament.clear()
+                self.house.clear()
+                self.city.clear()
+                self.zipcode.clear()
+                self.number.clear()
+                self.owner.clear()
+                self.lineEdit_2.clear()
+                self.month.setCurrentIndex(0)
+                self.year.setCurrentIndex(0)
+                write_file.close()
         except Exception as e:
             print(e)
 

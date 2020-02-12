@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>514</width>
+    <width>516</width>
     <height>796</height>
    </rect>
   </property>
@@ -1397,12 +1397,26 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_4">
      <item>
-      <widget class="QPushButton" name="Reset">
+      <widget class="QComboBox" name="profileSelectComboBox">
+       <property name="editable">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="editProfile">
+       <property name="text">
+        <string>Edit</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="RemoveProfile">
        <property name="styleSheet">
         <string/>
        </property>
        <property name="text">
-        <string>   Reset   </string>
+        <string>Remove</string>
        </property>
       </widget>
      </item>

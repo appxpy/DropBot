@@ -13,7 +13,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_ProfileManager(object):
     def setupUi(self, ProfileManager):
         ProfileManager.setObjectName("ProfileManager")
-        ProfileManager.resize(514, 796)
+        ProfileManager.resize(516, 796)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -644,10 +644,17 @@ class Ui_ProfileManager(object):
         self.verticalLayout_2.addLayout(self.horizontalLayout_2)
         self.horizontalLayout_4 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_4.setObjectName("horizontalLayout_4")
-        self.Reset = QtWidgets.QPushButton(ProfileManager)
-        self.Reset.setStyleSheet("")
-        self.Reset.setObjectName("Reset")
-        self.horizontalLayout_4.addWidget(self.Reset)
+        self.profileSelectComboBox = QtWidgets.QComboBox(ProfileManager)
+        self.profileSelectComboBox.setEditable(False)
+        self.profileSelectComboBox.setObjectName("profileSelectComboBox")
+        self.horizontalLayout_4.addWidget(self.profileSelectComboBox)
+        self.editProfile = QtWidgets.QPushButton(ProfileManager)
+        self.editProfile.setObjectName("editProfile")
+        self.horizontalLayout_4.addWidget(self.editProfile)
+        self.RemoveProfile = QtWidgets.QPushButton(ProfileManager)
+        self.RemoveProfile.setStyleSheet("")
+        self.RemoveProfile.setObjectName("RemoveProfile")
+        self.horizontalLayout_4.addWidget(self.RemoveProfile)
         spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout_4.addItem(spacerItem)
         self.horizontalLayout_5 = QtWidgets.QHBoxLayout()
@@ -705,18 +712,7 @@ class Ui_ProfileManager(object):
         self.year.setItemText(8, _translate("ProfileManager", "2028"))
         self.year.setItemText(9, _translate("ProfileManager", "2029"))
         self.year.setItemText(10, _translate("ProfileManager", "2030"))
-        self.Reset.setText(_translate("ProfileManager", "   Reset   "))
+        self.editProfile.setText(_translate("ProfileManager", "Edit"))
+        self.RemoveProfile.setText(_translate("ProfileManager", "Remove"))
         self.Save.setText(_translate("ProfileManager", "   Save   "))
         self.Cancel.setText(_translate("ProfileManager", "   Cancel   "))
-
-
-if __name__ == "__main__":
-    import sys
-    import qdarkstyle
-    app = QtWidgets.QApplication(sys.argv)
-    app.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
-    ProfileManager = QtWidgets.QDialog()
-    ui = Ui_ProfileManager()
-    ui.setupUi(ProfileManager)
-    ProfileManager.show()
-    sys.exit(app.exec_())
