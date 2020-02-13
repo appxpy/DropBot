@@ -1803,9 +1803,13 @@ class Ui_ProfileManager(object):
         self.number.setSizePolicy(sizePolicy)
         self.number.setStyleSheet("height: 20px;")
         self.number.setObjectName("number")
+        regexp = QtCore.QRegExp('[0-9 ]+')
+        validator = QtGui.QRegExpValidator(regexp)
+        self.number.setValidator(validator)
         font = QtGui.QFont()
         font.setFamily("Ubuntu")
         font.setPointSize(10)
+        self.number.setMaxLength(19)
         self.number.setFont(font)
         self.verticalLayout_4.addWidget(self.number)
         self.owner = QtWidgets.QLineEdit(ProfileManager)
@@ -2094,20 +2098,21 @@ class Ui_ProfileManager(object):
             print(e)
     def checkText(self):
         self.label_2.setStyleSheet('')
+        self.label_17.setStyleSheet('')
         fields = []
-        fields.append(self.profilename.text())
-        fields.append(self.firstname.text())
-        fields.append(self.lastname.text())
-        fields.append(self.email.text())
-        fields.append(self.telephone.text())
-        fields.append(self.address.text())
-        fields.append(self.apartament.text())
-        fields.append(self.house.text())
-        fields.append(self.city.text())
-        fields.append(self.zipcode.text())
-        fields.append(self.number.text())
-        fields.append(self.owner.text())
-        fields.append(self.lineEdit_2.text())
+        fields.append(self.profilename.text().replace(' ', ''))
+        fields.append(self.firstname.text().replace(' ', ''))
+        fields.append(self.lastname.text().replace(' ', ''))
+        fields.append(self.email.text().replace(' ', ''))
+        fields.append(self.telephone.text().replace(' ', ''))
+        fields.append(self.address.text().replace(' ', ''))
+        fields.append(self.apartament.text().replace(' ', ''))
+        fields.append(self.house.text().replace(' ', ''))
+        fields.append(self.city.text().replace(' ', ''))
+        fields.append(self.zipcode.text().replace(' ', ''))
+        fields.append(self.number.text().replace(' ', ''))
+        fields.append(self.owner.text().replace(' ', ''))
+        fields.append(self.lineEdit_2.text().replace(' ', ''))
         err = False
         for field in fields:
             if field == '':
@@ -2118,93 +2123,107 @@ class Ui_ProfileManager(object):
             self.Save.setEnabled(False)
     def saveProfile(self, ProfileManager):
         try:
-           field1 = self.profilename.text()
-           field2 = self.firstname.text()
-           field3 = self.lastname.text()
-           field4 = self.email.text()
-           field5 = self.telephone.text()
-           field6 = self.address.text()
-           field7 = self.apartament.text()
-           field8 = self.house.text()
-           field9 = self.city.text()
-           field10 = self.zipcode.text()
-           field11 = self.number.text()
-           field12 = self.owner.text()
-           field13 = str(self.month.currentText())
-           field14 = str(self.year.currentText())
-           field15 = self.lineEdit_2.text()
+            field1 = self.profilename.text()
+            field2 = self.firstname.text()
+            field3 = self.lastname.text()
+            field4 = self.email.text()
+            field5 = self.telephone.text()
+            field6 = self.address.text()
+            field7 = self.apartament.text()
+            field8 = self.house.text()
+            field9 = self.city.text()
+            field10 = self.zipcode.text()
+            field11 = self.number.text().replace(' ', '')
+            field12 = self.owner.text()
+            field13 = str(self.month.currentText())
+            field14 = str(self.year.currentText())
+            field15 = self.lineEdit_2.text()
+            numberpattern = re.compile('[0-9]{4} [0-9]{4} [0-9]{4} [0-9]{4}')
+            numberpattern2 = re.compile('[0-9]{4}[0-9]{4}[0-9]{4}[0-9]{4}')
+            if len(field11.replace(' ', '')) != 16:
+                err = True
+                self.label_17.setStyleSheet('color:red')
 
-           data = {'profilename': field1, 'firstname': field2, 'lastname': field3, 'email': field4, 'telephone': field5, 'address': field6, 'apartament': field7, 'housenum':field8, 'city':field9, 'zipcode':field10, 'cardnum':field11, 'cardowner':field12, 'month':field13, 'year':field14, 'cvc':field15}
+            else:
+                if numberpattern.match(field11) == None and numberpattern2.match(field11) == None:
+                    self.label_17.setStyleSheet('color:red')
+                    err = True
+                else:
+                    if numberpattern2.match(field11) != None:
+                        field11 = ' '.join([field11[i - 4:i] for i in range(4, len(field11) + 1, 4)])
+                    err = False
+                data = {'profilename': field1, 'firstname': field2, 'lastname': field3, 'email': field4, 'telephone': field5, 'address': field6, 'apartament': field7, 'housenum':field8, 'city':field9, 'zipcode':field10, 'cardnum':field11, 'cardowner':field12, 'month':field13, 'year':field14, 'cvc':field15}
         except Exception as e:
             print(e)
         #Check json syntax and file existance
-        try:
-            f = open("save.json", "r", encoding='utf-8').read()
-            json.loads(f)
-        except Exception as e:
-            f = open("save.json", "w", encoding='utf-8')
-            json.dump({'Profiles': [], 'Tasks': []}, f, ensure_ascii=False)
-            f.close()
-            print(e)
-        try:
-            write_file = open("save.json", "r+", encoding='utf-8')
-            jsondata = json.loads(write_file.read())
-            existance = False
-            if jsondata['Profiles'] != []:
-                for profile in jsondata['Profiles']:
-                    try:
-                        if profile['profilename'] == data['profilename']:
-                            existance = True
-                            currentProfile = profile
-                    except:
-                        err = False
-            else:
+        if err == False:
+            try:
+                f = open("save.json", "r", encoding='utf-8').read()
+                json.loads(f)
+            except Exception as e:
+                f = open("save.json", "w", encoding='utf-8')
+                json.dump({'Profiles': [], 'Tasks': []}, f, ensure_ascii=False)
+                f.close()
+                print(e)
+            try:
+                write_file = open("save.json", "r+", encoding='utf-8')
+                jsondata = json.loads(write_file.read())
                 existance = False
-            if existance == False:
-                jsondata['Profiles'].append(data)
-                write_file.close()
-                open('save.json', 'w', encoding='utf-8').close()
-                write_file = open("save.json", "r+", encoding='utf-8')
-                json.dump(jsondata, write_file, indent=4, ensure_ascii=False)
-                self.profilename.clear()
-                self.firstname.clear()
-                self.lastname.clear()
-                self.email.clear()
-                self.telephone.clear()
-                self.address.clear()
-                self.apartament.clear()
-                self.house.clear()
-                self.city.clear()
-                self.zipcode.clear()
-                self.number.clear()
-                self.owner.clear()
-                self.lineEdit_2.clear()
-                self.month.setCurrentIndex(0)
-                self.year.setCurrentIndex(0)
-                write_file.close()
-            else:
-                jsondata['Profiles'][jsondata['Profiles'].index(currentProfile)].update(data)
-                open('save.json', 'w', encoding='utf-8').close()
-                write_file = open("save.json", "r+", encoding='utf-8')
-                json.dump(jsondata, write_file, indent=4, ensure_ascii=False)
-                self.profilename.clear()
-                self.firstname.clear()
-                self.lastname.clear()
-                self.email.clear()
-                self.telephone.clear()
-                self.address.clear()
-                self.apartament.clear()
-                self.house.clear()
-                self.city.clear()
-                self.zipcode.clear()
-                self.number.clear()
-                self.owner.clear()
-                self.lineEdit_2.clear()
-                self.month.setCurrentIndex(0)
-                self.year.setCurrentIndex(0)
-                write_file.close()
-        except Exception as e:
-            print(e)
+                if jsondata['Profiles'] != []:
+                    for profile in jsondata['Profiles']:
+                        try:
+                            if profile['profilename'] == data['profilename']:
+                                existance = True
+                                currentProfile = profile
+                        except:
+                            err = False
+                else:
+                    existance = False
+                if existance == False:
+                    jsondata['Profiles'].append(data)
+                    write_file.close()
+                    open('save.json', 'w', encoding='utf-8').close()
+                    write_file = open("save.json", "r+", encoding='utf-8')
+                    json.dump(jsondata, write_file, indent=4, ensure_ascii=False)
+                    self.profilename.clear()
+                    self.firstname.clear()
+                    self.lastname.clear()
+                    self.email.clear()
+                    self.telephone.clear()
+                    self.address.clear()
+                    self.apartament.clear()
+                    self.house.clear()
+                    self.city.clear()
+                    self.zipcode.clear()
+                    self.number.clear()
+                    self.owner.clear()
+                    self.lineEdit_2.clear()
+                    self.month.setCurrentIndex(0)
+                    self.year.setCurrentIndex(0)
+                    write_file.close()
+                else:
+                    jsondata['Profiles'][jsondata['Profiles'].index(currentProfile)].update(data)
+                    open('save.json', 'w', encoding='utf-8').close()
+                    write_file = open("save.json", "r+", encoding='utf-8')
+                    json.dump(jsondata, write_file, indent=4, ensure_ascii=False)
+                    self.profilename.clear()
+                    self.firstname.clear()
+                    self.lastname.clear()
+                    self.email.clear()
+                    self.telephone.clear()
+                    self.address.clear()
+                    self.apartament.clear()
+                    self.house.clear()
+                    self.city.clear()
+                    self.zipcode.clear()
+                    self.number.clear()
+                    self.owner.clear()
+                    self.lineEdit_2.clear()
+                    self.month.setCurrentIndex(0)
+                    self.year.setCurrentIndex(0)
+                    write_file.close()
+            except Exception as e:
+                print(e)
 
 
 
