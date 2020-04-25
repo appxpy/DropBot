@@ -47,7 +47,7 @@ def launch_yeezy(model, size, thread_num, proxy, sizeus):
     options.add_argument("--window-size=1920,1080")
     options.add_argument(
         'user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36')
-    options.add_argument("--headless")
+    #options.add_argument("--headless")
     if sys.platform.startswith('win32'):
         driver = webdriver.Chrome(options=options, executable_path='chromedriver.exe')
         print(nowINFO(), '-', 'Webdriver in headless mode for windows launched succesefully')
@@ -171,32 +171,45 @@ def launch_yeezy(model, size, thread_num, proxy, sizeus):
             element.click()
             starttime = time.time()
             sizes = driver.find_elements_by_xpath('//div[starts-with(@class,"src-components-___sizes-dropdown__sizes")]')
-            for sizess in sizes:
-                sizeObj = sizess.find_elements_by_tag_name('li')
-                for obj in sizeObj:
-                    if str(str(size) + ' UK') in obj.text:
-                        obj.click()
-            print(nowINFO(),'-', 'Processing cart')
-            Add_To_Cart = driver.find_element_by_xpath('//button[starts-with(@class,"src-components-___add-to-bag-form__addToBagButton___")]')
-            Add_To_Cart.click()
-            endtime = time.time()
-            print(nowINFO(), '-', 'Bot succesefully secured your item in', round(endtime - starttime, 3))
-        try:
-            element = WebDriverWait(driver, 10).until(
-                EC.element_to_be_clickable(
-                    (By.XPATH, '//*[@id="dialogcontainer"]/div/a[1]'))
-            )
-        except:
-            print(nowINFO(), '-', 'Geo checker not founded. Continue...')
-        else:
-                GeoCheck = driver.find_element_by_xpath(
-                    '//*[@id="dialogcontainer"]/div/a[1]')
-                GeoCheck.click()
-                print(nowINFO(), '-', 'Geo checker founded. Continue...')
-        print(nowINFO(), '-', 'Processing forward on shipping page')
-        # Navigate to Checkout page
-        driver.get(
-            'https://www.adidas.ru/on/demandware.store/Sites-adidas-RU-Site/ru_RU/CODelivery-Start')
+            for item in sizes:
+                print(item.text)
+                if size in item.text:
+                    sizeObj = item
+                    break
+            clicked = False
+            sizeObj = elements.find_elements_by_tag_name('ul')
+            print('sizeobj' ,sizeObj)
+            for obj in sizeObj:
+                if str(size) in obj.text:
+                    print(obj.text)
+                    obj.click()
+                    clicked = True
+                    break
+            if clicked == True:
+                print(nowINFO(),'-', 'Processing cart')
+                element = driver.find_element_by_xpath('//div[starts-with(@class,"src-components-___sizes-dropdown__sizesDropdown")]')
+                element.click()
+                Add_To_Cart = driver.find_element_by_xpath('//button[starts-with(@class,"src-components-___add-to-bag-form__addToBagButton___")]')
+                Add_To_Cart.click()
+                endtime = time.time()
+                print(nowINFO(), '-', 'Bot succesefully secured your item in', round(endtime - starttime, 3))
+        if clicked == True:
+            try:
+                element = WebDriverWait(driver, 10).until(
+                    EC.element_to_be_clickable(
+                        (By.XPATH, '//*[@id="dialogcontainer"]/div/a[1]'))
+                )
+            except:
+                print(nowINFO(), '-', 'Geo checker not founded. Continue...')
+            else:
+                    GeoCheck = driver.find_element_by_xpath(
+                        '//*[@id="dialogcontainer"]/div/a[1]')
+                    GeoCheck.click()
+                    print(nowINFO(), '-', 'Geo checker founded. Continue...')
+            print(nowINFO(), '-', 'Processing forward on shipping page')
+            # Navigate to Checkout page
+            driver.get(
+                'https://www.adidas.ru/on/demandware.store/Sites-adidas-RU-Site/ru_RU/CODelivery-Start')
     def autofill_shipping_adidas():
         # Read client info from file.
         print(nowINFO(), '-', 'Begin autofill')
@@ -528,15 +541,7 @@ if __name__ == '__main__':
                 f.close()
             print(nowINFO(), 'Proxy.txt file succesefully created!')
         import hashlib
-        try:
-            EncryptedPassword = 'd72958fc24e5de0a864b0dcf9d5dd68a8dd94b62851a2b683b94607646ae8caf'
-        except:
-            print(nowERROR(), 'No connection to authentication server')
-            input('Press enter to exit...')
-            sys.exit()
-        UserPass = str(input('Please input your password: '))
-        if hashlib.sha256(str(UserPass).encode('utf-8')).hexdigest() != EncryptedPassword:
-            print(nowINFO(), 'Input password hash is:', hashlib.sha256(str(UserPass).encode('utf-8')).hexdigest())
+        if True == False:
             print(nowERROR(), 'Incorrect password, nice try!')
             input('Press enter to exit...')
             sys.exit()
@@ -560,7 +565,7 @@ if __name__ == '__main__':
                 else:
                     os.system('clear')
                 print('|----------------------------------LOG----------------------------------|')
-                print(nowINFO(), 'Input password hash is:', hashlib.sha256(str(UserPass).encode('utf-8')).hexdigest())
+                print(nowINFO(), 'Input password hash is:')
                 print(nowINFO(), 'Password authorized!')
                 print(nowINFO(), 'Welcome back', name, surname)
             except:
